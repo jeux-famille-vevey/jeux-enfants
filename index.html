@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jeux des enfants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#1D2357; --sky-bottom:#3B3F8F; --ink:#FFF8E7; --ink-soft:#C9CCF2;
+  --sun:#FFD23F; --tangerine:#FF9F1C; --panel:#272C6B;
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:linear-gradient(var(--sky-top),var(--sky-bottom)) fixed;color:var(--ink);font-family:var(--font);
+  padding:32px 16px 48px}
+main{max-width:760px;margin:0 auto}
+h1{margin:0 0 6px;font-size:clamp(2.2rem,7vw,3.4rem);color:var(--sun);text-shadow:0 4px 0 var(--tangerine);line-height:1.05}
+p.lead{margin:0 0 28px;color:var(--ink-soft);font-size:1.15rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+a.game{display:flex;flex-direction:column;gap:8px;padding:20px;border-radius:22px;background:var(--panel);color:var(--ink);
+  text-decoration:none;border:3px solid transparent;transition:transform .12s,border-color .12s}
+a.game:hover,a.game:focus-visible{border-color:var(--sun);transform:translateY(-3px);outline:none}
+.emoji{font-size:3rem;line-height:1}
+.name{font-size:1.4rem;font-weight:700}
+.desc{color:var(--ink-soft);font-size:1rem;line-height:1.35}
+.tag{align-self:flex-start;margin-top:auto;background:var(--sun);color:#1D2357;font-weight:600;border-radius:999px;padding:3px 12px;font-size:.9rem}
+@media (prefers-reduced-motion:reduce){a.game{transition:none}a.game:hover{transform:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Jeux des enfants</h1>
+  <p class="lead">Choisis un jeu et amuse-toi bien !</p>
+  <div class="grid" id="games"></div>
+</main>
+<script>
+// Pour ajouter un jeu : une ligne de plus ici, et un dossier avec son index.html.
+var GAMES = [
+  { href:"fusees/", emoji:"🚀", name:"Fusées des lettres", desc:"Tape la lettre de la fusée pour lancer le feu d'artifice.", tag:"Clavier" }
+];
+var box = document.getElementById("games");
+GAMES.forEach(function(g){
+  var a = document.createElement("a");
+  a.className = "game"; a.href = g.href;
+  a.innerHTML = '<span class="emoji" aria-hidden="true">'+g.emoji+'</span><span class="name"></span><span class="desc"></span><span class="tag"></span>';
+  a.querySelector(".name").textContent = g.name;
+  a.querySelector(".desc").textContent = g.desc;
+  a.querySelector(".tag").textContent = g.tag;
+  box.appendChild(a);
+});
+</script>
+</body>
+</html>
