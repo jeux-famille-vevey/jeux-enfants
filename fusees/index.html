@@ -119,6 +119,7 @@ h1{margin:0; font-size:clamp(2.2rem, 7vw, 3.6rem); line-height:1; font-weight:70
         <button class="btn" id="again">Rejouer</button>
         <button class="btn ghost" id="menu">Changer de niveau</button>
       </div>
+      <a class="btn ghost" id="step2" href="../doigts/" hidden style="text-decoration:none">Étape 2 : les doigts magiques 🖐️</a>
     </div>
   </div>
 
@@ -397,6 +398,7 @@ h1{margin:0; font-size:clamp(2.2rem, 7vw, 3.6rem); line-height:1; font-weight:70
     else $("endBest").textContent = "Record : " + prev;
     rockets.forEach(function(r){ r.dead = true; }); rockets = [];
     updateKeyHints();
+    $("step2").hidden = starsN < 2;
     show("endScreen"); tone(660,.15,"triangle",.15); setTimeout(function(){ tone(990,.3,"triangle",.15); }, 150);
   }
 

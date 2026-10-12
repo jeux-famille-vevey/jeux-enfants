@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les doigts magiques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#1D2357; --sky-bottom:#3B3F8F; --ink:#FFF8E7; --ink-soft:#C9CCF2;
+  --sun:#FFD23F; --tangerine:#FF9F1C; --mint:#2EC4B6; --pink:#FF5D8F;
+  --panel:#272C6B; --key:#2A3070; --key-edge:#161A45;
+  /* une couleur par doigt */
+  --f-pinky:#FF6F9F; --f-ring:#FF9F1C; --f-middle:#FFD23F; --f-lindex:#6FD08C; --f-rindex:#4CC9F0; --f-thumb:#B9B3F5;
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:linear-gradient(var(--sky-top),var(--sky-bottom)) fixed;color:var(--ink);font-family:var(--font);
+  -webkit-user-select:none;user-select:none;overflow:hidden}
+.app{height:100%;display:flex;flex-direction:column;max-width:980px;margin:0 auto;padding:0 12px}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 0;font-weight:600;font-size:1.05rem}
+.chip{background:var(--panel);border-radius:999px;padding:6px 14px;display:flex;gap:6px;align-items:baseline;white-space:nowrap}
+.chip b{font-size:1.25rem;color:var(--sun)}
+.spacer{flex:1}
+.icon-btn{font:inherit;color:var(--ink);background:var(--panel);border:0;border-radius:999px;width:44px;height:44px;font-size:1.2rem;cursor:pointer;
+  display:grid;place-items:center;text-decoration:none;flex:none}
+.icon-btn:focus-visible,.btn:focus-visible,.lesson:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.progress{height:10px;border-radius:999px;background:var(--panel);overflow:hidden;margin-bottom:6px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--sun));border-radius:999px;transition:width .3s}
+
+.stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(6px,1.6vh,16px);position:relative}
+.sentence{font-size:clamp(1.3rem,3.6vh,1.9rem);font-weight:600;color:var(--ink-soft);text-align:center;min-height:1.3em}
+.typing{font-size:clamp(1.8rem,6vh,3rem);font-weight:700;letter-spacing:.04em;text-align:center;line-height:1.25;max-width:100%;
+  background:var(--panel);border-radius:20px;padding:10px 22px;white-space:pre-wrap}
+.typing span{display:inline-block;min-width:.32em;border-radius:8px;transition:color .1s}
+.typing .todo{color:#6E73B8}
+.typing .done{color:var(--ink)}
+.typing .cur{color:#1D2357;background:var(--sun);padding:0 .05em;animation:blink 1s infinite}
+.typing .sp{min-width:.55em}
+.typing .sp.cur{min-width:1.6em;font-size:.45em;vertical-align:middle;padding:.35em .4em;text-align:center}
+.typing .bad{animation:shake .25s}
+@keyframes blink{50%{box-shadow:0 0 0 4px rgba(255,210,63,.35)}}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.hint{font-size:clamp(1rem,2.6vh,1.3rem);font-weight:600;display:flex;align-items:center;gap:10px;min-height:1.6em}
+.hint .dot{width:16px;height:16px;border-radius:50%}
+.hint .k{background:var(--sun);color:#1D2357;border-radius:8px;padding:1px 10px}
+.bravo{position:absolute;top:8%;font-size:clamp(2rem,7vh,3.4rem);font-weight:700;color:var(--sun);text-shadow:0 4px 0 var(--tangerine);
+  opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .2s,transform .2s}
+.bravo.show{opacity:1;transform:scale(1)}
+
+.kb{display:flex;flex-direction:column;gap:5px;align-items:center;width:100%;max-width:820px}
+.kb .r{display:flex;gap:5px;width:100%;justify-content:center}
+.key{font:inherit;font-weight:600;flex:0 1 56px;min-width:0;height:clamp(32px,5.6vh,50px);border-radius:10px;border:0;
+  display:grid;place-items:center;font-size:clamp(.95rem,2.6vh,1.3rem);color:#1D2357;position:relative;box-shadow:0 4px 0 rgba(0,0,0,.35);opacity:.55;
+  transition:opacity .12s,transform .06s}
+.key.bump::after{content:"";position:absolute;bottom:6px;left:50%;width:12px;height:3px;margin-left:-6px;border-radius:2px;background:#1D2357;opacity:.6}
+.key.space{flex:0 1 330px;font-size:clamp(.8rem,2vh,1rem)}
+.key.target{opacity:1;outline:4px solid #fff;outline-offset:2px;transform:translateY(-2px)}
+.key.hit{opacity:1;transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.key.wrong{opacity:1;background:#fff !important;animation:shake .25s}
+
+.hands{height:clamp(70px,15vh,130px);width:min(100%,560px);display:block}
+.hands .finger{opacity:.28;transition:opacity .15s}
+.hands .finger.on{opacity:1;stroke:#fff;stroke-width:4}
+.hands .palm{fill:#3A4090}
+
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:20px;gap:14px;background:rgba(21,26,71,.94);overflow-y:auto;z-index:5}
+.overlay[hidden]{display:none}
+h1{margin:0;font-size:clamp(2.1rem,6.5vw,3.4rem);line-height:1;font-weight:700;color:var(--sun);text-shadow:0 4px 0 var(--tangerine)}
+.lead{margin:0;color:var(--ink-soft);font-size:1.1rem;max-width:40ch;line-height:1.4}
+.lessons{display:grid;gap:9px;width:min(100%,460px)}
+.lesson{font:inherit;text-align:left;display:flex;gap:14px;align-items:center;padding:10px 16px;border-radius:18px;border:3px solid transparent;
+  background:var(--panel);color:var(--ink);cursor:pointer}
+.lesson .badge{flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-weight:700;font-size:1.3rem;color:#1D2357}
+.lesson strong{display:block;font-size:1.1rem}
+.lesson .d{color:var(--ink-soft);font-size:.93rem}
+.lesson .st{margin-left:auto;font-size:1.05rem;letter-spacing:2px;white-space:nowrap}
+.lesson[aria-pressed="true"]{border-color:var(--sun)}
+.btn{font:inherit;font-weight:700;font-size:1.3rem;border:0;border-radius:999px;padding:13px 32px;cursor:pointer;background:var(--sun);color:#1D2357;
+  box-shadow:0 5px 0 var(--tangerine)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--tangerine)}
+.btn.ghost{background:var(--panel);color:var(--ink);box-shadow:0 5px 0 var(--key-edge);font-size:1.05rem}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.stars{font-size:3rem;letter-spacing:6px}
+.stars .off{opacity:.25}
+.stats{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.stat{background:var(--panel);border-radius:16px;padding:10px 18px;min-width:120px}
+.stat b{display:block;font-size:1.8rem;color:var(--sun)}
+.stat span{color:var(--ink-soft);font-size:.95rem}
+.small{color:var(--ink-soft);font-size:.95rem;margin:0}
+@media (prefers-reduced-motion:reduce){.typing .cur,.typing .bad,.key.wrong{animation:none}}
+@media (max-height:540px){.hands{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <a class="icon-btn" href="../" aria-label="Tous les jeux">🏠</a>
+    <div class="chip" id="lessonName">Leçon</div>
+    <div class="spacer"></div>
+    <div class="chip" aria-label="Phrase">📝 <b id="count">1/6</b></div>
+    <div class="chip" aria-label="Précision">🎯 <b id="acc">100 %</b></div>
+    <button class="icon-btn" id="sound" aria-label="Couper le son">🔊</button>
+    <button class="icon-btn" id="menuBtn" aria-label="Choisir une leçon">☰</button>
+  </div>
+  <div class="progress"><i id="prog"></i></div>
+
+  <div class="stage">
+    <div class="bravo" id="bravo">Bravo !</div>
+    <div class="sentence" id="sentence"></div>
+    <div class="typing" id="typing" aria-live="polite"></div>
+    <div class="hint" id="hint"></div>
+    <div class="kb" id="kb"></div>
+    <svg class="hands" id="hands" viewBox="0 0 560 130" aria-hidden="true"></svg>
+  </div>
+</div>
+
+<div class="overlay" id="startScreen">
+  <h1>Les doigts magiques</h1>
+  <p class="lead">Tape les phrases avec le bon doigt. Chaque couleur, c'est un doigt : regarde la main en bas !</p>
+  <div class="lessons" id="lessons"></div>
+  <button class="btn" id="play">Commencer</button>
+  <p class="small">Pose les doigts sur A S D F et J K L é. Les pouces sont pour la barre d'espace.</p>
+</div>
+
+<div class="overlay" id="endScreen" hidden>
+  <div class="stars" id="stars"></div>
+  <h1 id="endTitle">Bravo !</h1>
+  <div class="stats">
+    <div class="stat"><b id="sAcc">0 %</b><span>précision</span></div>
+    <div class="stat"><b id="sWpm">0</b><span>mots par minute</span></div>
+    <div class="stat"><b id="sTime">0:00</b><span>temps</span></div>
+  </div>
+  <p class="small" id="endTip"></p>
+  <div class="row">
+    <button class="btn" id="next">Leçon suivante</button>
+    <button class="btn ghost" id="again">Recommencer</button>
+    <button class="btn ghost" id="menu">Choisir une leçon</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var LESSONS = [
+    { id:"base", name:"Les touches de base", desc:"F J D K S L A, sur la ligne du milieu", color:"#6FD08C",
+      items:["ff jj fj jf","dd kk dk kd","ss ll sl ls","aa ss dd ff","fff jjj ddd kkk","la salsa"] },
+    { id:"mots", name:"Petits mots", desc:"Des mots courts de tous les jours", color:"#4CC9F0",
+      items:["le chat","un ami","la lune","mon papa","ma maman","le soleil","un gros lion","la mer"] },
+    { id:"phrases", name:"Petites phrases", desc:"Avec des espaces entre les mots", color:"#FFD23F",
+      items:["je mange une pomme","le chat dort","il fait beau","papa lit un livre","nous jouons dehors","le chien court vite"] },
+    { id:"accents", name:"Les accents é è à", desc:"Les touches à droite du L et du P", color:"#FF9F1C",
+      items:["le bébé dort","ma mère est là","il va à la plage","le café est chaud","mon frère a un vélo","la fée est très jolie"] },
+    { id:"grandes", name:"Grandes phrases", desc:"Pour les championnes du clavier", color:"#FF6F9F",
+      items:["le soleil brille dans le ciel bleu","nous jouons au parc avec nos amis","mon chat aime dormir sur le canapé",
+             "je lis une histoire avant de dormir","en hiver il neige dans les montagnes","les oiseaux chantent dans les arbres"] }
+  ];
+  var PER_LESSON = 6;
+
+  /* Clavier suisse (QWERTZ) et doigt de chaque touche */
+  var FINGERS = {
+    lp:{name:"Petit doigt gauche", c:"var(--f-pinky)", hex:"#FF6F9F"},
+    lr:{name:"Annulaire gauche", c:"var(--f-ring)", hex:"#FF9F1C"},
+    lm:{name:"Majeur gauche", c:"var(--f-middle)", hex:"#FFD23F"},
+    li:{name:"Index gauche", c:"var(--f-lindex)", hex:"#6FD08C"},
+    th:{name:"Pouce", c:"var(--f-thumb)", hex:"#B9B3F5"},
+    ri:{name:"Index droit", c:"var(--f-rindex)", hex:"#4CC9F0"},
+    rm:{name:"Majeur droit", c:"var(--f-middle)", hex:"#FFD23F"},
+    rr:{name:"Annulaire droit", c:"var(--f-ring)", hex:"#FF9F1C"},
+    rp:{name:"Petit doigt droit", c:"var(--f-pinky)", hex:"#FF6F9F"}
+  };
+  var MAP = {};
+  [["lp","qay"],["lr","wsx"],["lm","edc"],["li","rtfgvb"],["ri","zuhjnm"],["rm","ik,"],["rr","ol."],["rp","pèéà-"],["th"," "]]
+    .forEach(function(p){ p[1].split("").forEach(function(ch){ MAP[ch] = p[0]; }); });
+  var ROWS = [["q","w","e","r","t","z","u","i","o","p","è"],["a","s","d","f","g","h","j","k","l","é","à"],["y","x","c","v","b","n","m",",",".","-"],[" "]];
+  var SKIP = ".!?'’";
+
+  var $ = function(id){ return document.getElementById(id); };
+  function store(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+
+  /* ---------- Clavier ---------- */
+  var keyEls = {};
+  ROWS.forEach(function(r){
+    var row = document.createElement("div"); row.className = "r";
+    r.forEach(function(ch){
+      var k = document.createElement("div");
+      k.className = "key" + (ch===" " ? " space" : "") + ((ch==="f"||ch==="j") ? " bump" : "");
+      k.textContent = ch===" " ? "espace" : (/[a-z]/.test(ch) ? ch.toUpperCase() : ch);
+      k.style.background = FINGERS[MAP[ch]].c;
+      keyEls[ch] = k; row.appendChild(k);
+    });
+    $("kb").appendChild(row);
+  });
+  function flashKey(ch, cls){
+    var k = keyEls[ch]; if(!k) return;
+    k.classList.remove("hit","wrong"); void k.offsetWidth; k.classList.add(cls);
+    setTimeout(function(){ k.classList.remove(cls); }, 200);
+  }
+
+  /* ---------- Mains ---------- */
+  var NS = "http://www.w3.org/2000/svg", fingerEls = {};
+  function el(tag, attrs){ var e = document.createElementNS(NS, tag); for(var a in attrs) e.setAttribute(a, attrs[a]); return e; }
+  function drawHand(x0, mirror){
+    var svg = $("hands");
+    var defs = [ ["lp",0,52], ["lr",30,30], ["lm",60,22], ["li",90,30] ]; // id, x, top
+    svg.appendChild(el("rect",{x:x0,y:78,width:150,height:52,rx:22,"class":"palm"}));
+    defs.forEach(function(d){
+      var id = mirror ? {lp:"rp",lr:"rr",lm:"rm",li:"ri"}[d[0]] : d[0];
+      var x = mirror ? x0 + 150 - d[1] - 26 : x0 + d[1] + 2;
+      var f = el("rect",{x:x,y:d[2],width:26,height:100-d[2],rx:13,fill:FINGERS[id].hex,"class":"finger"});
+      svg.appendChild(f); fingerEls[id] = fingerEls[id] || []; fingerEls[id].push(f);
+    });
+    var tx = mirror ? x0 - 30 : x0 + 130;
+    var thumb = el("rect",{x:tx,y:84,width:52,height:24,rx:12,fill:FINGERS.th.hex,"class":"finger",
+      transform:"rotate("+(mirror?-25:25)+" "+(tx+26)+" 96)"});
+    svg.appendChild(thumb); fingerEls.th = fingerEls.th || []; fingerEls.th.push(thumb);
+  }
+  drawHand(40, false); drawHand(370, true);
+
+  /* ---------- Son ---------- */
+  var actx = null, muted = store("fdl-mute")==="1";
+  function syncSound(){ $("sound").textContent = muted ? "🔇" : "🔊"; $("sound").setAttribute("aria-label", muted ? "Remettre le son" : "Couper le son"); }
+  syncSound();
+  $("sound").onclick = function(){ muted = !muted; store("fdl-mute", muted?"1":"0"); syncSound(); this.blur(); };
+  function audio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx && actx.state==="suspended") actx.resume(); }
+  function tone(f, d, type, v, slide){
+    if(muted || !actx) return;
+    var t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type||"sine"; o.frequency.setValueAtTime(f, t); if(slide) o.frequency.exponentialRampToValueAtTime(slide, t+d);
+    g.gain.setValueAtTime(v||.15, t); g.gain.exponentialRampToValueAtTime(.001, t+d);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d);
+  }
+
+  /* ---------- Jeu ---------- */
+  var lessonIdx = parseInt(store("dm-lesson")||"0",10); if(!(lessonIdx>=0 && lessonIdx<LESSONS.length)) lessonIdx = 0;
+  var items = [], itemIdx = 0, target = "", pos = 0, good = 0, bad = 0, typedChars = 0, startT = 0, state = "menu";
+
+  function shuffle(a){ a = a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+  function renderLessons(){
+    var box = $("lessons"); box.innerHTML = "";
+    LESSONS.forEach(function(L,i){
+      var b = document.createElement("button");
+      b.className = "lesson"; b.setAttribute("aria-pressed", i===lessonIdx ? "true":"false");
+      var s = parseInt(store("dm-stars-"+L.id)||"0",10), st = "";
+      for(var k=0;k<3;k++) st += k<s ? "⭐" : "☆";
+      b.innerHTML = '<div class="badge" style="background:'+L.color+'">'+(i+1)+'</div><div><strong></strong><span class="d"></span></div><span class="st">'+st+'</span>';
+      b.querySelector("strong").textContent = L.name; b.querySelector(".d").textContent = L.desc;
+      b.onclick = function(){ lessonIdx = i; store("dm-lesson", String(i)); renderLessons(); };
+      b.ondblclick = start;
+      box.appendChild(b);
+    });
+  }
+
+  function start(){
+    audio();
+    var L = LESSONS[lessonIdx];
+    items = L.id==="base" ? L.items.slice(0, PER_LESSON) : shuffle(L.items).slice(0, PER_LESSON);
+    itemIdx = 0; good = 0; bad = 0; typedChars = 0; startT = 0;
+    $("lessonName").textContent = (lessonIdx+1) + ". " + L.name;
+    $("startScreen").hidden = true; $("endScreen").hidden = true;
+    state = "play"; loadItem();
+  }
+
+  function loadItem(){
+    target = items[itemIdx]; pos = 0; skipPunct();
+    var display = target.charAt(0).toUpperCase() + target.slice(1);
+    $("sentence").textContent = LESSONS[lessonIdx].id==="base" ? "Tape les lettres :" : display + ".";
+    $("count").textContent = (itemIdx+1) + "/" + items.length;
+    $("prog").style.width = (itemIdx/items.length*100) + "%";
+    render();
+  }
+  function skipPunct(){ while(pos < target.length && SKIP.indexOf(target[pos]) >= 0) pos++; }
+
+  function render(){
+    var box = $("typing"); box.innerHTML = "";
+    for(var i=0;i<target.length;i++){
+      var s = document.createElement("span"), ch = target[i];
+      s.className = (i<pos ? "done" : i===pos ? "cur" : "todo") + (ch===" " ? " sp" : "");
+      s.textContent = ch===" " ? (i===pos ? "espace" : " ") : ch;
+      box.appendChild(s);
+    }
+    var expected = target[pos];
+    for(var k in keyEls) keyEls[k].classList.remove("target");
+    for(var f in fingerEls) fingerEls[f].forEach(function(e){ e.classList.remove("on"); });
+    if(expected !== undefined){
+      var fk = MAP[expected];
+      if(keyEls[expected]) keyEls[expected].classList.add("target");
+      if(fk){
+        fingerEls[fk].forEach(function(e){ e.classList.add("on"); });
+        var label = expected===" " ? "espace" : (/[a-z]/.test(expected) ? expected.toUpperCase() : expected);
+        $("hint").innerHTML = '<span class="dot" style="background:'+FINGERS[fk].hex+'"></span><span></span> → <span class="k"></span>';
+        $("hint").children[1].textContent = FINGERS[fk].name;
+        $("hint").children[2].textContent = label;
+      }
+    }
+    var tot = good + bad;
+    $("acc").textContent = (tot ? Math.round(good/tot*100) : 100) + " %";
+  }
+
+  function press(key){
+    if(state !== "play") return;
+    if(!startT) startT = Date.now();
+    var expected = target[pos];
+    if(key === expected){
+      good++; typedChars++; flashKey(key, "hit"); tone(660 + Math.random()*120, .07, "triangle", .08);
+      pos++; skipPunct();
+      if(pos >= target.length){ sentenceDone(); return; }
+    } else {
+      bad++; flashKey(key, "wrong"); tone(170, .15, "square", .05, 120);
+      var cur = $("typing").children[pos];
+      if(cur){ cur.classList.remove("bad"); void cur.offsetWidth; cur.classList.add("bad"); }
+    }
+    render();
+  }
+
+  function sentenceDone(){
+    render(); state = "pause";
+    $("prog").style.width = ((itemIdx+1)/items.length*100) + "%";
+    var words = ["Bravo !","Super !","Génial !","Très bien !","Bien joué !"];
+    $("bravo").textContent = words[Math.floor(Math.random()*words.length)];
+    $("bravo").classList.add("show");
+    tone(784,.12,"triangle",.12); setTimeout(function(){ tone(1046,.2,"triangle",.12); },110);
+    setTimeout(function(){
+      $("bravo").classList.remove("show");
+      itemIdx++;
+      if(itemIdx >= items.length) finish(); else { state = "play"; loadItem(); }
+    }, 900);
+  }
+
+  function finish(){
+    state = "end";
+    var L = LESSONS[lessonIdx], tot = good + bad, acc = tot ? Math.round(good/tot*100) : 0;
+    var secs = Math.max(1, (Date.now()-startT)/1000), wpm = Math.round((typedChars/5)/(secs/60));
+    var stars = acc>=95 ? 3 : acc>=85 ? 2 : acc>=70 ? 1 : 0;
+    var html = ""; for(var i=0;i<3;i++) html += i<stars ? "⭐" : '<span class="off">⭐</span>';
+    $("stars").innerHTML = html;
+    $("endTitle").textContent = stars===3 ? "Championne !" : stars>=1 ? "Bravo !" : "Continue, tu progresses !";
+    $("sAcc").textContent = acc + " %"; $("sWpm").textContent = wpm;
+    $("sTime").textContent = Math.floor(secs/60) + ":" + String(Math.round(secs%60)).padStart(2,"0");
+    var prev = parseInt(store("dm-stars-"+L.id)||"0",10); if(stars > prev) store("dm-stars-"+L.id, String(stars));
+    $("endTip").textContent = stars>=2 ? "Tu peux passer à la leçon suivante."
+      : "Essaie de regarder l'écran et pas le clavier : la main en bas te montre le bon doigt.";
+    $("next").hidden = lessonIdx >= LESSONS.length-1;
+    $("endScreen").hidden = false;
+    tone(660,.15,"triangle",.15); setTimeout(function(){ tone(990,.3,"triangle",.15); },150);
+  }
+
+  document.addEventListener("keydown", function(e){
+    if(e.ctrlKey || e.metaKey) return;
+    if(state === "menu" && e.key === "Enter"){ e.preventDefault(); start(); return; }
+    if(state === "end" && e.key === "Enter"){ e.preventDefault(); $("next").hidden ? start() : $("next").click(); return; }
+    if(state !== "play") return;
+    if(e.key === "Escape"){ openMenu(); return; }
+    if(e.key.length !== 1) return;
+    e.preventDefault();
+    press(e.key.toLowerCase());
+  });
+
+  function openMenu(){ state = "menu"; renderLessons(); $("endScreen").hidden = true; $("startScreen").hidden = false; }
+  $("play").onclick = start;
+  $("again").onclick = start;
+  $("next").onclick = function(){ lessonIdx = Math.min(LESSONS.length-1, lessonIdx+1); store("dm-lesson", String(lessonIdx)); start(); };
+  $("menu").onclick = openMenu;
+  $("menuBtn").onclick = function(){ this.blur(); openMenu(); };
+
+  renderLessons();
+  // aperçu derrière le menu
+  target = LESSONS[lessonIdx].items[0]; pos = 0; render();
+})();
+</script>
+</body>
+</html>
