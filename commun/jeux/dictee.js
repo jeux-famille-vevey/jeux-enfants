@@ -40,7 +40,15 @@
         expliquer:function(v){ return "Tu as écrit : <i>" + M.echapper(v) + "</i><br>Le bon mot : " + marquer(mot, v.trim()) + "<br>" + indice(liste, mot); } };
       if(voix){
         q.enonce = "<small>Écoute bien et écris " + (phrase ? "la phrase" : "le mot") + "</small><span class=\"big\">🎧</span>";
-        q.parler = phrase ? mot : mot + "… " + (it[1] ? it[1] + "… " : "") + mot;
+        if(phrase){ // comme à l'école : la phrase, puis par petits groupes de mots, puis la phrase
+          var mots = mot.replace(/[.!?]$/, "").split(" "), groupes = [];
+          for(var g=0; g<mots.length; g+=3) groupes.push(mots.slice(g, g+3).join(" "));
+          q.parler = [mot].concat(groupes, [mot]);
+          q.parlerLent = groupes;
+        } else {
+          q.parler = it[1] ? [mot, it[1], mot] : [mot, mot];
+          q.parlerLent = [mot];
+        }
       } else {
         q.enonce = "<small>Regarde bien, " + (phrase ? "la phrase" : "le mot") + " va disparaître…</small>";
         q.visuel = '<div class="big" id="dFlash" style="font-size:' + (phrase ? "1.6rem" : "2.6rem") + ';font-weight:700;color:var(--sun);min-height:1.4em">' + M.echapper(mot) + "</div>";
@@ -66,6 +74,10 @@
           var maj = function(){ b.textContent = voix ? "🔊 Avec la voix (toucher pour afficher les mots à la place)" : "👀 Les mots s'affichent (toucher pour remettre la voix)"; };
           b.onclick = function(){ voix = !voix; M.ecrire("mot-dictee-sansvoix", voix ? "0" : "1"); maj(); if(voix) M.parler("Bonjour ! Tu m'entends bien ?"); };
           maj(); i.parentNode.insertBefore(b, i.nextSibling);
+          var v = document.createElement("button"); v.className = "btn ghost small"; v.id = "dVitesse";
+          var majV = function(){ v.textContent = "🐢 Vitesse de la voix : " + M.nomVitesse() + " (toucher pour changer)"; };
+          v.onclick = function(){ M.vitesse((M.vitesse() + 1) % 3); majV(); M.parler(["Bonjour", "Voici la nouvelle vitesse."]); };
+          majV(); b.parentNode.insertBefore(v, b.nextSibling);
         }
       });
     },

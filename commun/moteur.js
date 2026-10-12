@@ -65,12 +65,26 @@
       setTimeout(function(){ if(!fini){ fini = true; voix = trouverVoix(); ok(!!voix); } }, 1800);
     });
   };
-  M.parler = function(texte, lent){
+  // vitesse de la voix (réglable) : 0 = normale, 1 = lente, 2 = très lente
+  var VITESSES = [.9, .72, .55];
+  M.vitesse = function(v){ if(v != null) ecrire("mot-voix-vitesse", String(v)); var x = parseInt(lire("mot-voix-vitesse") || "1", 10); return x >= 0 && x <= 2 ? x : 1; };
+  M.nomVitesse = function(){ return ["normale","lente","très lente"][M.vitesse()]; };
+  // texte = une phrase ou une liste de morceaux, dits l'un après l'autre avec une pause entre chacun
+  var tour = 0;
+  M.parler = function(texte, tresLent){
     if(!("speechSynthesis" in window)) return;
     if(!voix) voix = trouverVoix();
     speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(texte); u.lang = voix ? voix.lang : "fr-FR"; if(voix) u.voice = voix; u.rate = lent ? .7 : .9;
-    speechSynthesis.speak(u);
+    var morceaux = [].concat(texte), id = ++tour, rate = tresLent ? .5 : VITESSES[M.vitesse()];
+    var pause = 700 + (1 - rate) * 1200;
+    (function dire(i){
+      if(id !== tour || i >= morceaux.length) return;
+      var u = new SpeechSynthesisUtterance(morceaux[i]); u.lang = voix ? voix.lang : "fr-FR"; if(voix) u.voice = voix; u.rate = rate;
+      var suite = false, go = function(){ if(suite) return; suite = true; setTimeout(function(){ dire(i+1); }, pause); };
+      u.onend = go; u.onerror = go;
+      setTimeout(go, 1500 + morceaux[i].length * 160 / rate); // au cas où « fin » n'arrive jamais
+      speechSynthesis.speak(u);
+    })(0);
   };
 
   /* ---------- interface ---------- */
@@ -170,6 +184,8 @@
     if(q.parler){
       var sb = document.createElement("button"); sb.className = "say-btn"; sb.textContent = "🔊 Réécouter";
       sb.onclick = function(){ M.parler(q.parler, false); }; zone.appendChild(sb);
+      if(q.parlerLent){ var lb = document.createElement("button"); lb.className = "say-btn"; lb.style.background = "var(--mint)"; lb.textContent = "🐢 Très lentement";
+        lb.onclick = function(){ M.parler(q.parlerLent, true); }; zone.appendChild(lb); }
       setTimeout(function(){ M.parler(q.parler, false); }, 250);
     }
     if(q.monter){
