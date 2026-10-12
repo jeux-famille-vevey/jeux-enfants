@@ -54,9 +54,19 @@
   M.inscrire({ id:"dictee", titre:"La dictée magique", emoji:"🎧", matiere:"Français",
     intro:"Écoute le mot (bouton 🔊 pour le réentendre) et écris-le. Si tu te trompes, on te montre la lettre qui pose problème.",
     preparer:function(){
+      var coupee = M.lire("mot-dictee-sansvoix") === "1";
       M.voixPrete().then(function(ok){
-        voix = ok;
-        if(!ok){ var i = document.getElementById("mIntro"); if(i && /dictée/i.test(document.title)) i.textContent = "Cet appareil n'a pas encore de voix française : le mot s'affichera 3 secondes, puis il faudra l'écrire de mémoire."; }
+        voix = ok && !coupee;
+        var i = document.getElementById("mIntro");
+        if(!i || !/dictée/i.test(document.title)) return;
+        if(!ok) i.textContent = "Cet appareil n'a pas de voix française : le mot s'affichera 3 secondes, puis il faudra l'écrire de mémoire.";
+        else {
+          // la voix de l'ordinateur peut être difficile à comprendre : on laisse choisir
+          var b = document.createElement("button"); b.className = "btn ghost small"; b.id = "dVoix";
+          var maj = function(){ b.textContent = voix ? "🔊 Avec la voix (toucher pour afficher les mots à la place)" : "👀 Les mots s'affichent (toucher pour remettre la voix)"; };
+          b.onclick = function(){ voix = !voix; M.ecrire("mot-dictee-sansvoix", voix ? "0" : "1"); maj(); if(voix) M.parler("Bonjour ! Tu m'entends bien ?"); };
+          maj(); i.parentNode.insertBefore(b, i.nextSibling);
+        }
       });
     },
     niveaux:[
