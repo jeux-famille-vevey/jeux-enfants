@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Le coin des petits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky-top:#1D2357; --sky-bottom:#3B3F8F; --ink:#FFF8E7; --ink-soft:#C9CCF2; --sun:#FFD23F; --tangerine:#FF9F1C;
+  --mint:#2EC4B6; --pink:#FF6F9F; --lilac:#B9B3F5; --panel:#272C6B; --night:#1D2357;
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%}
+body{background:linear-gradient(var(--sky-top),var(--sky-bottom)) fixed;color:var(--ink);font-family:var(--font);overflow:hidden;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.view{position:absolute;inset:0;display:flex;flex-direction:column;padding:12px 16px 16px}
+.view[hidden]{display:none}
+.top{display:flex;align-items:center;gap:12px;min-height:64px}
+.round{font:inherit;width:60px;height:60px;border-radius:50%;border:0;background:var(--panel);color:var(--ink);font-size:1.8rem;display:grid;place-items:center;text-decoration:none;cursor:pointer;flex:none}
+.say{background:var(--sun);color:var(--night)}
+.title{font-size:clamp(1.3rem,4vmin,2rem);font-weight:700;flex:1;text-align:center}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.22)}
+.dots i.on{background:var(--sun)}
+h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color:var(--sun);text-shadow:0 4px 0 var(--tangerine)}
+.sub{text-align:center;color:var(--ink-soft);margin:0 0 12px;font-size:1.05rem}
+.menu{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(42vw,220px),1fr));gap:16px;align-content:center;max-width:1000px;width:100%;margin:0 auto}
+.tile{font:inherit;border:0;border-radius:32px;padding:18px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;color:var(--night);
+  box-shadow:0 8px 0 rgba(0,0,0,.25);min-height:150px;justify-content:center}
+.tile:active{transform:translateY(5px);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.tile .e{font-size:clamp(3.4rem,11vmin,5.5rem);line-height:1}
+.tile b{font-size:clamp(1.2rem,3.6vmin,1.6rem)}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;min-height:0}
+.prompt{font-size:clamp(1.4rem,4.6vmin,2.4rem);font-weight:700;text-align:center;min-height:1.3em}
+.row{display:flex;flex-wrap:wrap;gap:clamp(12px,3vmin,28px);justify-content:center;align-items:center;max-width:100%}
+.pick{font:inherit;border:0;background:#FFF8E7;border-radius:28px;cursor:pointer;display:grid;place-items:center;box-shadow:0 7px 0 rgba(0,0,0,.25);
+  width:clamp(110px,26vmin,200px);height:clamp(110px,26vmin,200px);font-size:clamp(3.5rem,13vmin,7rem);font-weight:700;color:var(--night);transition:transform .1s}
+.pick:active{transform:scale(.95)}
+.pick.good{background:var(--mint);transform:scale(1.08)}
+.pick.nope{animation:wobble .4s}
+@keyframes wobble{20%{transform:rotate(-8deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(5deg)}}
+.items{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:min(92vw,760px)}
+.item{font-size:clamp(2.6rem,9vmin,4.6rem);line-height:1.15;cursor:pointer;border-radius:18px;padding:2px 6px;transition:transform .15s,background .15s}
+.item.counted{background:rgba(255,210,63,.3);transform:scale(1.1)}
+.num{font-size:clamp(3rem,11vmin,6rem)}
+.memory{display:grid;gap:clamp(8px,2vmin,16px)}
+.card{aspect-ratio:1;border-radius:22px;border:0;cursor:pointer;font-size:clamp(2.4rem,9vmin,5rem);display:grid;place-items:center;position:relative;
+  background:linear-gradient(135deg,var(--lilac),var(--pink));box-shadow:0 6px 0 rgba(0,0,0,.25);transition:transform .25s}
+.card span{opacity:0;transition:opacity .15s}
+.card.open{background:#FFF8E7;transform:rotateY(180deg)}
+.card.open span{opacity:1;transform:rotateY(180deg)}
+.card.done{background:var(--mint);transform:rotateY(180deg) scale(.94)}
+.card.done span{opacity:1;transform:rotateY(180deg)}
+.card::after{content:"⭐";position:absolute;font-size:.6em;opacity:.5}
+.card.open::after,.card.done::after{display:none}
+.shadow{filter:brightness(0) opacity(.75)}
+.party{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:30}
+.party span{position:absolute;top:-60px;font-size:2.4rem;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
+.win{position:fixed;inset:0;background:rgba(21,26,71,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;z-index:20}
+.win[hidden]{display:none}
+.win .big{font-size:clamp(5rem,20vmin,9rem);line-height:1}
+.win .row .tile{min-height:auto;padding:16px 28px;flex-direction:row}
+.win .row .tile .e{font-size:2.6rem}
+.note{font-size:.9rem;color:var(--ink-soft);text-align:center;margin:6px 0 0}
+@media (prefers-reduced-motion:reduce){.party{display:none}.pick.nope{animation:none}.card,.card span{transition:none}}
+</style>
+</head>
+<body>
+
+<section class="view" id="vMenu">
+  <div class="top"><a class="round" href="../" aria-label="Retour aux jeux">🏠</a><div class="title"></div><span style="width:60px"></span></div>
+  <h1>Le coin des petits</h1>
+  <p class="sub">Touche un jeu pour commencer 👇</p>
+  <div class="menu" id="menu"></div>
+  <p class="note" id="noVoice" hidden>Astuce pour les parents : cet appareil n'a pas de voix française, les consignes sont écrites à l'écran.</p>
+</section>
+
+<section class="view" id="vGame" hidden>
+  <div class="top">
+    <button class="round" id="back" aria-label="Retour au menu">⬅️</button>
+    <div class="title"><div id="gTitle"></div><div class="dots" id="dots"></div></div>
+    <button class="round say" id="repeat" aria-label="Réécouter la consigne">🔊</button>
+  </div>
+  <div class="stage" id="stage"></div>
+</section>
+
+<div class="win" id="win" hidden>
+  <div class="big">🏆</div>
+  <h1 id="winText">Bravo !</h1>
+  <div class="row">
+    <button class="tile" id="again" style="background:var(--sun)"><span class="e">🔁</span><b>Encore</b></button>
+    <button class="tile" id="toMenu" style="background:var(--lilac)"><span class="e">🏠</span><b>Les jeux</b></button>
+  </div>
+</div>
+<div class="party" id="party"></div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var R = function(t){ return t[Math.floor(Math.random()*t.length)]; };
+  var shuffle = function(t){ t = t.slice(); for(var i=t.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), x=t[i]; t[i]=t[j]; t[j]=x; } return t; };
+  function store(k, v){ try{ if(v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){ return null; } }
+
+  /* ---------- voix et sons ---------- */
+  var voice = null;
+  function pickVoice(){ if(!("speechSynthesis" in window)) return null; var v = speechSynthesis.getVoices().filter(function(x){ return /^fr/i.test(x.lang); });
+    v.sort(function(a,b){ return (/fr-CH/i.test(b.lang)?2:/fr-FR/i.test(b.lang)?1:0) - (/fr-CH/i.test(a.lang)?2:/fr-FR/i.test(a.lang)?1:0); }); return v[0] || null; }
+  if("speechSynthesis" in window){ voice = pickVoice(); speechSynthesis.onvoiceschanged = function(){ voice = pickVoice(); }; }
+  setTimeout(function(){ if(!voice) $("noVoice").hidden = false; }, 2000);
+  function say(t){
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(t); u.lang = voice ? voice.lang : "fr-FR"; if(voice) u.voice = voice; u.rate = .85; u.pitch = 1.15;
+    speechSynthesis.speak(u);
+  }
+  var actx = null;
+  function audio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx && actx.state === "suspended") actx.resume(); }
+  function tone(f, d, type, v){ if(!actx) return; var t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type||"sine"; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(v||.15, t); g.gain.exponentialRampToValueAtTime(.001, t+d); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d); }
+  function yay(){ [523,659,784].forEach(function(f,i){ setTimeout(function(){ tone(f,.18,"triangle",.14); }, i*90); }); }
+  function boop(){ tone(330,.15,"sine",.08); }
+  function party(n){
+    var box = $("party"), em = ["⭐","🎉","🌟","🎈","💛","✨"];
+    for(var i=0;i<(n||24);i++){ var s = document.createElement("span"); s.textContent = R(em); s.style.left = Math.random()*100 + "vw";
+      s.style.animationDuration = (1.6 + Math.random()*1.6) + "s"; s.style.animationDelay = (Math.random()*.6) + "s"; box.appendChild(s);
+      setTimeout(function(x){ return function(){ x.remove(); }; }(s), 3600); }
+  }
+  var BRAVO = ["Bravo !","Super !","Génial !","Très bien !","Youpi !","Bien joué !"];
+
+  /* ---------- données ---------- */
+  var ANIMAUX = [["🐶","le chien"],["🐱","le chat"],["🐰","le lapin"],["🦁","le lion"],["🐸","la grenouille"],["🐵","le singe"],["🐷","le cochon"],["🐮","la vache"],
+                 ["🐔","la poule"],["🦊","le renard"],["🐻","l'ours"],["🐼","le panda"],["🐘","l'éléphant"],["🦒","la girafe"],["🐢","la tortue"],["🐟","le poisson"]];
+  var COULEURS = [["rouge","rouge","#E5484D"],["bleu","bleue","#3D7BD9"],["jaune","jaune","#FFD23F"],["vert","verte","#3FA34D"],["orange","orange","#FF9F1C"],["violet","violette","#8E5BC4"],["rose","rose","#FF8FB8"]];
+  var FORMES = { rond:{f:0, d:'<circle cx="50" cy="50" r="42"/>'}, carré:{f:0, d:'<rect x="10" y="10" width="80" height="80" rx="6"/>'},
+    triangle:{f:0, d:'<polygon points="50,8 94,90 6,90"/>'}, étoile:{f:1, d:'<polygon points="50,5 61,38 96,38 68,58 79,92 50,72 21,92 32,58 4,38 39,38"/>'},
+    cœur:{f:0, d:'<path d="M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C40 8 47 14 50 22 C53 14 60 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88Z"/>'} };
+  var OBJETS = [["🍎","pommes"],["🍌","bananes"],["🚗","voitures"],["⭐","étoiles"],["🎈","ballons"],["🐟","poissons"],["🌸","fleurs"],["🍓","fraises"],["🐞","coccinelles"]];
+  var NOMBRES = ["zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix"];
+  var VOYELLES = ["A","E","I","O","U"];
+  var LETTRES = "ABCDEFGHIJKLMNOPRSTUVZ".split("");
+  var OMBRES = ANIMAUX.concat([["🚲","le vélo"],["🏠","la maison"],["✈️","l'avion"],["🍎","la pomme"],["🎸","la guitare"],["⛵","le bateau"]]);
+
+  /* ---------- menu ---------- */
+  var JEUX = [
+    { id:"memory", e:"🃏", nom:"Memory", c:"var(--pink)", dire:"Memory des animaux" },
+    { id:"couleurs", e:"🎨", nom:"Couleurs et formes", c:"var(--sun)", dire:"Les couleurs et les formes" },
+    { id:"compter", e:"🍎", nom:"Compter", c:"var(--mint)", dire:"On compte" },
+    { id:"lettres", e:"🔤", nom:"Les lettres", c:"var(--lilac)", dire:"Les lettres" },
+    { id:"ombres", e:"👤", nom:"Les ombres", c:"var(--tangerine)", dire:"Les ombres" }
+  ];
+  JEUX.forEach(function(j){
+    var b = document.createElement("button"); b.className = "tile"; b.style.background = j.c;
+    b.innerHTML = '<span class="e" aria-hidden="true">' + j.e + '</span><b></b>'; b.querySelector("b").textContent = j.nom;
+    b.onclick = function(){ audio(); start(j); };
+    $("menu").appendChild(b);
+  });
+
+  /* ---------- partie ---------- */
+  var G = null, ROUNDS = 6;
+  function start(j){
+    G = { j:j, round:0, consigne:"", level:parseInt(store("petits-" + j.id) || "0", 10) };
+    $("vMenu").hidden = true; $("vGame").hidden = false; $("win").hidden = true;
+    $("gTitle").textContent = j.e + " " + j.nom;
+    var d = $("dots"); d.innerHTML = ""; for(var i=0;i<ROUNDS;i++) d.appendChild(document.createElement("i"));
+    if(j.id === "memory"){ d.innerHTML = ""; memory(); } else next();
+  }
+  function consigne(t){ G.consigne = t; $("stage").querySelector(".prompt").textContent = t; say(t); }
+  $("repeat").onclick = function(){ if(G) say(G.consigne); };
+  $("back").onclick = function(){ if(window.speechSynthesis) speechSynthesis.cancel(); $("vGame").hidden = true; $("vMenu").hidden = false; G = null; };
+  $("toMenu").onclick = function(){ $("win").hidden = true; $("back").onclick(); };
+  $("again").onclick = function(){ var j = G.j; $("win").hidden = true; start(j); };
+
+  function good(btn){
+    G.locked = true; if(btn) btn.classList.add("good"); yay(); var b = R(BRAVO); say(b); party(14);
+    G.round++; var dots = $("dots").children; if(dots[G.round-1]) dots[G.round-1].classList.add("on");
+    setTimeout(function(){ if(G.round >= ROUNDS) finish(); else next(); }, 1500);
+  }
+  function oops(btn){ boop(); if(btn){ btn.classList.remove("nope"); void btn.offsetWidth; btn.classList.add("nope"); } say("Essaie encore !"); }
+  function finish(){
+    // le jeu devient un peu plus difficile à chaque victoire (jusqu'à un maximum)
+    store("petits-" + G.j.id, String(Math.min((G.level||0) + 1, 4)));
+    party(50); $("winText").textContent = R(["Bravo, champion !","Super, tu as gagné !","Génial !"]);
+    $("win").hidden = false; say("Bravo ! Tu as gagné !");
+  }
+  function stage(html){ $("stage").innerHTML = '<div class="prompt"></div>' + html; G.locked = false; }
+
+  function next(){
+    var f = { couleurs:couleurs, compter:compter, lettres:lettres, ombres:ombres }[G.j.id]; f();
+  }
+
+  /* --- couleurs et formes --- */
+  function shapeSvg(forme, coul){ return '<svg viewBox="0 0 100 100" width="78%" height="78%" fill="' + coul[2] + '">' + FORMES[forme].d + "</svg>"; }
+  function couleurs(){
+    var lvl = G.level, n = lvl >= 2 ? 4 : 3, mode = lvl === 0 ? "c" : lvl === 1 ? (G.round % 2 ? "f" : "c") : "cf";
+    var cols = shuffle(COULEURS).slice(0, n), formes = shuffle(Object.keys(FORMES)).slice(0, n), opts, cible;
+    if(mode === "c"){ var fo = "rond"; opts = cols.map(function(c){ return {f:fo, c:c}; }); }
+    else if(mode === "f"){ var co = R(COULEURS); opts = formes.map(function(f){ return {f:f, c:co}; }); }
+    else opts = formes.map(function(f, i){ return {f:f, c:cols[i]}; });
+    cible = R(opts);
+    var nom = mode === "c" ? "Touche le " + cible.c[0] + " !" : mode === "f" ? "Touche " + (FORMES[cible.f].f ? "l'" : "le ") + cible.f + " !"
+      : "Touche " + (FORMES[cible.f].f ? "l'" : "le ") + cible.f + " " + (FORMES[cible.f].f ? cible.c[1] : cible.c[0]) + " !";
+    stage('<div class="row" id="opts"></div>');
+    opts.forEach(function(o){
+      var b = document.createElement("button"); b.className = "pick"; b.innerHTML = shapeSvg(o.f, o.c); b.setAttribute("aria-label", o.f + " " + o.c[0]);
+      b.onclick = function(){ if(G.locked) return; if(o === cible) good(b); else oops(b); };
+      $("opts").appendChild(b);
+    });
+    consigne(nom);
+  }
+  /* --- compter --- */
+  function compter(){
+    var max = [3,5,7,10,10][G.level] || 10, n = 1 + Math.floor(Math.random()*max), obj = R(OBJETS), counted = 0;
+    var nums = shuffle([n].concat(shuffle([1,2,3,4,5,6,7,8,9,10].filter(function(x){ return x !== n && Math.abs(x-n) <= 3; })).slice(0, 2)));
+    stage('<div class="items" id="items"></div><div class="row" id="opts"></div>');
+    for(var i=0;i<n;i++){
+      var s = document.createElement("span"); s.className = "item"; s.textContent = obj[0];
+      s.onclick = function(){ if(this.classList.contains("counted")) return; this.classList.add("counted"); counted++; tone(440 + counted*40, .12, "triangle", .1); say(NOMBRES[counted]); };
+      $("items").appendChild(s);
+    }
+    nums.forEach(function(x){
+      var b = document.createElement("button"); b.className = "pick num"; b.textContent = x;
+      b.onclick = function(){ if(G.locked) return; if(x === n){ good(b); setTimeout(function(){ say(NOMBRES[n] + " " + obj[1] + " !"); }, 500); } else oops(b); };
+      $("opts").appendChild(b);
+    });
+    consigne("Combien de " + obj[1] + " ? Touche-les pour compter !");
+  }
+  /* --- lettres --- */
+  function lettres(){
+    var pool = G.level === 0 ? VOYELLES : LETTRES, n = G.level >= 2 ? 4 : 3;
+    var opts = shuffle(pool).slice(0, n), cible = R(opts);
+    stage('<div class="row" id="opts"></div>');
+    opts.forEach(function(l){
+      var b = document.createElement("button"); b.className = "pick"; b.textContent = l;
+      b.onclick = function(){ if(G.locked) return; if(l === cible) good(b); else { oops(b); setTimeout(function(){ say("Ça, c'est le " + l.toLowerCase() + ". Trouve le " + cible.toLowerCase() + " !"); }, 700); } };
+      $("opts").appendChild(b);
+    });
+    G.consigne = "Trouve la lettre " + cible + " !";
+    $("stage").querySelector(".prompt").textContent = G.consigne;
+    say("Trouve la lettre… " + cible.toLowerCase() + " !");
+  }
+  /* --- ombres --- */
+  function ombres(){
+    var n = G.level >= 2 ? 4 : 3, opts = shuffle(OMBRES).slice(0, n), cible = R(opts);
+    stage('<div class="pick" style="cursor:default;background:var(--sun)">' + cible[0] + '</div><div class="row" id="opts"></div>');
+    opts.forEach(function(o){
+      var b = document.createElement("button"); b.className = "pick"; b.innerHTML = '<span class="shadow">' + o[0] + "</span>";
+      b.onclick = function(){ if(G.locked) return; if(o === cible){ b.innerHTML = o[0]; good(b); } else oops(b); };
+      $("opts").appendChild(b);
+    });
+    consigne("Trouve l'ombre de " + cible[1] + " !");
+  }
+  /* --- memory --- */
+  function memory(){
+    var pairs = [3,4,6,6,8][G.level] || 6, animals = shuffle(ANIMAUX).slice(0, pairs), cards = shuffle(animals.concat(animals));
+    var cols = pairs <= 3 ? 3 : pairs <= 4 ? 4 : 4;
+    var rows = Math.ceil(pairs*2/cols);
+    stage('<div class="memory" id="mem" style="grid-template-columns:repeat(' + cols + ',1fr);width:min(96vw,calc((100vh - 170px) * ' + (cols/rows).toFixed(2) + '),860px)"></div>');
+    var open = [], found = 0;
+    cards.forEach(function(a){
+      var c = document.createElement("button"); c.className = "card"; c.innerHTML = "<span>" + a[0] + "</span>"; c.setAttribute("aria-label", "carte");
+      c.onclick = function(){
+        if(G.locked || c.classList.contains("open") || c.classList.contains("done")) return;
+        c.classList.add("open"); say(a[1]); open.push({el:c, a:a});
+        if(open.length === 2){
+          G.locked = true;
+          var x = open[0], y = open[1]; open = [];
+          if(x.a === y.a){ setTimeout(function(){ x.el.classList.add("done"); y.el.classList.add("done"); yay(); party(10); found++; G.locked = false;
+              if(found === pairs){ G.round = ROUNDS; setTimeout(finish, 900); } }, 500); }
+          else setTimeout(function(){ x.el.classList.remove("open"); y.el.classList.remove("open"); G.locked = false; }, 1100);
+        }
+      };
+      $("mem").appendChild(c);
+    });
+    consigne("Retrouve les paires d'animaux !");
+  }
+})();
+</script>
+</body>
+</html>

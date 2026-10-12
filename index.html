@@ -10,25 +10,37 @@
 <style>
 :root{
   --sky-top:#1D2357; --sky-bottom:#3B3F8F; --ink:#FFF8E7; --ink-soft:#C9CCF2;
-  --sun:#FFD23F; --tangerine:#FF9F1C; --panel:#272C6B;
+  --sun:#FFD23F; --tangerine:#FF9F1C; --panel:#272C6B; --night:#1D2357;
   --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
-body{background:linear-gradient(var(--sky-top),var(--sky-bottom)) fixed;color:var(--ink);font-family:var(--font);
-  padding:32px 16px 48px}
-main{max-width:760px;margin:0 auto}
-h1{margin:0 0 6px;font-size:clamp(2.2rem,7vw,3.4rem);color:var(--sun);text-shadow:0 4px 0 var(--tangerine);line-height:1.05}
-p.lead{margin:0 0 28px;color:var(--ink-soft);font-size:1.15rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-a.game{display:flex;flex-direction:column;gap:8px;padding:20px;border-radius:22px;background:var(--panel);color:var(--ink);
+html{background:#3B3F8F}
+body{background:linear-gradient(var(--sky-top),var(--sky-bottom)) fixed;color:var(--ink);font-family:var(--font);padding:28px 16px 48px}
+main{max-width:900px;margin:0 auto}
+h1{margin:0 0 4px;font-size:clamp(2.2rem,7vw,3.4rem);color:var(--sun);text-shadow:0 4px 0 var(--tangerine);line-height:1.05}
+p.lead{margin:0 0 22px;color:var(--ink-soft);font-size:1.1rem}
+h2{font-size:1.3rem;margin:26px 0 10px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+a.game{display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:22px;background:var(--panel);color:var(--ink);
   text-decoration:none;border:3px solid transparent;transition:transform .12s,border-color .12s}
 a.game:hover,a.game:focus-visible{border-color:var(--sun);transform:translateY(-3px);outline:none}
-.emoji{font-size:3rem;line-height:1}
-.name{font-size:1.4rem;font-weight:700}
-.desc{color:var(--ink-soft);font-size:1rem;line-height:1.35}
-.tag{align-self:flex-start;margin-top:auto;background:var(--sun);color:#1D2357;font-weight:600;border-radius:999px;padding:3px 12px;font-size:.9rem}
+.emoji{font-size:2.4rem;line-height:1}
+.name{font-size:1.25rem;font-weight:700}
+.desc{color:var(--ink-soft);font-size:.98rem;line-height:1.35}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:6px}
+.tag{background:var(--sun);color:var(--night);font-weight:600;border-radius:999px;padding:2px 11px;font-size:.85rem}
+.stars{font-size:.95rem;color:var(--sun);font-weight:600}
+a.defi{display:flex;align-items:center;gap:18px;padding:18px 22px;border-radius:24px;text-decoration:none;color:var(--night);
+  background:linear-gradient(100deg,var(--sun),var(--tangerine));box-shadow:0 6px 0 #c9771a;margin-bottom:6px;border:3px solid transparent}
+a.defi:hover,a.defi:focus-visible{border-color:#fff;outline:none}
+a.defi .emoji{font-size:3rem}
+a.defi strong{font-size:1.5rem;display:block}
+a.defi span{font-size:1.02rem}
+a.defi .streak{margin-left:auto;font-weight:700;font-size:1.3rem;white-space:nowrap}
+a.petits{background:linear-gradient(135deg,#FF6F9F,#B9B3F5)}
+a.petits .desc{color:#fff}
 @media (prefers-reduced-motion:reduce){a.game{transition:none}a.game:hover{transform:none}}
 </style>
 </head>
@@ -36,24 +48,52 @@ a.game:hover,a.game:focus-visible{border-color:var(--sun);transform:translateY(-
 <main>
   <h1>Jeux des enfants</h1>
   <p class="lead">Choisis un jeu et amuse-toi bien !</p>
-  <div class="grid" id="games"></div>
+  <a class="defi" href="defi/"><span class="emoji" aria-hidden="true">🏆</span><div><strong>Défi du jour</strong><span>10 questions de toutes les matières, un nouveau défi chaque jour</span></div><span class="streak" id="streak"></span></a>
+  <div id="sections"></div>
 </main>
 <script>
 // Pour ajouter un jeu : une ligne de plus ici, et un dossier avec son index.html.
-var GAMES = [
-  { href:"fusees/", emoji:"🚀", name:"Fusées des lettres", desc:"Tape la lettre de la fusée pour lancer le feu d'artifice.", tag:"Clavier · étape 1" },
-  { href:"doigts/", emoji:"🖐️", name:"Les doigts magiques", desc:"Tape des mots et des phrases avec le bon doigt.", tag:"Clavier · étape 2" }
+var SECTIONS = [
+  { titre:"🧸 Le coin des petits", jeux:[
+    { href:"petits/", id:"", emoji:"🐻", name:"Pour les 3 à 5 ans", desc:"Memory, couleurs, chiffres, lettres, ombres. Sur tablette, avec une voix qui parle.", tag:"3-5 ans", cls:"petits" } ] },
+  { titre:"⌨️ Le clavier", jeux:[
+    { href:"fusees/", id:"", emoji:"🚀", name:"Fusées des lettres", desc:"Tape la lettre de la fusée pour lancer le feu d'artifice.", tag:"étape 1" },
+    { href:"doigts/", id:"", emoji:"🖐️", name:"Les doigts magiques", desc:"Tape des mots et des phrases avec le bon doigt.", tag:"étape 2" } ] },
+  { titre:"📚 Français", jeux:[
+    { href:"homophones/", id:"homophones", emoji:"⚔️", name:"Le duel des homophones", desc:"a/à, et/est, son/sont, on/ont, ces/ses…", tag:"7P" },
+    { href:"conjugaison/", id:"conjugaison", emoji:"✍️", name:"Conjugaison express", desc:"Présent, imparfait, futur, conditionnel, impératif, passé composé.", tag:"7P" },
+    { href:"pluriels/", id:"pluriels", emoji:"🦔", name:"Les pluriels pièges", desc:"Chevaux, festivals, bijoux, pneus…", tag:"7P" },
+    { href:"dictee/", id:"dictee", emoji:"🎧", name:"La dictée magique", desc:"Écoute le mot et écris-le.", tag:"7P" } ] },
+  { titre:"🔢 Maths", jeux:[
+    { href:"calcul/", id:"calcul", emoji:"🧮", name:"Tables et calcul mental", desc:"Les tables, les divisions, les doubles, le calcul de tête.", tag:"Maths" },
+    { href:"heure/", id:"heure", emoji:"🕒", name:"Lire l'heure", desc:"L'horloge à aiguilles, les quarts, les durées.", tag:"Maths" },
+    { href:"sous/", id:"sous", emoji:"🪙", name:"Les sous suisses", desc:"Compter, rendre la monnaie, faire les courses.", tag:"Maths" } ] },
+  { titre:"🌍 Le monde", jeux:[
+    { href:"cantons/", id:"cantons", emoji:"🇨🇭", name:"Les cantons suisses", desc:"La carte, les abréviations, les chefs-lieux, les langues.", tag:"Géographie" } ] }
 ];
-var box = document.getElementById("games");
-GAMES.forEach(function(g){
-  var a = document.createElement("a");
-  a.className = "game"; a.href = g.href;
-  a.innerHTML = '<span class="emoji" aria-hidden="true">'+g.emoji+'</span><span class="name"></span><span class="desc"></span><span class="tag"></span>';
-  a.querySelector(".name").textContent = g.name;
-  a.querySelector(".desc").textContent = g.desc;
-  a.querySelector(".tag").textContent = g.tag;
-  box.appendChild(a);
+function lire(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function etoiles(id){
+  var s = 0; if(!id) return 0;
+  try{ for(var i=0;i<localStorage.length;i++){ var k = localStorage.key(i); if(k.indexOf("mot-"+id+"-") === 0 && /-etoiles$/.test(k)) s += parseInt(localStorage.getItem(k)||"0",10); } }catch(e){}
+  return s;
+}
+var box = document.getElementById("sections");
+SECTIONS.forEach(function(sec){
+  var h = document.createElement("h2"); h.textContent = sec.titre; box.appendChild(h);
+  var g = document.createElement("div"); g.className = "grid"; box.appendChild(g);
+  sec.jeux.forEach(function(j){
+    var a = document.createElement("a"); a.className = "game" + (j.cls ? " " + j.cls : ""); a.href = j.href;
+    a.innerHTML = '<span class="emoji" aria-hidden="true"></span><span class="name"></span><span class="desc"></span><span class="foot"><span class="tag"></span><span class="stars"></span></span>';
+    a.querySelector(".emoji").textContent = j.emoji; a.querySelector(".name").textContent = j.name;
+    a.querySelector(".desc").textContent = j.desc; a.querySelector(".tag").textContent = j.tag;
+    var e = etoiles(j.id); if(e) a.querySelector(".stars").textContent = "⭐ " + e;
+    g.appendChild(a);
+  });
 });
+var auj = new Date(), cle = function(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+var dernier = lire("mot-defi-dernier"), serie = parseInt(lire("mot-defi-serie")||"0",10);
+if(dernier === cle(auj)) document.getElementById("streak").textContent = "✅ 🔥 " + serie;
+else if(dernier === cle(new Date(Date.now()-864e5)) && serie) document.getElementById("streak").textContent = "🔥 " + serie;
 </script>
 </body>
 </html>

@@ -1,6 +1,11 @@
 # Jeux des enfants
 
-Petits jeux éducatifs en français.
+Petits jeux éducatifs en français, sans publicité ni compte.
 
-- Fusées des lettres : apprendre le clavier (QWERTZ suisse), étape 1
-- Les doigts magiques : taper des mots et des phrases avec le bon doigt, étape 2
+- `commun/` : moteur commun (niveaux, étoiles, explications, questions ratées reposées) et contenu de chaque jeu (`commun/jeux/`)
+- Clavier : `fusees/` (étape 1), `doigts/` (étape 2)
+- Français (7P) : `homophones/`, `conjugaison/`, `pluriels/`, `dictee/`
+- Maths : `calcul/`, `heure/`, `sous/`
+- Le monde : `cantons/` (carte : swiss-maps, licence BSD-3)
+- `defi/` : défi du jour (10 questions de toutes les matières)
+- `petits/` : le coin des petits (3-5 ans, tablette)
