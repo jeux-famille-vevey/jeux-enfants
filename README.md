@@ -7,5 +7,6 @@ Petits jeux éducatifs en français, sans publicité ni compte.
 - Français (7P) : `homophones/`, `conjugaison/`, `pluriels/`, `dictee/`
 - Maths : `calcul/`, `heure/`, `sous/`
 - Le monde : `cantons/` (carte : swiss-maps, licence BSD-3)
+- Langues : `anglais/` (7P, 1re année), `allemand/` (orthographe suisse)
 - `defi/` : défi du jour (10 questions de toutes les matières)
 - `petits/` : le coin des petits (3-5 ans, tablette)

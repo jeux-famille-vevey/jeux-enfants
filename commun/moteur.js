@@ -50,19 +50,22 @@
   M.sonFin = function(){ [523,659,784,1046].forEach(function(f,i){ setTimeout(function(){ ton(f,.22,"triangle",.13); }, i*120); }); };
 
   /* ---------- voix (synthèse vocale du navigateur) ---------- */
-  var voix = null;
-  function trouverVoix(){
+  var voix = null, voixLangue = {};
+  function trouverVoix(lang){
     if(!("speechSynthesis" in window)) return null;
-    var v = speechSynthesis.getVoices().filter(function(x){ return /^fr/i.test(x.lang); });
-    v.sort(function(a,b){ return (/fr-CH/i.test(b.lang)?2:/fr-FR/i.test(b.lang)?1:0) - (/fr-CH/i.test(a.lang)?2:/fr-FR/i.test(a.lang)?1:0); });
+    lang = lang || "fr";
+    var pref = { fr:["fr-CH","fr-FR"], en:["en-GB","en-US"], de:["de-CH","de-DE"] }[lang] || [];
+    var v = speechSynthesis.getVoices().filter(function(x){ return x.lang && x.lang.toLowerCase().indexOf(lang) === 0; });
+    v.sort(function(a,b){ var ia = pref.indexOf(a.lang), ib = pref.indexOf(b.lang); return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib); });
     return v[0] || null;
   }
-  M.voixPrete = function(){
+  M.voixPour = function(lang){ if(!voixLangue[lang]) voixLangue[lang] = trouverVoix(lang); return voixLangue[lang]; };
+  M.voixPrete = function(lang){
     return new Promise(function(ok){
-      voix = trouverVoix(); if(voix || !("speechSynthesis" in window)) return ok(!!voix);
+      voix = trouverVoix(lang); if(voix || !("speechSynthesis" in window)) return ok(!!voix);
       var fini = false;
-      speechSynthesis.onvoiceschanged = function(){ if(fini) return; voix = trouverVoix(); if(voix){ fini = true; ok(true); } };
-      setTimeout(function(){ if(!fini){ fini = true; voix = trouverVoix(); ok(!!voix); } }, 1800);
+      speechSynthesis.onvoiceschanged = function(){ if(fini) return; voix = trouverVoix(lang); voixLangue = {}; if(voix){ fini = true; ok(true); } };
+      setTimeout(function(){ if(!fini){ fini = true; voix = trouverVoix(lang); ok(!!voix); } }, 1800);
     });
   };
   // vitesse de la voix (réglable) : 0 = normale, 1 = lente, 2 = très lente
@@ -71,15 +74,16 @@
   M.nomVitesse = function(){ return ["normale","lente","très lente"][M.vitesse()]; };
   // texte = une phrase ou une liste de morceaux, dits l'un après l'autre avec une pause entre chacun
   var tour = 0;
-  M.parler = function(texte, tresLent){
+  M.parler = function(texte, tresLent, lang){
     if(!("speechSynthesis" in window)) return;
-    if(!voix) voix = trouverVoix();
+    var vx = M.voixPour(lang || "fr");
+    if(!vx && lang && lang !== "fr") return; // pas de voix dans cette langue : on se tait plutôt que de mal prononcer
     speechSynthesis.cancel();
     var morceaux = [].concat(texte), id = ++tour, rate = tresLent ? .5 : VITESSES[M.vitesse()];
     var pause = 700 + (1 - rate) * 1200;
     (function dire(i){
       if(id !== tour || i >= morceaux.length) return;
-      var u = new SpeechSynthesisUtterance(morceaux[i]); u.lang = voix ? voix.lang : "fr-FR"; if(voix) u.voice = voix; u.rate = rate;
+      var u = new SpeechSynthesisUtterance(morceaux[i]); u.lang = vx ? vx.lang : "fr-FR"; if(vx) u.voice = vx; u.rate = rate;
       var suite = false, go = function(){ if(suite) return; suite = true; setTimeout(function(){ dire(i+1); }, pause); };
       u.onend = go; u.onerror = go;
       setTimeout(go, 1500 + morceaux[i].length * 160 / rate); // au cas où « fin » n'arrive jamais
@@ -183,10 +187,10 @@
     var zone = $("mZone"); zone.innerHTML = "";
     if(q.parler){
       var sb = document.createElement("button"); sb.className = "say-btn"; sb.textContent = "🔊 Réécouter";
-      sb.onclick = function(){ M.parler(q.parler, false); }; zone.appendChild(sb);
+      sb.onclick = function(){ M.parler(q.parler, false, q.langue); }; zone.appendChild(sb);
       if(q.parlerLent){ var lb = document.createElement("button"); lb.className = "say-btn"; lb.style.background = "var(--mint)"; lb.textContent = "🐢 Très lentement";
-        lb.onclick = function(){ M.parler(q.parlerLent, true); }; zone.appendChild(lb); }
-      setTimeout(function(){ M.parler(q.parler, false); }, 250);
+        lb.onclick = function(){ M.parler(q.parlerLent, true, q.langue); }; zone.appendChild(lb); }
+      if(!q.parlerSurClic) setTimeout(function(){ M.parler(q.parler, false, q.langue); }, 250);
     }
     if(q.monter){
       q.monter($("mVisuel"), repondre);
@@ -227,6 +231,7 @@
     if(bouton && !ok) bouton.classList.add("wrong");
     var inp = $("mInput"); if(inp) inp.disabled = true;
     var carte = $("mCarte"), retour = $("mRetour");
+    if(q.direApres) setTimeout(function(){ M.parler(q.direApres, false, q.langue); }, 300);
     if(ok){
       carte.className = "card ok"; M.sonBon();
       if(P.it.essai === 1){ P.bons++; P.serie++; P.meilleure = Math.max(P.meilleure, P.serie); if(!P.defi) majRates(P.jeu.id, P.niv.id, q.cle, false); }
@@ -328,7 +333,7 @@
     $("mDebut").hidden = false;
     $("mDTitre").textContent = "🏆 Défi du jour";
     $("mIntro").textContent = dejaFait ? "Tu as déjà fait le défi d'aujourd'hui. Tu peux le refaire pour t'entraîner, ou revenir demain pour un nouveau !"
-      : "10 questions de toutes les matières : français, maths, l'heure, les sous et la Suisse. Un nouveau défi chaque jour !";
+      : "10 questions de toutes les matières : français, maths, langues, l'heure, les sous et la Suisse. Un nouveau défi chaque jour !";
     $("mNiveaux").innerHTML = '<div class="stat" style="justify-self:center"><b>🔥 ' + serieJours + '</b><span>jour' + (serieJours>1?"s":"") + ' de suite</span></div>';
     $("mGo").onclick = function(){
       var fab = function(c){ var it = parCle[c], q = it.niv.question(it.cle); q.enonce = '<small>'+it.jeu.emoji+' '+it.jeu.titre+'</small>' + q.enonce; return q; };
