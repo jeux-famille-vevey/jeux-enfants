@@ -211,6 +211,7 @@
   }
 
   function juste(q, v){
+    if(q.accepter) return q.accepter(v, normal);
     if(q.saisie === "nombre"){ var x = nombre(v); return q.reponses.some(function(r){ return nombre(r) === x; }); }
     return q.reponses.some(function(r){ return normal(r) === normal(v); });
   }

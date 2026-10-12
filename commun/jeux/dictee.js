@@ -36,17 +36,24 @@
       var it = LISTES[liste].filter(function(x){ return x[0] === cle; })[0], mot = it[0];
       var phrase = liste === "phr";
       var acc = [mot]; if(phrase) acc.push(mot.replace(/[.!?]$/, ""));
-      var q = { saisie:"texte", indice: phrase ? "Écris la phrase" : "Écris le mot", reponses:acc, resume: phrase ? "La phrase" : "Le mot",
+      var q = { saisie:"texte", indice: phrase ? "Écris la phrase" : "Écris seulement le mot", reponses:acc, resume: phrase ? "La phrase" : "Le mot",
+        // si elle écrit aussi la phrase d'exemple, on accepte quand même si le mot est bien écrit dedans
+        accepter: phrase ? null : function(v, normal){
+          var n = normal(v), m = normal(mot);
+          if(n === m) return true;
+          var morceaux = n.replace(/[.,!?;:«»"]/g, " ").split(/\s+/);
+          return morceaux.indexOf(m) >= 0;
+        },
         expliquer:function(v){ return "Tu as écrit : <i>" + M.echapper(v) + "</i><br>Le bon mot : " + marquer(mot, v.trim()) + "<br>" + indice(liste, mot); } };
       if(voix){
-        q.enonce = "<small>Écoute bien et écris " + (phrase ? "la phrase" : "le mot") + "</small><span class=\"big\">🎧</span>";
+        q.enonce = "<small>Écoute bien et écris " + (phrase ? "toute la phrase" : "<b>seulement le mot</b> (pas la phrase d'exemple)") + "</small><span class=\"big\">🎧</span>";
         if(phrase){ // comme à l'école : la phrase, puis par petits groupes de mots, puis la phrase
           var mots = mot.replace(/[.!?]$/, "").split(" "), groupes = [];
           for(var g=0; g<mots.length; g+=3) groupes.push(mots.slice(g, g+3).join(" "));
           q.parler = [mot].concat(groupes, [mot]);
           q.parlerLent = groupes;
         } else {
-          q.parler = it[1] ? [mot, it[1], mot] : [mot, mot];
+          q.parler = it[1] ? [mot, "Comme dans la phrase : " + it[1], "Écris seulement le mot : " + mot] : [mot, "Écris : " + mot];
           q.parlerLent = [mot];
         }
       } else {
