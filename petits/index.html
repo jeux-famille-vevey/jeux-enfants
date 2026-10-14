@@ -60,6 +60,18 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
 .card::after{content:"⭐";position:absolute;font-size:.6em;opacity:.5}
 .card.open::after,.card.done::after{display:none}
 .shadow{filter:brightness(0) opacity(.75)}
+.slots{display:flex;gap:clamp(8px,2.5vmin,20px);justify-content:center;flex-wrap:wrap}
+.slot{font:inherit;width:clamp(90px,20vmin,150px);height:clamp(120px,26vmin,190px);border-radius:16px;border:6px dashed;background:rgba(255,255,255,.08);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;cursor:pointer;color:#FFF8E7;font-size:clamp(2rem,7vmin,3.4rem);font-weight:700}
+.slot .p{font-size:.45em;opacity:.8}
+.slot.good{background:rgba(46,196,182,.35)}
+.slot.nope{animation:wobble .4s}
+.carbox{transition:transform .9s cubic-bezier(.5,0,.3,1);width:clamp(170px,38vmin,280px)}
+.carbox svg{width:100%;height:auto;display:block}
+.race{position:relative;width:min(96vw,560px);flex:1;min-height:0;border-radius:24px;overflow:hidden;touch-action:none}
+.race canvas{width:100%;height:100%;display:block}
+.race .hud{position:absolute;top:10px;left:0;right:0;display:flex;justify-content:space-between;padding:0 14px;font-size:clamp(1.3rem,4vmin,2rem);font-weight:700;pointer-events:none;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.race .side{position:absolute;bottom:14px;font-size:2.4rem;opacity:.55;pointer-events:none}
 .party{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:30}
 .party span{position:absolute;top:-60px;font-size:2.4rem;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(115vh) rotate(540deg)}}
@@ -154,12 +166,15 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
     { id:"couleurs", e:"🎨", nom:"Couleurs et formes", c:"var(--sun)", dire:"Les couleurs et les formes" },
     { id:"compter", e:"🍎", nom:"Compter", c:"var(--mint)", dire:"On compte" },
     { id:"lettres", e:"🔤", nom:"Les lettres", c:"var(--lilac)", dire:"Les lettres" },
-    { id:"ombres", e:"👤", nom:"Les ombres", c:"var(--tangerine)", dire:"Les ombres" }
+    { id:"ombres", e:"👤", nom:"Les ombres", c:"var(--tangerine)", dire:"Les ombres" },
+    { id:"course", e:"🏎️", nom:"La course", c:"#4CC9F0", dire:"La course" },
+    { id:"parking", e:"🅿️", nom:"Le parking", c:"#6FD08C", dire:"Le parking" },
+    { id:"histoires", e:"📚", nom:"Les histoires", c:"#FF9F1C", href:"../histoires/" }
   ];
   JEUX.forEach(function(j){
     var b = document.createElement("button"); b.className = "tile"; b.style.background = j.c;
     b.innerHTML = '<span class="e" aria-hidden="true">' + j.e + '</span><b></b>'; b.querySelector("b").textContent = j.nom;
-    b.onclick = function(){ audio(); start(j); };
+    b.onclick = function(){ audio(); if(j.href) location.href = j.href; else start(j); };
     $("menu").appendChild(b);
   });
 
@@ -170,7 +185,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
     $("vMenu").hidden = true; $("vGame").hidden = false; $("win").hidden = true;
     $("gTitle").textContent = j.e + " " + j.nom;
     var d = $("dots"); d.innerHTML = ""; for(var i=0;i<ROUNDS;i++) d.appendChild(document.createElement("i"));
-    if(j.id === "memory"){ d.innerHTML = ""; memory(); } else next();
+    if(j.id === "memory"){ d.innerHTML = ""; memory(); } else if(j.id === "course"){ d.innerHTML = ""; course(); } else next();
   }
   function consigne(t){ G.consigne = t; $("stage").querySelector(".prompt").textContent = t; say(t); }
   $("repeat").onclick = function(){ if(G) say(G.consigne); };
@@ -193,7 +208,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
   function stage(html){ $("stage").innerHTML = '<div class="prompt"></div>' + html; G.locked = false; }
 
   function next(){
-    var f = { couleurs:couleurs, compter:compter, lettres:lettres, ombres:ombres }[G.j.id]; f();
+    var f = { couleurs:couleurs, compter:compter, lettres:lettres, ombres:ombres, parking:parking }[G.j.id]; f();
   }
 
   /* --- couleurs et formes --- */
@@ -256,6 +271,130 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
       $("opts").appendChild(b);
     });
     consigne("Trouve l'ombre de " + cible[1] + " !");
+  }
+  /* --- dessin d'une voiture vue de côté (pour le parking) --- */
+  function carSvg(col, label){
+    return '<svg viewBox="0 0 200 110" aria-hidden="true"><path d="M18 70 Q20 48 46 46 L70 24 Q76 18 88 18 L130 18 Q142 18 150 28 L168 46 Q188 48 190 66 L190 78 Q190 84 184 84 L16 84 Q10 84 12 76Z" fill="' + col + '" stroke="#1D2357" stroke-width="4"/>' +
+      '<path d="M78 28 L90 24 L112 24 L112 46 L64 46Z" fill="#CFEFFF" stroke="#1D2357" stroke-width="3"/><path d="M120 24 L134 24 Q140 24 145 30 L158 46 L120 46Z" fill="#CFEFFF" stroke="#1D2357" stroke-width="3"/>' +
+      '<circle cx="54" cy="84" r="17" fill="#2b2b2b"/><circle cx="54" cy="84" r="7" fill="#ccc"/><circle cx="150" cy="84" r="17" fill="#2b2b2b"/><circle cx="150" cy="84" r="7" fill="#ccc"/>' +
+      '<circle cx="184" cy="62" r="5" fill="#FFE27A"/>' + (label ? '<circle cx="100" cy="62" r="15" fill="#FFF8E7" stroke="#1D2357" stroke-width="3"/><text x="100" y="69" text-anchor="middle" font-size="20" font-weight="700" fill="#1D2357" font-family="Fredoka, sans-serif">' + label + '</text>' : "") + '</svg>';
+  }
+  /* --- le parking : garer la voiture à la place de sa couleur, puis de son numéro --- */
+  function parking(){
+    var lvl = G.level, parNombre = lvl >= 2, n = lvl === 0 ? 3 : 4;
+    var opts, cible;
+    if(!parNombre){ opts = shuffle(COULEURS).slice(0, n); cible = R(opts); }
+    else { var max = lvl >= 4 ? 9 : 5; opts = shuffle([1,2,3,4,5,6,7,8,9].slice(0, max)).slice(0, n); cible = R(opts); }
+    var couleurVoiture = parNombre ? R(COULEURS)[2] : cible[2];
+    var label = parNombre ? (lvl === 3 ? "" : String(cible)) : "";
+    var points = parNombre && lvl === 3 ? '<div style="font-size:2.2rem;letter-spacing:4px">' + new Array(cible + 1).join("●") + "</div>" : "";
+    stage('<div class="slots" id="slots"></div><div class="carbox" id="car">' + carSvg(couleurVoiture, label) + points + "</div>");
+    opts.forEach(function(o){
+      var b = document.createElement("button"); b.className = "slot";
+      if(parNombre){ b.style.borderColor = "#FFF8E7"; b.innerHTML = '<span class="p">P</span>' + o; }
+      else { b.style.borderColor = o[2]; b.style.background = o[2] + "33"; b.innerHTML = '<span class="p" style="color:' + o[2] + '">P</span>'; }
+      b.onclick = function(){
+        if(G.locked) return;
+        if(o === cible){
+          var car = $("car"), rb = b.getBoundingClientRect(), rc = car.getBoundingClientRect();
+          car.style.transform = "translate(" + (rb.left + rb.width/2 - rc.left - rc.width/2) + "px," + (rb.top + rb.height/2 - rc.top - rc.height/2) + "px) scale(.5)";
+          tone(300, .5, "sawtooth", .05); good(b);
+        } else oops(b);
+      };
+      $("slots").appendChild(b);
+    });
+    if(!parNombre) consigne("La voiture " + cible[1] + " veut se garer. Touche la place " + cible[1] + " !");
+    else if(lvl === 3) consigne("Compte les points sur la voiture, et gare-la à la bonne place !");
+    else consigne("La voiture numéro " + cible + " veut se garer. Touche la place " + cible + " !");
+  }
+  /* --- la course : on change de voie pour ramasser les étoiles --- */
+  var VEHICULES = [ { id:"voiture", e:"🚗", nom:"la voiture", c:"#E5484D" }, { id:"moto", e:"🏍️", nom:"la moto", c:"#3D7BD9" },
+                    { id:"pompiers", e:"🚒", nom:"le camion de pompiers", c:"#E5484D" }, { id:"tracteur", e:"🚜", nom:"le tracteur", c:"#3FA34D" } ];
+  function course(){
+    stage('<div class="row" id="opts"></div>');
+    VEHICULES.forEach(function(v){
+      var b = document.createElement("button"); b.className = "pick"; b.textContent = v.e; b.setAttribute("aria-label", v.nom);
+      b.onclick = function(){ say("C'est parti avec " + v.nom + " !"); lancerCourse(v); };
+      $("opts").appendChild(b);
+    });
+    consigne("Choisis ton véhicule !");
+  }
+  function dessinVehicule(ctx, type, x, y, w, col){
+    ctx.save(); ctx.translate(x, y);
+    var r = function(a,b,c,d,rad,f){ ctx.fillStyle = f; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(a,b,c,d,rad); else ctx.rect(a,b,c,d); ctx.fill(); };
+    if(type === "moto"){
+      r(-w*.08,-w*.75,w*.16,w*.32,w*.08,"#222"); r(-w*.08,w*.45,w*.16,w*.32,w*.08,"#222");
+      r(-w*.16,-w*.5,w*.32,w,w*.12,col); ctx.fillStyle = "#FFD23F"; ctx.beginPath(); ctx.arc(0,w*.05,w*.17,0,7); ctx.fill();
+      ctx.fillStyle = "#1D2357"; ctx.beginPath(); ctx.arc(0,-w*.02,w*.11,0,7); ctx.fill();
+    } else if(type === "tracteur"){
+      r(-w*.5,w*.05,w*.22,w*.55,w*.06,"#222"); r(w*.28,w*.05,w*.22,w*.55,w*.06,"#222"); r(-w*.38,-w*.7,w*.14,w*.3,w*.05,"#222"); r(w*.24,-w*.7,w*.14,w*.3,w*.05,"#222");
+      r(-w*.25,-w*.8,w*.5,w*1.45,w*.1,col); r(-w*.2,w*.05,w*.4,w*.42,w*.06,"#CFEFFF"); ctx.fillStyle = "#555"; ctx.fillRect(-w*.04,-w*.95,w*.08,w*.2);
+    } else {
+      var long = type === "pompiers" ? 1.35 : 1;
+      r(-w*.47,-w*.55*long,w*.12,w*.3,w*.04,"#222"); r(w*.35,-w*.55*long,w*.12,w*.3,w*.04,"#222");
+      r(-w*.47,w*.3*long,w*.12,w*.3,w*.04,"#222"); r(w*.35,w*.3*long,w*.12,w*.3,w*.04,"#222");
+      r(-w*.4,-w*.8*long,w*.8,w*1.6*long,w*.18,col);
+      r(-w*.3,-w*.5*long,w*.6,w*.28,w*.06,"#CFEFFF");
+      if(type === "pompiers"){ ctx.fillStyle = "#ddd"; for(var i=0;i<6;i++) ctx.fillRect(-w*.2,-w*.1+i*w*.16,w*.4,w*.04); ctx.fillRect(-w*.2,-w*.12,w*.04,w*.95); ctx.fillRect(w*.16,-w*.12,w*.04,w*.95); }
+      else r(-w*.3,w*.2,w*.6,w*.24,w*.06,"#CFEFFF");
+      ctx.fillStyle = "#FFE27A"; ctx.beginPath(); ctx.arc(-w*.25,-w*.78*long,w*.07,0,7); ctx.arc(w*.25,-w*.78*long,w*.07,0,7); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function lancerCourse(v){
+    stage('<div class="race" id="race"><canvas id="cv"></canvas><div class="hud"><span id="nbEt">⭐ 0</span><span id="tps">⏱ 40</span></div>' +
+          '<span class="side" style="left:14px">👈</span><span class="side" style="right:14px">👉</span></div>');
+    consigne("Touche à gauche ou à droite pour changer de route, et ramasse les étoiles !");
+    var box = $("race"), cv = $("cv"), ctx = cv.getContext("2d"), W, H, dpr = Math.min(2, window.devicePixelRatio || 1);
+    function taille(){ var r = box.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+    taille();
+    var lane = 1, px = 0, etoiles = 0, objets = [], t0 = performance.now(), last = t0, defil = 0, spawn = 0, choc = 0, duree = 40, fini = false;
+    var vitesse = 0.32 + 0.05 * Math.min(G.level, 4); // hauteurs d'écran par seconde
+    var monId = G;
+    function laneX(l){ return W * (0.2 + 0.3 * l); }
+    px = laneX(1);
+    function bouger(d){ if(fini) return; lane = Math.max(0, Math.min(2, lane + d)); tone(500 + lane*80, .06, "triangle", .06); }
+    box.addEventListener("pointerdown", function(e){ var r = box.getBoundingClientRect(); bouger(e.clientX - r.left < W/2 ? -1 : 1); });
+    var clav = function(e){ if(e.key === "ArrowLeft") bouger(-1); if(e.key === "ArrowRight") bouger(1); };
+    document.addEventListener("keydown", clav);
+    function boucle(now){
+      if(G !== monId || !document.body.contains(cv)){ document.removeEventListener("keydown", clav); return; }
+      var dt = Math.min(.05, (now - last)/1000); last = now;
+      var reste = Math.max(0, duree - (now - t0)/1000);
+      $("tps").textContent = "⏱ " + Math.ceil(reste);
+      var v = vitesse * H * (choc > 0 ? .4 : 1);
+      defil = (defil + v*dt) % 80; choc = Math.max(0, choc - dt);
+      spawn -= dt;
+      if(spawn <= 0 && reste > 2){ spawn = .9 + Math.random()*.5;
+        var l1 = Math.floor(Math.random()*3); objets.push({ l:l1, y:-40, t:Math.random() < .72 ? "⭐" : R(["🚧","🪨","🛢️"]) });
+        if(Math.random() < .25){ var l2 = (l1 + 1 + Math.floor(Math.random()*2)) % 3; objets.push({ l:l2, y:-40, t:"⭐" }); } }
+      px += (laneX(lane) - px) * Math.min(1, dt*12);
+      var py = H - Math.min(H*.2, 120), lw = W*.3*.62;
+      // route
+      ctx.fillStyle = "#5BB85B"; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#4A4F6A"; ctx.fillRect(W*.05,0,W*.9,H);
+      ctx.fillStyle = "#FFF8E7"; for(var y = -80 + defil; y < H; y += 80){ ctx.fillRect(W*.35-3, y, 6, 40); ctx.fillRect(W*.65-3, y, 6, 40); }
+      ctx.fillStyle = "#FFD23F"; ctx.fillRect(W*.05, 0, 5, H); ctx.fillRect(W*.95-5, 0, 5, H);
+      // objets
+      ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = Math.round(lw*.7) + "px sans-serif";
+      for(var i = objets.length-1; i >= 0; i--){
+        var o = objets[i]; o.y += v*dt;
+        ctx.fillText(o.t, laneX(o.l), o.y);
+        if(!o.pris && Math.abs(o.y - py) < lw*.7 && o.l === lane){
+          o.pris = true;
+          if(o.t === "⭐"){ etoiles++; $("nbEt").textContent = "⭐ " + etoiles; tone(700 + (etoiles % 8)*60, .15, "triangle", .12); say(etoiles <= 10 ? NOMBRES[etoiles] : String(etoiles)); objets.splice(i, 1); continue; }
+          else { choc = .8; boop(); }
+        }
+        if(o.y > H + 60) objets.splice(i, 1);
+      }
+      var secousse = choc > 0 ? Math.sin(now/30) * 6 : 0;
+      dessinVehicule(ctx, v_type, px + secousse, py, lw, v_col);
+      if(reste <= 0 && !fini){ fini = true; document.removeEventListener("keydown", clav);
+        setTimeout(function(){ if(G !== monId) return; finish(); $("winText").textContent = "Tu as ramassé " + etoiles + " étoiles !"; say("Bravo ! Tu as ramassé " + etoiles + " étoiles !"); }, 600); return; }
+      requestAnimationFrame(boucle);
+    }
+    var v_type = v.id, v_col = v.c;
+    requestAnimationFrame(boucle);
   }
   /* --- memory --- */
   function memory(){

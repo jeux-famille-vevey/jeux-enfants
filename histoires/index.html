@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Les histoires</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --sky-top:#1D2357; --sky-bottom:#3B3F8F; --ink:#FFF8E7; --ink-soft:#C9CCF2; --sun:#FFD23F; --tangerine:#FF9F1C; --mint:#2EC4B6; --pink:#FF6F9F;
+  --panel:#272C6B; --night:#1D2357; --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#2B3070}
+body{background:linear-gradient(var(--sky-top),var(--sky-bottom)) fixed;color:var(--ink);font-family:var(--font);touch-action:manipulation}
+.top{display:flex;align-items:center;gap:12px;padding:10px 14px}
+.round{font:inherit;width:56px;height:56px;border-radius:50%;border:0;background:var(--panel);color:var(--ink);font-size:1.6rem;display:grid;place-items:center;text-decoration:none;cursor:pointer;flex:none}
+.title{flex:1;text-align:center;font-weight:700;font-size:clamp(1.1rem,3.6vmin,1.6rem);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color:var(--sun);text-shadow:0 4px 0 var(--tangerine)}
+.sub{text-align:center;color:var(--ink-soft);margin:0 0 14px}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:16px;padding:0 16px 30px;max-width:1100px;margin:0 auto}
+.book{font:inherit;border:0;padding:0;border-radius:22px;overflow:hidden;background:var(--panel);color:var(--ink);text-align:left;cursor:pointer;box-shadow:0 8px 0 rgba(0,0,0,.25);position:relative}
+.book:active{transform:translateY(4px)}
+.book svg{display:block;width:100%;height:auto}
+.book .t{padding:10px 14px 14px;font-weight:700;font-size:1.2rem}
+.book .a{display:block;font-weight:500;font-size:.9rem;color:var(--ink-soft)}
+.book .lu{position:absolute;top:10px;right:10px;background:var(--mint);color:var(--night);font-weight:700;border-radius:999px;padding:3px 10px;font-size:.9rem}
+#reader{position:fixed;inset:0;display:flex;flex-direction:column;background:linear-gradient(var(--sky-top),var(--sky-bottom))}
+#reader[hidden],#fin[hidden],#lib[hidden]{display:none}
+.page{flex:1;min-height:0;display:grid;gap:14px;padding:0 14px;grid-template-rows:auto 1fr}
+.scene{border-radius:22px;overflow:hidden;box-shadow:0 6px 0 rgba(0,0,0,.25);align-self:start}
+.scene svg{display:block;width:100%;height:auto}
+.texte{overflow-y:auto;font-size:clamp(1.35rem,4vmin,2.1rem);line-height:1.45;padding:4px 6px}
+.texte p{margin:0 0 .5em}
+.texte .qui{display:block;font-size:.55em;font-weight:600;opacity:.8;margin-bottom:-.1em}
+.mot{border-radius:8px;padding:0 .06em;cursor:pointer;transition:background .1s}
+.mot.on{background:var(--sun);color:var(--night)}
+.ligne.on{text-decoration:underline;text-decoration-color:rgba(255,210,63,.6);text-underline-offset:6px}
+@media (orientation:landscape) and (min-width:700px){ .page{grid-template-columns:1.25fr 1fr;grid-template-rows:1fr;align-items:center} .scene{align-self:center} }
+.ctrl{display:flex;justify-content:center;align-items:center;gap:clamp(14px,4vw,40px);padding:12px 14px 18px}
+.big{font:inherit;width:clamp(70px,16vmin,96px);height:clamp(70px,16vmin,96px);border-radius:50%;border:0;font-size:clamp(2rem,6vmin,2.8rem);cursor:pointer;
+  background:var(--panel);color:var(--ink);box-shadow:0 6px 0 rgba(0,0,0,.3)}
+.big.main{background:var(--sun);color:var(--night);width:clamp(86px,19vmin,116px);height:clamp(86px,19vmin,116px)}
+.big:disabled{opacity:.3}
+.dots{display:flex;gap:6px;justify-content:center}
+.dots i{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.22)}
+.dots i.on{background:var(--sun)}
+.mode{font:inherit;font-weight:600;border:0;border-radius:999px;padding:10px 16px;background:var(--panel);color:var(--ink);cursor:pointer;font-size:1rem;white-space:nowrap}
+#fin{position:fixed;inset:0;background:rgba(21,26,71,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;text-align:center;z-index:5}
+#fin .q{font-size:clamp(1.5rem,5vmin,2.4rem);font-weight:700;max-width:24ch}
+#fin .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.pick{font:inherit;border:0;background:#FFF8E7;color:var(--night);border-radius:24px;min-width:clamp(100px,24vmin,170px);height:clamp(100px,24vmin,170px);padding:0 14px;
+  font-size:clamp(1.4rem,5vmin,2.2rem);font-weight:700;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.pick.emoji{font-size:clamp(3rem,11vmin,5.5rem)}
+.pick.good{background:var(--mint)}
+.pick.nope{animation:wob .4s}
+@keyframes wob{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.tile{font:inherit;border:0;border-radius:24px;padding:14px 26px;font-size:1.3rem;font-weight:700;cursor:pointer;color:var(--night);box-shadow:0 6px 0 rgba(0,0,0,.25)}
+/* animations des personnages */
+.saut{animation:saut 1.6s ease-in-out infinite}
+.balance{animation:balance 2.4s ease-in-out infinite}
+.vole{animation:vole 3s ease-in-out infinite}
+@keyframes saut{0%,100%{transform:translateY(0)}50%{transform:translateY(-4%)}}
+@keyframes balance{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes vole{0%,100%{transform:translateY(0)}50%{transform:translateY(-6%)}}
+.saut,.balance,.vole{transform-box:fill-box;transform-origin:50% 90%}
+.pluie line{animation:pluie .8s linear infinite}
+@keyframes pluie{to{transform:translateY(60px)}}
+@media (prefers-reduced-motion:reduce){.saut,.balance,.vole,.pluie line{animation:none}}
+</style>
+</head>
+<body>
+<section id="lib">
+  <div class="top"><a class="round" href="../" aria-label="Retour aux jeux">🏠</a><div class="title"></div><span style="width:56px"></span></div>
+  <h1>Les histoires</h1>
+  <p class="sub">Touche un livre pour l'écouter ou le lire 📖</p>
+  <div class="lib" id="biblio"></div>
+</section>
+
+<section id="reader" hidden>
+  <div class="top">
+    <button class="round" id="fermer" aria-label="Retour aux livres">📚</button>
+    <div class="title" id="rTitre"></div>
+    <button class="mode" id="mode"></button>
+  </div>
+  <div class="page">
+    <div class="scene" id="scene"></div>
+    <div class="texte" id="texte"></div>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="ctrl">
+    <button class="big" id="prec" aria-label="Page précédente">◀</button>
+    <button class="big main" id="lire" aria-label="Lire la page">🔊</button>
+    <button class="big" id="suiv" aria-label="Page suivante">▶</button>
+  </div>
+</section>
+
+<section id="fin" hidden></section>
+
+<script src="livres.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  function store(k, v){ try{ if(v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); }catch(e){ return null; } }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  /* ---------- sons ---------- */
+  var actx = null;
+  function audio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(actx && actx.state === "suspended") actx.resume(); }
+  function tone(f, d, v){ if(!actx) return; var t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain(); o.type = "triangle"; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(v||.12, t); g.gain.exponentialRampToValueAtTime(.001, t+d); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+d); }
+  function yay(){ [523,659,784].forEach(function(f,i){ setTimeout(function(){ tone(f,.18); }, i*90); }); }
+
+  /* ---------- voix ---------- */
+  var VOIX = [];
+  function chargerVoix(){
+    if(!("speechSynthesis" in window)) return;
+    VOIX = speechSynthesis.getVoices().filter(function(v){ return /^fr/i.test(v.lang); });
+    VOIX.sort(function(a,b){ var s = function(v){ return /fr-CH/i.test(v.lang) ? 0 : /fr-FR/i.test(v.lang) ? 1 : 2; }; return s(a) - s(b); });
+  }
+  chargerVoix(); if("speechSynthesis" in window) speechSynthesis.onvoiceschanged = chargerVoix;
+  var tour = 0;
+  function stopVoix(){ tour++; if("speechSynthesis" in window) speechSynthesis.cancel(); }
+  // dit un texte avec la voix d'un personnage ; onMot(i) reçoit la position du mot prononcé
+  function dire(texte, perso, rangPerso, onMot, fin){
+    if(!("speechSynthesis" in window)){ if(fin) setTimeout(fin, 400); return; }
+    var id = tour, u = new SpeechSynthesisUtterance(texte.replace(/[«»]/g, ""));
+    var v = VOIX.length ? VOIX[(rangPerso || 0) % VOIX.length] : null;
+    u.lang = v ? v.lang : "fr-FR"; if(v) u.voice = v;
+    u.pitch = perso ? perso.h : 1; u.rate = (perso ? perso.v : .9) * vitesse;
+    var fait = false, finir = function(){ if(fait) return; fait = true; if(id === tour && fin) fin(); };
+    u.onboundary = function(e){ if(id === tour && onMot && (e.name === "word" || e.name === undefined)) onMot(e.charIndex); };
+    u.onend = finir; u.onerror = finir;
+    setTimeout(finir, 2500 + texte.length * 110 / u.rate); // si « fin » n'arrive jamais
+    speechSynthesis.speak(u);
+  }
+  var vitesse = 1;
+
+  /* ---------- dessin des scènes ---------- */
+  var nGrad = 0; // un identifiant unique par dessin, sinon le ciel disparaît quand plusieurs images sont dans la page
+  function ciel(a, b){ var id = "ci" + (++nGrad); return '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient></defs><rect width="800" height="500" fill="url(#' + id + ')"/>'; }
+  function soleil(x, y){ return '<circle cx="' + x + '" cy="' + y + '" r="46" fill="#FFD84D"/><circle cx="' + x + '" cy="' + y + '" r="62" fill="#FFD84D" opacity=".25"/>'; }
+  function nuage(x, y, s){ s = s || 1; return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')" fill="#fff" opacity=".92"><circle cx="0" cy="10" r="24"/><circle cx="26" cy="0" r="30"/><circle cx="56" cy="12" r="22"/><rect x="-10" y="10" width="76" height="24" rx="12"/></g>'; }
+  function collines(c1, c2){ return '<path d="M0 330 Q200 250 400 320 T800 300 V500 H0Z" fill="' + c1 + '"/><path d="M0 380 Q250 330 520 380 T800 370 V500 H0Z" fill="' + c2 + '"/>'; }
+  function arbre(x, y, s){ s = s || 1; return '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')"><rect x="-8" y="0" width="16" height="60" fill="#8A5A3B"/><circle cx="0" cy="-10" r="40" fill="#3E9B4F"/><circle cx="-22" cy="8" r="26" fill="#45A857"/><circle cx="22" cy="8" r="26" fill="#45A857"/></g>'; }
+  function fleurs(){ var s = "", c = ["#FF6F9F","#FFD23F","#FFFFFF","#B9B3F5"]; for(var i=0;i<14;i++){ var x = 30 + i*55 + (i%3)*9, y = 430 + (i%4)*14; s += '<circle cx="' + x + '" cy="' + y + '" r="6" fill="' + c[i%4] + '"/><circle cx="' + x + '" cy="' + y + '" r="2.5" fill="#FF9F1C"/>'; } return s; }
+  function maison(x, y, mur, toit){ return '<g transform="translate(' + x + ' ' + y + ')"><rect x="0" y="0" width="110" height="90" fill="' + mur + '"/><path d="M-12 4 L55 -52 L122 4Z" fill="' + toit + '"/><rect x="40" y="40" width="30" height="50" fill="#7A4B2E"/><rect x="12" y="18" width="22" height="20" fill="#CFEFFF"/><rect x="76" y="18" width="22" height="20" fill="#CFEFFF"/></g>'; }
+  function route(){ var s = '<rect x="0" y="400" width="800" height="100" fill="#5A5F78"/><rect x="0" y="400" width="800" height="6" fill="#FFD23F"/>'; for(var x=10;x<800;x+=90) s += '<rect x="' + x + '" y="448" width="50" height="8" rx="4" fill="#FFF8E7"/>'; return s; }
+  var FONDS = {
+    prairie: function(){ return ciel("#7CC8FF","#D7F0FF") + soleil(660, 90) + nuage(120, 80) + nuage(400, 60, .8) + collines("#7BCB6B","#5DB55A") + fleurs(); },
+    jardin: function(){ var s = ciel("#8FD3FF","#E3F6FF") + soleil(90, 80) + nuage(520, 70) + '<rect x="0" y="300" width="800" height="200" fill="#6CC16A"/>';
+      for(var x=10;x<800;x+=40) s += '<rect x="' + x + '" y="250" width="22" height="80" rx="6" fill="#E9C79B"/>'; s += '<rect x="0" y="270" width="800" height="12" fill="#D9B07E"/><rect x="0" y="305" width="800" height="12" fill="#D9B07E"/>';
+      s += '<rect x="0" y="380" width="800" height="120" fill="#8A5A3B"/>'; for(var i=0;i<12;i++) s += '<path d="M' + (40+i*66) + ' 392 q-8 -22 0 -30 q8 8 0 30" fill="#3FA34D"/>'; return s; },
+    foret: function(){ var s = ciel("#9EDBFF","#E6F7FF") + collines("#5DB55A","#4CA14C"); [80,230,560,700].forEach(function(x, i){ s += arbre(x, 250 + (i%2)*30, 1.4); }); return s; },
+    nuit: function(){ var s = ciel("#0E1440","#2E3A8A"); for(var i=0;i<40;i++){ s += '<circle cx="' + ((i*137)%800) + '" cy="' + ((i*61)%260 + 10) + '" r="' + (1 + i%3) + '" fill="#FFF8E7" opacity=".85"/>'; }
+      return s + '<circle cx="660" cy="90" r="44" fill="#FFF3B0"/><circle cx="680" cy="78" r="40" fill="#18205A"/>' + collines("#26306E","#1E2660"); },
+    chambre: function(){ return '<rect width="800" height="500" fill="#F6D6B8"/><rect x="0" y="380" width="800" height="120" fill="#C98E5A"/>' + (function(){ var s = ""; for(var x=0;x<800;x+=80) s += '<rect x="' + x + '" y="380" width="2" height="120" fill="#B07A4A"/>'; return s; })() +
+      '<rect x="80" y="70" width="190" height="160" rx="10" fill="#1E2660" stroke="#FFF8E7" stroke-width="12"/><line x1="175" y1="70" x2="175" y2="230" stroke="#FFF8E7" stroke-width="8"/><circle cx="230" cy="110" r="18" fill="#FFF3B0"/>' +
+      '<rect x="560" y="250" width="220" height="140" rx="14" fill="#8EC5FF"/><rect x="560" y="230" width="60" height="60" rx="14" fill="#FFF8E7"/><rect x="540" y="200" width="20" height="190" rx="6" fill="#7A4B2E"/>'; },
+    route: function(){ return ciel("#7CC8FF","#D7F0FF") + soleil(680, 80) + nuage(100, 70) + collines("#7BCB6B","#5DB55A") + maison(70, 300, "#FFE1A8", "#E5484D") + maison(600, 300, "#CFE8FF", "#3D7BD9") + route(); },
+    pluie: function(){ var s = ciel("#8A93A8","#C3C8D4") + nuage(80, 60, 1.3) + nuage(420, 40, 1.5) + collines("#6E9C6A","#5E8A5B") + route() + '<g class="pluie" stroke="#DCEBFF" stroke-width="3" opacity=".8">';
+      for(var i=0;i<40;i++){ var x = (i*53)%800, y = (i*37)%380; s += '<line x1="' + x + '" y1="' + y + '" x2="' + (x-6) + '" y2="' + (y+22) + '"/>'; } return s + "</g>"; },
+    village: function(){ return ciel("#8FD3FF","#E3F6FF") + soleil(700, 70) + nuage(250, 60) + '<rect x="0" y="320" width="800" height="180" fill="#7BCB6B"/>' +
+      maison(30, 240, "#FFE1A8", "#E5484D") + maison(200, 250, "#FFC8DD", "#8E5BC4") + maison(560, 245, "#CFE8FF", "#3D7BD9") + arbre(450, 260, 1) + '<rect x="0" y="400" width="800" height="100" fill="#C9B79C"/>'; },
+    ferme: function(){ return ciel("#8FD3FF","#E3F6FF") + soleil(90, 80) + nuage(380, 60) + '<rect x="0" y="320" width="800" height="180" fill="#7BCB6B"/>' +
+      '<g transform="translate(540 170)"><rect x="0" y="60" width="200" height="150" fill="#C8433C"/><path d="M-14 66 L100 0 L214 66Z" fill="#8E2F2A"/><rect x="70" y="120" width="60" height="90" fill="#FFF8E7"/><path d="M70 120 L130 210 M130 120 L70 210" stroke="#C8433C" stroke-width="6"/></g>' +
+      '<ellipse cx="400" cy="440" rx="200" ry="40" fill="#7A5230"/>' + (function(){ var s = ""; for(var x=0;x<520;x+=40) s += '<rect x="' + x + '" y="330" width="14" height="60" fill="#E9C79B"/>'; return s + '<rect x="0" y="345" width="520" height="8" fill="#D9B07E"/>'; })(); }
+  };
+  function scene(sc, petit){
+    var s = '<svg viewBox="0 0 800 500" role="img" aria-hidden="true">' + (FONDS[sc.f] || FONDS.prairie)();
+    (sc.p || []).forEach(function(p){
+      var x = p[1]*8, y = p[2]*5 + 40, t = p[3]*8; // + 40 : les pieds posés sur le sol
+      s += '<g class="' + (p[4] || "") + '"><ellipse cx="' + x + '" cy="' + (y + t*.08) + '" rx="' + (t*.32) + '" ry="' + (t*.06) + '" fill="rgba(0,0,0,.18)"/>' +
+        '<text x="' + x + '" y="' + y + '" font-size="' + t + '" text-anchor="middle">' + p[0] + "</text></g>";
+    });
+    return s + "</svg>";
+  }
+
+  /* ---------- bibliothèque ---------- */
+  function biblio(){
+    var box = $("biblio"); box.innerHTML = "";
+    LIVRES.forEach(function(L){
+      var b = document.createElement("button"); b.className = "book";
+      b.innerHTML = scene(L.couverture) + '<div class="t"></div>' + (store("histoire-lu-" + L.id) ? '<span class="lu">✓ lu</span>' : "");
+      b.querySelector(".t").textContent = L.titre; var a = document.createElement("span"); a.className = "a"; a.textContent = L.age + " · " + L.pages.length + " pages"; b.querySelector(".t").appendChild(a);
+      b.onclick = function(){ audio(); ouvrir(L); };
+      box.appendChild(b);
+    });
+  }
+
+  /* ---------- lecteur ---------- */
+  var B = null, P = 0, mode = store("histoire-mode") || "ecoute", enLecture = false;
+  function majMode(){ $("mode").textContent = mode === "ecoute" ? "🎧 J'écoute" : "📖 Je lis"; }
+  $("mode").onclick = function(){ mode = mode === "ecoute" ? "lis" : "ecoute"; store("histoire-mode", mode); majMode(); stopVoix(); enLecture = false; majLire();
+    dire(mode === "ecoute" ? "J'écoute l'histoire." : "Je lis tout seul. Touche un mot pour l'entendre.", null, 0); };
+  function ouvrir(L){
+    B = L; P = 0; $("lib").hidden = true; $("reader").hidden = false; $("fin").hidden = true; $("rTitre").textContent = L.titre; majMode();
+    var d = $("dots"); d.innerHTML = ""; L.pages.forEach(function(){ d.appendChild(document.createElement("i")); });
+    afficher();
+    if(mode === "ecoute"){ enLecture = true; majLire(); dire(L.titre, null, 0, null, function(){ setTimeout(lirePage, 500); }); }
+  }
+  function rangPerso(cle){ var k = Object.keys(B.persos); return Math.max(0, k.indexOf(cle)); }
+  function afficher(){
+    var pg = B.pages[P];
+    $("scene").innerHTML = scene(pg.s);
+    var t = $("texte"); t.innerHTML = ""; t.scrollTop = 0;
+    pg.l.forEach(function(l, i){
+      var p = document.createElement("p"); p.className = "ligne"; p.id = "l" + i;
+      var perso = B.persos[l[0]] || {};
+      if(perso.nom){ var q = document.createElement("span"); q.className = "qui"; q.textContent = perso.nom; q.style.color = perso.c; p.appendChild(q); p.style.color = perso.c; }
+      // espaces insécables à la française (même longueur : les positions restent justes pour la voix)
+      var pos = 0, txt = l[1].replace(/ ([?!:;»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
+      txt.split(/( +)/).forEach(function(m){
+        if(/^ +$/.test(m) || !m){ p.appendChild(document.createTextNode(m)); pos += m.length; return; }
+        var sp = document.createElement("span"); sp.className = "mot"; sp.textContent = m; sp.dataset.d = pos; sp.dataset.f = pos + m.length;
+        sp.onclick = function(){ stopVoix(); enLecture = false; majLire(); surligner(sp); var w = m.replace(/[«»!?.,…:;"]/g, ""); if(w) dire(w, perso.h ? perso : B.persos.narr, rangPerso(l[0])); };
+        p.appendChild(sp); pos += m.length;
+      });
+      t.appendChild(p);
+    });
+    Array.prototype.forEach.call($("dots").children, function(d, i){ d.classList.toggle("on", i <= P); });
+    $("prec").disabled = P === 0;
+  }
+  function surligner(el){ document.querySelectorAll(".mot.on").forEach(function(x){ x.classList.remove("on"); }); if(el) el.classList.add("on"); }
+  function lirePage(){
+    var pg = B.pages[P], monP = P, monB = B;
+    (function ligne(i){
+      if(B !== monB || P !== monP || !enLecture) return;
+      document.querySelectorAll(".ligne.on").forEach(function(x){ x.classList.remove("on"); });
+      if(i >= pg.l.length){ surligner(null);
+        if(mode === "ecoute") setTimeout(function(){ if(B === monB && P === monP && enLecture) suivante(true); }, 1300);
+        else { enLecture = false; majLire(); }
+        return; }
+      var el = $("l" + i); el.classList.add("on");
+      var mots = el.querySelectorAll(".mot");
+      // la voix ne lit pas les « » : on recalcule les positions sans eux
+      var propre = pg.l[i][1].replace(/[«»]/g, ""), carte = [], k = 0;
+      for(var c = 0; c < pg.l[i][1].length; c++){ if(!/[«»]/.test(pg.l[i][1][c])) carte[k++] = c; }
+      dire(pg.l[i][1], B.persos[pg.l[i][0]], rangPerso(pg.l[i][0]), function(ci){
+        var orig = carte[ci] != null ? carte[ci] : ci;
+        for(var m = 0; m < mots.length; m++){ if(orig < +mots[m].dataset.f){ surligner(mots[m]); break; } }
+      }, function(){ setTimeout(function(){ ligne(i + 1); }, 350); });
+    })(0);
+  }
+  function majLire(){ $("lire").textContent = enLecture ? "⏸" : "🔊"; $("lire").setAttribute("aria-label", enLecture ? "Pause" : "Lire la page"); }
+  $("lire").onclick = function(){ audio(); if(enLecture){ enLecture = false; stopVoix(); surligner(null); } else { enLecture = true; stopVoix(); lirePage(); } majLire(); };
+  function suivante(auto){
+    stopVoix(); if(!auto){ enLecture = mode === "ecoute"; }
+    if(P >= B.pages.length - 1){ enLecture = false; majLire(); store("histoire-lu-" + B.id, "1"); quiz(); return; }
+    P++; afficher(); tone(520, .08, .06); majLire();
+    if(enLecture) setTimeout(lirePage, 400);
+  }
+  $("suiv").onclick = function(){ audio(); suivante(false); };
+  $("prec").onclick = function(){ if(P === 0) return; stopVoix(); P--; afficher(); enLecture = mode === "ecoute"; majLire(); if(enLecture) setTimeout(lirePage, 300); };
+  $("fermer").onclick = function(){ stopVoix(); enLecture = false; B = null; $("reader").hidden = true; $("fin").hidden = true; $("lib").hidden = false; biblio(); };
+  document.addEventListener("keydown", function(e){ if($("reader").hidden || !B) return; if(e.key === "ArrowRight") $("suiv").click(); if(e.key === "ArrowLeft") $("prec").click(); if(e.key === " "){ e.preventDefault(); $("lire").click(); } });
+
+  /* ---------- petites questions à la fin ---------- */
+  function quiz(){
+    var f = $("fin"), qi = 0, L = B;
+    f.hidden = false;
+    function poser(){
+      if(qi >= L.quiz.length){ return bravo(); }
+      var q = L.quiz[qi];
+      f.innerHTML = '<div style="font-size:2.4rem">🤔</div><div class="q"></div><div class="row" id="rep"></div><button class="tile" style="background:var(--panel);color:var(--ink)" id="redire">🔊 Réécouter</button>';
+      f.querySelector(".q").textContent = q.q;
+      q.c.forEach(function(c, i){
+        var b = document.createElement("button"); b.className = "pick" + (/^[^a-zA-Z0-9À-ÿ\s']+$/.test(c) ? " emoji" : ""); b.textContent = c;
+        b.onclick = function(){
+          if(i === q.r){ b.classList.add("good"); yay(); dire("Bravo !", L.persos.narr, 0); qi++; setTimeout(poser, 1300); }
+          else { b.classList.remove("nope"); void b.offsetWidth; b.classList.add("nope"); dire("Essaie encore !", L.persos.narr, 0); }
+        };
+        $("rep").appendChild(b);
+      });
+      $("redire").onclick = function(){ dire(q.q, L.persos.narr, 0); };
+      dire(q.q, L.persos.narr, 0);
+    }
+    function bravo(){
+      f.innerHTML = '<div style="font-size:5rem">🏆</div><h1>Bravo !</h1><p class="sub">Tu as bien écouté l\'histoire.</p><div class="row"><button class="tile" style="background:var(--sun)" id="relire">🔁 Relire</button><button class="tile" style="background:#B9B3F5" id="autres">📚 Autres histoires</button></div>';
+      yay(); dire("Bravo ! Tu as bien écouté l'histoire !", L.persos.narr, 0);
+      $("relire").onclick = function(){ ouvrir(L); };
+      $("autres").onclick = function(){ $("fermer").click(); };
+    }
+    poser();
+  }
+  biblio();
+})();
+</script>
+</body>
+</html>
