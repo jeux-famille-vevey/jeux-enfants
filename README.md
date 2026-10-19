@@ -12,4 +12,4 @@ Petits jeux éducatifs en français, sans publicité ni compte.
 - `petits/` : le coin des petits (3-5 ans, tablette) : memory, couleurs, compter, lettres, ombres, course, parking
 - `histoires/` : livres illustrés à écouter ou lire (`livres.js` contient les histoires)
 - `dactylo/` : le Coin dactylo, dactylo avancée pour adultes avec profils (prénom, nom, mot de passe) ; résultats gardés sur l'appareil, mot de passe jamais stocké en clair
-- `commun/voix.js` : choisit la voix la plus naturelle disponible (Google, Microsoft, Apple, Piper) avant les voix robotiques
+- `commun/voix.js` : voix naturelle Piper (fr_FR-siwis-medium) calculée dans le navigateur, téléchargée une fois puis gardée sur l'appareil ; sinon, meilleure voix du navigateur. `commun/piper/` : moteur (licences dans LICENCES.txt)

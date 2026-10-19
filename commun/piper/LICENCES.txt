@@ -1,0 +1,5 @@
+Voix naturelle des jeux
+- piper-tts-web 1.0.5 (Mintplex Labs, fork de diffusion-studio/vits-web) : licence MIT
+- onnxruntime-web 1.18.0 (Microsoft) : licence MIT
+- piper-wasm / piper_phonemize 1.0.0 (Diffusion Studio, basé sur rhasspy/piper et espeak-ng) : MIT / GPL-3.0 pour espeak-ng
+- Voix fr_FR-siwis-medium (Piper, rhasspy) : téléchargée depuis huggingface.co/diffusionstudio/piper-voices
