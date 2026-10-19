@@ -12,8 +12,8 @@ FICHE="https://jeux-famille-vevey.github.io/jeux-enfants/fiches/logiciels-aleyah
 
 echo "Installation pour Aleyah. Une fenêtre va demander le mot de passe de papa."
 
-etape "1/2 Logiciels (GCompris, Tux Paint, Krita, GIMP, Inkscape, Audacity, LocalSend)"
-if flatpak install -y flathub org.kde.gcompris org.tuxpaint.Tuxpaint org.kde.krita org.gimp.GIMP org.inkscape.Inkscape org.audacityteam.Audacity org.localsend.localsend_app; then ok "Logiciels installés"; else pb "Logiciels (relance le script pour réessayer)"; fi
+etape "1/2 Logiciels (GCompris, Tux Paint, Krita, GIMP, Inkscape, Audacity, LocalSend, Kdenlive, OBS Studio, HandBrake)"
+if flatpak install -y flathub org.kde.gcompris org.tuxpaint.Tuxpaint org.kde.krita org.gimp.GIMP org.inkscape.Inkscape org.audacityteam.Audacity org.localsend.localsend_app org.kde.kdenlive com.obsproject.Studio fr.handbrake.ghb; then ok "Logiciels installés"; else pb "Logiciels (relance le script pour réessayer)"; fi
 
 etape "2/2 Fiche « Mes logiciels » sur le bureau"
 BUREAU="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Bureau")"
