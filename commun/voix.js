@@ -49,23 +49,34 @@
     badge.textContent = t; badge.hidden = !t;
   }
 
+  var promesse = null, pct = 0, erreur = "", abonnes = [];
+  function signaler(){ abonnes.forEach(function(f){ try{ f(etat, pct, erreur); }catch(e){} }); }
   function charger(){
-    if(etat !== "attente" || !ok) return;
-    etat = "chargement";
+    if(promesse) return promesse;
+    if(!ok){ etat = "erreur"; erreur = "Cet appareil ou ce navigateur ne permet pas la voix naturelle."; signaler(); return Promise.reject(new Error(erreur)); }
+    etat = "chargement"; signaler();
     montrer("🔊 Préparation de la voix…");
-    import(BASE + "piper.js").then(function(P){
+    promesse = import(BASE + "piper.js").then(function(P){
       return P.TtsSession.create({
         voiceId: VOIX_ID,
         wasmPaths: { onnxWasm: BASE, piperData: BASE + "piper_phonemize.data", piperWasm: BASE + "piper_phonemize.wasm" },
-        progress: function(p){ if(p && p.total && /\.onnx$/.test(p.url || "")) montrer("🔊 Téléchargement de la voix : " + Math.round(p.loaded / p.total * 100) + " %"); }
+        progress: function(p){
+          if(p && p.total && /\.onnx$/.test(p.url || "")){ pct = Math.round(p.loaded / p.total * 100); montrer("🔊 Téléchargement de la voix : " + pct + " % (ne ferme pas la page)"); signaler(); }
+        }
       });
     }).then(function(s){
-      session = s; etat = "pret"; montrer("🔊 Voix naturelle prête");
+      // petit essai pour être sûr que tout fonctionne
+      return s.predict("Bonjour.").then(function(){ return s; });
+    }).then(function(s){
+      session = s; etat = "pret"; pct = 100; montrer("🔊 Voix naturelle prête"); signaler();
       setTimeout(function(){ montrer(""); }, 2500);
+      return s;
     }).catch(function(e){
-      etat = "erreur"; montrer("");
+      etat = "erreur"; erreur = String(e && e.message || e); montrer(""); signaler();
       if(window.console) console.warn("Voix naturelle indisponible, voix du navigateur utilisée.", e);
+      throw e;
     });
+    return promesse;
   }
 
   function wav(texte){
@@ -117,7 +128,7 @@
   try{
     speechSynthesis.speak = function(u){
       if(ok && estFrancais(u)){
-        if(etat === "attente") charger();
+        if(etat === "attente") charger().catch(function(){});
         if(etat === "pret"){ file.push(u); suivant(); return; }
       }
       origSpeak(u);
@@ -129,13 +140,16 @@
     };
   }catch(e){ ok = false; }
 
-  // On prépare la voix dès que l'enfant touche l'écran ou le clavier (le son a besoin d'un geste).
-  function premierGeste(){ charger(); window.removeEventListener("pointerdown", premierGeste, true); window.removeEventListener("keydown", premierGeste, true); }
-  window.addEventListener("pointerdown", premierGeste, true);
-  window.addEventListener("keydown", premierGeste, true);
+  // On prépare la voix dès l'ouverture de la page : la première fois elle se télécharge (une seule fois par appareil).
+  if(ok){ if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", function(){ charger().catch(function(){}); }); else charger().catch(function(){}); }
 
   window.voixNaturelle = {
     etat: function(){ return etat; },
+    pourcent: function(){ return pct; },
+    erreur: function(){ return erreur; },
+    preparer: charger,
+    suivre: function(f){ abonnes.push(f); f(etat, pct, erreur); },
+    navigateur: function(){ return ok; },
     desactiver: function(){ try{ localStorage.setItem("voix-naturelle", "non"); }catch(e){} },
     activer: function(){ try{ localStorage.removeItem("voix-naturelle"); }catch(e){} }
   };

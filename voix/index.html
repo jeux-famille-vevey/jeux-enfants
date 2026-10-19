@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La voix des jeux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="../commun/voix.js"></script>
+<style>
+:root{ --sky-top:#1D2357; --sky-bottom:#3B3F8F; --ink:#FFF8E7; --ink-soft:#C9CCF2; --sun:#FFD23F; --tangerine:#FF9F1C; --panel:#272C6B; --mint:#2EC4B6; --pink:#FF5D8F;
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+html{background:#3B3F8F}
+body{background:linear-gradient(var(--sky-top),var(--sky-bottom)) fixed;color:var(--ink);font-family:var(--font);padding:28px 16px 48px}
+main{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+a.back{color:var(--ink-soft);text-decoration:none;font-weight:600}
+h1{margin:0;font-size:clamp(2rem,6vw,2.8rem);color:var(--sun);text-shadow:0 4px 0 var(--tangerine);line-height:1.1}
+p{margin:0;color:var(--ink-soft);font-size:1.1rem;line-height:1.45}
+.box{background:var(--panel);border-radius:22px;padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.etat{font-size:1.35rem;font-weight:700}
+.bar{height:16px;border-radius:999px;background:#1D2357;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--sun));transition:width .3s}
+.btn{font:inherit;font-weight:700;font-size:1.25rem;border:0;border-radius:999px;padding:13px 28px;cursor:pointer;background:var(--sun);color:#1D2357;box-shadow:0 5px 0 var(--tangerine);align-self:flex-start}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.err{color:#FFB3C6}
+small{color:var(--ink-soft);font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../">← Tous les jeux</a>
+  <h1>La voix des jeux</h1>
+  <p>Les jeux parlent avec une voix naturelle. La première fois, elle se télécharge sur cet appareil (environ 90 Mo, une seule fois). Garde cette page ouverte jusqu'à ce qu'elle soit prête.</p>
+  <div class="box">
+    <div class="etat" id="etat">Vérification…</div>
+    <div class="bar"><i id="bar"></i></div>
+    <p class="err" id="err" hidden></p>
+    <button class="btn" id="ecouter" type="button" disabled>🔊 Écouter la voix</button>
+    <small id="info"></small>
+  </div>
+</main>
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  if(!window.voixNaturelle){
+    $("etat").textContent = "Ce navigateur ne sait pas parler.";
+    $("err").textContent = "Essaie avec Firefox ou Chrome à jour."; $("err").hidden = false; return;
+  }
+  window.voixNaturelle.suivre(function(etat, pct, erreur){
+    if(etat === "pret"){ $("etat").textContent = "✅ La voix naturelle est prête sur cet appareil"; $("bar").style.width = "100%"; $("ecouter").disabled = false; $("err").hidden = true; }
+    else if(etat === "chargement"){ $("etat").textContent = pct ? "⏳ Téléchargement : " + pct + " %" : "⏳ Préparation de la voix…"; $("bar").style.width = Math.max(3, pct) + "%"; }
+    else if(etat === "erreur"){ $("etat").textContent = "❌ La voix naturelle n'a pas pu être préparée"; $("err").textContent = "Détail : " + erreur + ". Recharge la page pour réessayer. En attendant, les jeux utilisent la voix de l'ordinateur."; $("err").hidden = false; $("ecouter").disabled = false; }
+  });
+  $("ecouter").onclick = function(){
+    var u = new SpeechSynthesisUtterance("Bonjour ! Je suis la voix des jeux. Bravo, tu as trouvé la bonne réponse !");
+    u.lang = "fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  };
+  $("info").textContent = "Navigateur : " + (/Firefox\/(\d+)/.exec(navigator.userAgent) ? "Firefox " + RegExp.$1 : /Chrome\/(\d+)/.exec(navigator.userAgent) ? "Chrome " + RegExp.$1 : "autre") +
+    " · voix naturelle possible : " + (window.voixNaturelle.navigateur() ? "oui" : "non");
+})();
+</script>
+</body>
+</html>
