@@ -11,5 +11,5 @@ Petits jeux éducatifs en français, sans publicité ni compte.
 - `defi/` : défi du jour (10 questions de toutes les matières)
 - `petits/` : le coin des petits (3-5 ans, tablette) : memory, couleurs, compter, lettres, ombres, course, parking
 - `histoires/` : livres illustrés à écouter ou lire (`livres.js` contient les histoires)
-- `ahmed/` : le Coin d'Ahmed, dactylo avancée pour adultes (résultats gardés dans le navigateur)
+- `dactylo/` : le Coin dactylo, dactylo avancée pour adultes (résultats gardés dans le navigateur)
 - `commun/voix.js` : choisit la voix la plus naturelle disponible (Google, Microsoft, Apple, Piper) avant les voix robotiques
