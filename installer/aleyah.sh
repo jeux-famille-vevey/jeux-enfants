@@ -8,7 +8,7 @@ ERREURS=()
 ok(){ printf '\e[32m✔ %s\e[0m\n' "$*"; }
 etape(){ printf '\n\e[1;34m▶ %s\e[0m\n' "$*"; }
 pb(){ printf '\e[31m✘ %s\e[0m\n' "$*"; ERREURS+=("$*"); }
-FICHE="https://jeux-famille-vevey.github.io/jeux-enfants/fiches/mes-logiciels.pdf"
+FICHE="https://jeux-famille-vevey.github.io/jeux-enfants/fiches/logiciels-aleyah.pdf"
 
 echo "Installation pour Aleyah. Une fenêtre va demander le mot de passe de papa."
 
