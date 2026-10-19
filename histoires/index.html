@@ -69,6 +69,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
 @keyframes pluie{to{transform:translateY(60px)}}
 @media (prefers-reduced-motion:reduce){.saut,.balance,.vole,.pluie line{animation:none}}
 </style>
+<script src="../commun/voix.js"></script>
 </head>
 <body>
 <section id="lib">
@@ -117,8 +118,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   var VOIX = [];
   function chargerVoix(){
     if(!("speechSynthesis" in window)) return;
-    VOIX = speechSynthesis.getVoices().filter(function(v){ return /^fr/i.test(v.lang); });
-    VOIX.sort(function(a,b){ var s = function(v){ return /fr-CH/i.test(v.lang) ? 0 : /fr-FR/i.test(v.lang) ? 1 : 2; }; return s(a) - s(b); });
+    VOIX = window.voixTriees("fr");
   }
   chargerVoix(); if("speechSynthesis" in window) speechSynthesis.onvoiceschanged = chargerVoix;
   var tour = 0;

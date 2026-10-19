@@ -53,11 +53,7 @@
   var voix = null, voixLangue = {};
   function trouverVoix(lang){
     if(!("speechSynthesis" in window)) return null;
-    lang = lang || "fr";
-    var pref = { fr:["fr-CH","fr-FR"], en:["en-GB","en-US"], de:["de-CH","de-DE"] }[lang] || [];
-    var v = speechSynthesis.getVoices().filter(function(x){ return x.lang && x.lang.toLowerCase().indexOf(lang) === 0; });
-    v.sort(function(a,b){ var ia = pref.indexOf(a.lang), ib = pref.indexOf(b.lang); return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib); });
-    return v[0] || null;
+    return (window.voixTriees ? window.voixTriees(lang || "fr") : speechSynthesis.getVoices().filter(function(x){ return x.lang && x.lang.toLowerCase().indexOf(lang || "fr") === 0; }))[0] || null;
   }
   M.voixPour = function(lang){ if(!voixLangue[lang]) voixLangue[lang] = trouverVoix(lang); return voixLangue[lang]; };
   M.voixPrete = function(lang){

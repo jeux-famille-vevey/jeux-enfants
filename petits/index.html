@@ -83,6 +83,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
 .note{font-size:.9rem;color:var(--ink-soft);text-align:center;margin:6px 0 0}
 @media (prefers-reduced-motion:reduce){.party{display:none}.pick.nope{animation:none}.card,.card span{transition:none}}
 </style>
+<script src="../commun/voix.js"></script>
 </head>
 <body>
 
@@ -123,8 +124,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
 
   /* ---------- voix et sons ---------- */
   var voice = null;
-  function pickVoice(){ if(!("speechSynthesis" in window)) return null; var v = speechSynthesis.getVoices().filter(function(x){ return /^fr/i.test(x.lang); });
-    v.sort(function(a,b){ return (/fr-CH/i.test(b.lang)?2:/fr-FR/i.test(b.lang)?1:0) - (/fr-CH/i.test(a.lang)?2:/fr-FR/i.test(a.lang)?1:0); }); return v[0] || null; }
+  function pickVoice(){ if(!("speechSynthesis" in window)) return null; return window.voixTriees("fr")[0] || null; }
   if("speechSynthesis" in window){ voice = pickVoice(); speechSynthesis.onvoiceschanged = function(){ voice = pickVoice(); }; }
   setTimeout(function(){ if(!voice) $("noVoice").hidden = false; }, 2000);
   function say(t){

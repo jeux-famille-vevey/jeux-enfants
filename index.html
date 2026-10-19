@@ -73,7 +73,9 @@ var SECTIONS = [
     { href:"heure/", id:"heure", emoji:"🕒", name:"Lire l'heure", desc:"L'horloge à aiguilles, les quarts, les durées.", tag:"Maths" },
     { href:"sous/", id:"sous", emoji:"🪙", name:"Les sous suisses", desc:"Compter, rendre la monnaie, faire les courses.", tag:"Maths" } ] },
   { titre:"🌍 Le monde", jeux:[
-    { href:"cantons/", id:"cantons", emoji:"🇨🇭", name:"Les cantons suisses", desc:"La carte, les abréviations, les chefs-lieux, les langues.", tag:"Géographie" } ] }
+    { href:"cantons/", id:"cantons", emoji:"🇨🇭", name:"Les cantons suisses", desc:"La carte, les abréviations, les chefs-lieux, les langues.", tag:"Géographie" } ] },
+  { titre:"🧑 Pour les grands", jeux:[
+    { href:"ahmed/", id:"", emoji:"⌨️", name:"Coin d'Ahmed", desc:"Dactylo avancée : accents, chiffres, courriers, textes longs et test de vitesse.", tag:"Adultes" } ] }
 ];
 function lire(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function etoiles(id){

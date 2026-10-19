@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coin d'Ahmed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Mise en page : un bureau sobre. Colonne d'exercices à gauche, feuille de frappe au centre, suivi des progrès en dessous. */
+:root{
+  --bg:#eef1f5; --paper:#ffffff; --ink:#1a2230; --muted:#5d6878; --line:#d5dbe4;
+  --accent:#2350b5; --accent-soft:#e3eafb; --ok:#1d7f55; --err:#c0332b; --err-soft:#fbe4e2; --todo:#9aa4b3;
+  --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "DejaVu Sans Mono", monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161e; --paper:#1a212c; --ink:#e6ebf2; --muted:#98a3b3; --line:#2b3442;
+  --accent:#7ea2f2; --accent-soft:#1f2c47; --ok:#4cc38a; --err:#f07167; --err-soft:#3a1f22; --todo:#5f6a7a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161e; --paper:#1a212c; --ink:#e6ebf2; --muted:#98a3b3; --line:#2b3442;
+  --accent:#7ea2f2; --accent-soft:#1f2c47; --ok:#4cc38a; --err:#f07167; --err-soft:#3a1f22; --todo:#5f6a7a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:20px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header a.back{color:var(--muted);text-decoration:none;font-size:.95rem;border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:var(--paper)}
+header a.back:hover{color:var(--accent);border-color:var(--accent)}
+h1{margin:0;font-size:1.8rem;font-weight:700;letter-spacing:-.01em}
+.sub{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.layout{grid-template-columns:1fr}}
+
+/* Exercices */
+nav.ex{display:flex;flex-direction:column;gap:6px}
+nav.ex h2,.panel h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 4px;font-weight:600}
+button.mode{font:inherit;text-align:left;cursor:pointer;background:transparent;color:var(--ink);border:1px solid transparent;border-radius:10px;padding:10px 12px;
+  display:flex;flex-direction:column;gap:2px}
+button.mode:hover{background:var(--paper);border-color:var(--line)}
+button.mode[aria-pressed="true"]{background:var(--paper);border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+button.mode strong{font-weight:600}
+button.mode span{color:var(--muted);font-size:.88rem;line-height:1.35}
+button.mode .best{font-family:var(--mono);font-size:.8rem;color:var(--accent)}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Feuille de frappe */
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline}
+.meta .title{font-weight:600;font-size:1.05rem;margin-right:auto}
+.live{display:flex;gap:18px;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);font-size:.95rem}
+.live b{color:var(--ink);font-weight:500}
+.target{position:relative;font-family:var(--mono);font-size:clamp(1.05rem,2.2vw,1.35rem);line-height:1.9;
+  border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-height:7em;cursor:text;background:var(--paper)}
+.target.focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.target span.t{color:var(--todo)}
+.target span.g{color:var(--ink)}
+.target span.b{color:var(--err);background:var(--err-soft);border-radius:3px;text-decoration:underline}
+.target span.c{box-shadow:inset 0 -3px 0 var(--accent);color:var(--ink)}
+.target.focus span.c{animation:caret 1.1s steps(1) infinite}
+@keyframes caret{50%{box-shadow:inset 0 -3px 0 transparent}}
+#text{white-space:pre-wrap;word-break:break-word}
+textarea#entry{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;left:0;top:0;resize:none}
+.paused{position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(2px);border-radius:10px;
+  color:var(--accent);font-family:var(--sans);font-weight:600;font-size:1rem}
+.bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-weight:600;cursor:pointer;border-radius:8px;padding:9px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--paper)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.note{color:var(--muted);font-size:.9rem;margin:0}
+
+/* Résultat */
+.result{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:baseline}
+.result .k{display:flex;flex-direction:column}
+.result .k b{font-family:var(--mono);font-size:1.6rem;font-weight:500;font-variant-numeric:tabular-nums}
+.result .k span{color:var(--muted);font-size:.85rem}
+.result p{flex-basis:100%;margin:0}
+
+/* Progrès */
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.figures{display:flex;gap:24px;flex-wrap:wrap}
+.figures div{display:flex;flex-direction:column}
+.figures b{font-family:var(--mono);font-size:1.5rem;font-weight:500;font-variant-numeric:tabular-nums}
+.figures span{color:var(--muted);font-size:.85rem}
+svg.spark{width:100%;height:90px;display:block}
+.keys{display:flex;flex-wrap:wrap;gap:8px}
+.keys span{font-family:var(--mono);border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:.95rem}
+.keys span small{color:var(--muted);font-family:var(--sans);margin-left:6px}
+table.hist{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
+table.hist td,table.hist th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left}
+table.hist th{color:var(--muted);font-weight:500;font-size:.8rem}
+table.hist td.n{font-family:var(--mono);text-align:right}
+table.hist th.n{text-align:right}
+.histwrap{overflow-x:auto}
+details{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 20px}
+summary{cursor:pointer;font-weight:600}
+.kt{width:100%;border-collapse:collapse;margin-top:10px;font-size:.92rem}
+.kt td,.kt th{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.kt th{color:var(--muted);font-weight:500}
+.kt code{font-family:var(--mono)}
+kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--bg)}
+@media (prefers-reduced-motion:reduce){.target.focus span.c{animation:none}.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="../">← Tous les jeux</a>
+    <div>
+      <h1>Coin d'Ahmed</h1>
+      <p class="sub">Dactylo avancée : accents, chiffres, courriers et textes longs.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="ex" id="modes" aria-label="Exercices"><h2>Exercices</h2></nav>
+
+    <section class="sheet" aria-label="Feuille de frappe">
+      <div class="meta">
+        <span class="title" id="mTitle">Exercice</span>
+        <div class="live">
+          <span>Texte <b id="lCount">1/5</b></span>
+          <span><b id="lTime">0:00</b></span>
+          <span><b id="lWpm">0</b> mpm</span>
+          <span><b id="lAcc">100</b> %</span>
+        </div>
+      </div>
+      <div class="bar"><i id="prog"></i></div>
+      <div class="target" id="target" tabindex="0" aria-describedby="help">
+        <textarea id="entry" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Zone de frappe"></textarea>
+        <div id="text"></div>
+        <div class="paused" id="paused">Clique ici ou appuie sur une touche pour commencer</div>
+      </div>
+      <p class="note" id="help">Tape le texte tel qu'il est écrit. Une faute s'affiche en rouge : efface-la avec la touche ⌫ (en haut à droite des lettres) pour continuer. Le chronomètre démarre à la première touche.</p>
+      <div class="row">
+        <button class="btn ghost" id="restart">Recommencer</button>
+        <button class="btn ghost" id="skip">Texte suivant</button>
+      </div>
+      <div class="result" id="result" hidden>
+        <div class="k"><b id="rWpm">0</b><span>mots par minute</span></div>
+        <div class="k"><b id="rAcc">0 %</b><span>précision</span></div>
+        <div class="k"><b id="rTime">0:00</b><span>temps</span></div>
+        <div class="k"><b id="rErr">0</b><span>fautes</span></div>
+        <p id="rMsg"></p>
+        <div class="row"><button class="btn" id="again">Refaire une série</button></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="panels">
+    <section class="panel" aria-label="Mes progrès">
+      <h2>Mes progrès</h2>
+      <div class="figures">
+        <div><b id="pBest">–</b><span>meilleur mpm</span></div>
+        <div><b id="pAvg">–</b><span>moyenne des 10 dernières</span></div>
+        <div><b id="pAcc">–</b><span>précision moyenne</span></div>
+      </div>
+      <svg class="spark" id="spark" viewBox="0 0 300 90" preserveAspectRatio="none" role="img" aria-label="Vitesse des 20 dernières séries"></svg>
+      <p class="note" id="pNote">Vitesse des 20 dernières séries.</p>
+    </section>
+    <section class="panel" aria-label="Touches à travailler">
+      <h2>Touches à travailler</h2>
+      <div class="keys" id="weak"></div>
+      <p class="note">Les caractères où tu fais le plus de fautes, sur toutes tes séries.</p>
+    </section>
+    <section class="panel" aria-label="Historique">
+      <h2>Dernières séries</h2>
+      <div class="histwrap"><table class="hist"><thead><tr><th>Date</th><th>Exercice</th><th class="n">mpm</th><th class="n">%</th></tr></thead><tbody id="hist"></tbody></table></div>
+    </section>
+  </div>
+
+  <details>
+    <summary>Où sont les touches spéciales sur le clavier suisse ?</summary>
+    <table class="kt">
+      <thead><tr><th>Caractère</th><th>Clavier « Suisse – Français »</th><th>Clavier « Suisse – Français (Macintosh) »</th></tr></thead>
+      <tbody>
+        <tr><td><code>é è à</code></td><td colspan="2">Touches à droite du <kbd>L</kbd> (é, à) et du <kbd>P</kbd> (è)</td></tr>
+        <tr><td><code>ç</code></td><td colspan="2"><kbd>Maj</kbd> + <kbd>4</kbd> (Maj = la touche avec la flèche vers le haut, à gauche)</td></tr>
+        <tr><td><code>ê â î ô û</code></td><td colspan="2">D'abord <kbd>^</kbd> (la touche à gauche de ⌫, en haut à droite), lâche, puis la lettre</td></tr>
+        <tr><td><code>ë ï</code></td><td colspan="2">D'abord <kbd>¨</kbd> (la touche à droite du è), lâche, puis la lettre</td></tr>
+        <tr><td><code>'</code></td><td colspan="2">La touche à droite du <kbd>0</kbd></td></tr>
+        <tr><td><code>%</code> <code>&amp;</code> <code>/</code></td><td colspan="2"><kbd>Maj</kbd> + <kbd>5</kbd>, <kbd>6</kbd>, <kbd>7</kbd></td></tr>
+        <tr><td><code>@</code></td><td><kbd>Alt</kbd> de droite + <kbd>2</kbd></td><td><kbd>Alt</kbd> (option) de droite + <kbd>G</kbd></td></tr>
+        <tr><td><code>€</code></td><td colspan="2"><kbd>Alt</kbd> de droite + <kbd>E</kbd></td></tr>
+        <tr><td><code>: ;</code></td><td colspan="2"><kbd>Maj</kbd> + <kbd>.</kbd> et <kbd>Maj</kbd> + <kbd>,</kbd></td></tr>
+      </tbody>
+    </table>
+    <p class="note">Sur le clavier Apple de l'iMac, la touche « Alt de droite » est la touche <kbd>alt / option</kbd> juste à droite de la barre d'espace, après <kbd>⌘ cmd</kbd>.</p>
+  </details>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  /* Les textes. Aucun ne commence par une majuscule accentuée (É, À, Ç), introuvables sur le clavier suisse. */
+  var MODES = [
+    { id:"accents", name:"Accents et lettres françaises", desc:"é è à ù ç ê â î ô ë ï dans des phrases courantes", per:5, items:[
+      "Le prélèvement a été effectué à la fin du mois.",
+      "Ça m'a fait très plaisir de vous revoir à Vevey.",
+      "Il s'agit d'une tâche précise, à réaliser avant l'été.",
+      "Mon frère a reçu la lettre hier après-midi.",
+      "La fenêtre de la chambre ne se ferme plus très bien.",
+      "Nous avons dû reporter la réunion à la semaine prochaine.",
+      "Le maître a expliqué le problème avec beaucoup de clarté.",
+      "Il faut être prêt à huit heures et quart, sans faute.",
+      "La forêt était déjà couverte de neige au début de décembre.",
+      "Le garçon a aperçu un hôpital au bord du lac.",
+      "Je préfère le thé au café, surtout l'après-midi.",
+      "Elle a noté chaque détail dans son cahier, à la ligne près.",
+      "Il est naïf de croire que tout sera réglé en une journée.",
+      "La façade de l'église a été rénovée l'année dernière."
+    ]},
+    { id:"chiffres", name:"Chiffres, montants et dates", desc:"CHF, dates suisses, pourcentages, adresses", per:5, items:[
+      "La facture no 2026-418 s'élève à CHF 1'284.50.",
+      "Le délai de paiement est fixé au 30.11.2026.",
+      "Rendez-vous le 14 janvier 2027 à 9 h 30, salle 3.",
+      "Le loyer passe de CHF 1'650.- à CHF 1'720.- dès le 1er avril.",
+      "Avenue de la Gare 12, 1800 Vevey.",
+      "Le taux d'intérêt de référence est de 1.25 %.",
+      "Envoyez le formulaire à info@exemple.ch avant vendredi.",
+      "Mon numéro de téléphone est le 079 123 45 67.",
+      "Le colis pèse 2.4 kg et mesure 40 x 30 x 15 cm.",
+      "Remboursement : 12 mensualités de CHF 85.- (total CHF 1'020.-).",
+      "Le train part à 7 h 42 de la voie 2 et arrive à 8 h 15.",
+      "Commande no 58/2026 : 3 articles, rabais de 15 %."
+    ]},
+    { id:"courrier", name:"Courriers administratifs", desc:"Les formules des lettres officielles", per:5, items:[
+      "Madame, Monsieur,",
+      "Par la présente, je me permets de vous contacter au sujet de mon dossier.",
+      "Vous trouverez en annexe une copie de la décision du 12 septembre 2026.",
+      "Je vous remercie par avance de l'attention que vous porterez à ma demande.",
+      "Je reste à votre disposition pour tout renseignement complémentaire.",
+      "Veuillez agréer, Madame, Monsieur, mes salutations distinguées.",
+      "Je conteste la décision mentionnée ci-dessus dans le délai de 30 jours.",
+      "Je vous prie de bien vouloir m'accorder un délai supplémentaire.",
+      "Suite à notre entretien téléphonique de ce matin, je vous confirme ma demande.",
+      "Je vous saurais gré de me faire parvenir une attestation à mon nom.",
+      "Dans l'attente de votre réponse, je vous adresse mes meilleures salutations.",
+      "Concerne : demande de remboursement, référence 2026-0147."
+    ]},
+    { id:"mots", name:"Mots difficiles", desc:"L'orthographe qui piège, mot à mot", per:5, items:[
+      "néanmoins, quelquefois, apparaître, accueil, rythme",
+      "développement, environnement, renseignement, recommandation",
+      "conscience, exigence, résilier, échéance, procédure",
+      "acquérir, accessoire, occurrence, ultérieurement",
+      "bénéficiaire, préalable, intérêt, ci-joint, au-delà",
+      "parallèle, adresse, appartement, apparemment, évidemment",
+      "règlement, événement, paiement, remerciements"
+    ]},
+    { id:"textes", name:"Textes longs", desc:"Des paragraphes entiers, pour l'endurance", per:3, items:[
+      "Vevey se trouve sur la rive nord du lac Léman, entre Lausanne et Montreux. La ville est connue pour son marché du samedi, ses quais fleuris et la vue sur les Alpes de l'autre côté du lac.",
+      "Les vignobles en terrasses de Lavaux s'étendent sur plusieurs kilomètres entre Lausanne et Vevey. Ils sont inscrits au patrimoine mondial de l'UNESCO depuis 2007, et on peut les parcourir à pied par des sentiers balisés.",
+      "La Fête des Vignerons a lieu à Vevey environ une fois par génération. La dernière édition s'est tenue en 2019, avec une grande arène construite sur la place du Marché et des milliers de figurants venus de toute la région.",
+      "Pour bien taper au clavier, il vaut mieux garder les yeux sur l'écran et les doigts sur la rangée du milieu. La vitesse vient avec la régularité : quelques minutes chaque jour valent mieux qu'une longue séance par semaine.",
+      "Quand on écrit une lettre officielle, il faut indiquer clairement l'objet, la référence du dossier et ce que l'on demande. Une phrase par idée suffit. On garde toujours une copie de la lettre et la preuve de l'envoi.",
+      "Le lac Léman est le plus grand lac d'Europe occidentale. Il est partagé entre la Suisse et la France, et les bateaux à roues de la CGN le traversent depuis plus de cent ans."
+    ]},
+    { id:"chrono", name:"Test de vitesse, 1 minute", desc:"Le plus de texte possible en 60 secondes", chrono:60 }
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  function get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function getJSON(k, d){ try{ var v = JSON.parse(get(k)); return v == null ? d : v; }catch(e){ return d; } }
+  function shuffle(a){ a = a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function norm(s){ return s.replace(/[’‘]/g,"'").replace(/[  ]/g," ").replace(/[«»“”]/g,'"'); }
+  function mmss(s){ s = Math.max(0, Math.round(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
+
+  /* ---------- État ---------- */
+  var mode = null, items = [], idx = 0, target = "", typed = "", t0 = 0, timer = null;
+  var keystrokes = 0, errors = 0, charsDone = 0, missed = {}, finished = false;
+
+  /* ---------- Liste des exercices ---------- */
+  function bestFor(id){
+    var h = getJSON("ahmed-hist", []), b = 0;
+    h.forEach(function(r){ if(r.m === id && r.w > b) b = r.w; }); return b;
+  }
+  function renderModes(){
+    var nav = $("modes"); nav.querySelectorAll("button").forEach(function(b){ b.remove(); });
+    MODES.forEach(function(M){
+      var b = document.createElement("button"); b.className = "mode"; b.type = "button";
+      b.setAttribute("aria-pressed", mode && mode.id === M.id ? "true" : "false");
+      var best = bestFor(M.id);
+      b.innerHTML = "<strong></strong><span></span>" + (best ? '<span class="best">record : ' + best + " mpm</span>" : "");
+      b.querySelector("strong").textContent = M.name; b.querySelector("span").textContent = M.desc;
+      b.onclick = function(){ choose(M.id); };
+      nav.appendChild(b);
+    });
+  }
+
+  function choose(id){
+    mode = MODES.filter(function(M){ return M.id === id; })[0] || MODES[0];
+    set("ahmed-mode", mode.id);
+    if(mode.chrono){
+      var all = []; MODES.forEach(function(M){ if(M.items && M.id !== "mots") all = all.concat(M.items); });
+      items = [shuffle(all).join(" ")];
+    } else items = shuffle(mode.items).slice(0, mode.per);
+    idx = 0; keystrokes = 0; errors = 0; charsDone = 0; missed = {}; t0 = 0; finished = false;
+    clearInterval(timer); timer = null;
+    $("mTitle").textContent = mode.name;
+    $("result").hidden = true; $("skip").hidden = !!mode.chrono;
+    renderModes(); load(); focusEntry();
+  }
+
+  function load(){
+    target = norm(items[idx]); typed = ""; $("entry").value = "";
+    $("lCount").textContent = mode.chrono ? "1 min" : (idx+1) + "/" + items.length;
+    paint(); updateLive();
+  }
+
+  /* ---------- Affichage du texte ---------- */
+  function paint(){
+    var box = $("text"), html = "", show = target;
+    if(mode.chrono){ var end = Math.min(target.length, typed.length + 260); show = target.slice(0, end); }
+    var from = 0;
+    if(mode.chrono && typed.length > 120){ from = target.lastIndexOf(" ", typed.length - 80) + 1; }
+    for(var i=from;i<show.length;i++){
+      var ch = show[i], cls;
+      if(i < typed.length) cls = typed[i] === ch ? "g" : "b";
+      else if(i === typed.length) cls = "c";
+      else cls = "t";
+      var vis = ch === " " && cls === "b" ? "·" : ch;
+      html += '<span class="' + cls + '">' + vis.replace(/&/g,"&amp;").replace(/</g,"&lt;") + "</span>";
+    }
+    box.innerHTML = html;
+    var prog = mode.chrono ? (t0 ? Math.min(1, (Date.now()-t0)/1000/mode.chrono) : 0)
+      : (idx + typed.length / Math.max(1,target.length)) / items.length;
+    $("prog").style.width = (prog*100) + "%";
+  }
+
+  function elapsed(){ return t0 ? (Date.now() - t0) / 1000 : 0; }
+  function wpmNow(){ var s = elapsed(); if(s < 2) return 0; return Math.round(((charsDone + correctPrefix()) / 5) / (s / 60)); }
+  function correctPrefix(){ var n = 0; while(n < typed.length && typed[n] === target[n]) n++; return n; }
+  function accNow(){ return keystrokes ? Math.floor((keystrokes - errors) / keystrokes * 100) : 100; }
+  function updateLive(){
+    var s = elapsed();
+    $("lTime").textContent = mode && mode.chrono ? mmss(Math.max(0, mode.chrono - s)) : mmss(s);
+    $("lWpm").textContent = wpmNow(); $("lAcc").textContent = accNow();
+    if(mode && mode.chrono){ paint(); if(t0 && s >= mode.chrono) done(); }
+  }
+
+  /* ---------- Saisie ---------- */
+  var entry = $("entry");
+  entry.addEventListener("input", function(){
+    if(finished) { entry.value = typed; return; }
+    var v = norm(entry.value).replace(/\n/g, "");
+    if(v.length > target.length) v = v.slice(0, target.length);
+    if(!t0 && v.length){ t0 = Date.now(); timer = setInterval(updateLive, 250); }
+    if(v.length > typed.length){
+      for(var i = typed.length; i < v.length; i++){
+        keystrokes++;
+        if(v[i] !== target[i]){ errors++; var c = target[i] === " " ? "espace" : target[i]; missed[c] = (missed[c]||0) + 1; }
+      }
+    }
+    typed = v; if(entry.value !== v) entry.value = v;
+    paint(); updateLive();
+    if(typed === target){
+      if(mode.chrono){ return; }
+      charsDone += target.length;
+      idx++;
+      if(idx >= items.length) done(); else load();
+    }
+  });
+  entry.addEventListener("keydown", function(e){ if(e.key === "Enter") e.preventDefault(); });
+  entry.addEventListener("focus", function(){ $("target").classList.add("focus"); $("paused").hidden = true; });
+  entry.addEventListener("blur", function(){ $("target").classList.remove("focus"); if(!finished) $("paused").hidden = false; });
+  function focusEntry(){ try{ entry.focus({preventScroll:true}); }catch(e){ entry.focus(); } }
+  $("target").addEventListener("mousedown", function(e){ e.preventDefault(); focusEntry(); });
+  $("target").addEventListener("focus", focusEntry);
+  document.addEventListener("keydown", function(e){
+    if(document.activeElement === entry || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = document.activeElement && document.activeElement.tagName;
+    if(tag === "BUTTON" || tag === "SUMMARY" || tag === "A") return;
+    if(e.key.length === 1) focusEntry();
+  });
+
+  /* ---------- Fin de série ---------- */
+  function done(){
+    if(finished) return; finished = true;
+    clearInterval(timer); timer = null;
+    var s = Math.max(1, elapsed());
+    if(mode.chrono){ charsDone += correctPrefix(); s = Math.min(s, mode.chrono); }
+    var w = Math.round((charsDone / 5) / (s / 60)), a = accNow();
+    $("rWpm").textContent = w; $("rAcc").textContent = a + " %"; $("rTime").textContent = mmss(s); $("rErr").textContent = errors;
+    var best = bestFor(mode.id);
+    var msg = w > best && best ? "Nouveau record pour cet exercice (avant : " + best + " mpm)." :
+      a < 92 ? "Ralentis un peu : la précision d'abord, la vitesse suit." :
+      a >= 97 ? "Très propre. Tu peux pousser un peu plus vite." : "Bonne série.";
+    $("rMsg").textContent = msg;
+    var h = getJSON("ahmed-hist", []);
+    h.push({ d: Date.now(), m: mode.id, w: w, a: a });
+    if(h.length > 300) h = h.slice(-300);
+    set("ahmed-hist", JSON.stringify(h));
+    var mk = getJSON("ahmed-missed", {}); for(var k in missed) mk[k] = (mk[k]||0) + missed[k];
+    set("ahmed-missed", JSON.stringify(mk));
+    $("result").hidden = false; $("paused").hidden = true; entry.blur();
+    $("prog").style.width = "100%";
+    renderModes(); renderProgress();
+    $("again").focus(); $("paused").hidden = true;
+  }
+
+  /* ---------- Progrès ---------- */
+  var NAMES = {}; MODES.forEach(function(M){ NAMES[M.id] = M.name; });
+  function renderProgress(){
+    var h = getJSON("ahmed-hist", []);
+    if(!h.length){
+      $("pBest").textContent = "–"; $("pAvg").textContent = "–"; $("pAcc").textContent = "–";
+      $("spark").innerHTML = ""; $("pNote").textContent = "Termine une première série pour voir ta courbe.";
+    } else {
+      var best = 0, last = h.slice(-10), sw = 0, sa = 0;
+      h.forEach(function(r){ if(r.w > best) best = r.w; });
+      last.forEach(function(r){ sw += r.w; sa += r.a; });
+      $("pBest").textContent = best; $("pAvg").textContent = Math.round(sw/last.length); $("pAcc").textContent = Math.round(sa/last.length) + " %";
+      $("pNote").textContent = "Vitesse (mpm) des " + Math.min(20, h.length) + " dernières séries.";
+      drawSpark(h.slice(-20));
+    }
+    var mk = getJSON("ahmed-missed", {}), list = Object.keys(mk).sort(function(a,b){ return mk[b]-mk[a]; }).slice(0,8), wk = $("weak");
+    wk.innerHTML = "";
+    if(!list.length){ wk.innerHTML = '<p class="note">Rien pour l\'instant.</p>'; }
+    list.forEach(function(c){ var s = document.createElement("span"); s.textContent = c; var sm = document.createElement("small"); sm.textContent = mk[c] + "×"; s.appendChild(sm); wk.appendChild(s); });
+    var tb = $("hist"); tb.innerHTML = "";
+    h.slice(-8).reverse().forEach(function(r){
+      var tr = document.createElement("tr"), d = new Date(r.d);
+      [String(d.getDate()).padStart(2,"0") + "." + String(d.getMonth()+1).padStart(2,"0") + " " + String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"),
+       NAMES[r.m] || r.m, r.w, r.a].forEach(function(v, i){ var td = document.createElement("td"); td.textContent = v; if(i >= 2) td.className = "n"; tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    if(!h.length){ tb.innerHTML = '<tr><td colspan="4" class="note">Aucune série pour l\'instant.</td></tr>'; }
+  }
+  function drawSpark(rows){
+    var svg = $("spark"), W = 300, H = 90, pad = 10, max = 10;
+    rows.forEach(function(r){ if(r.w > max) max = r.w; }); max = Math.ceil(max / 10) * 10;
+    var n = rows.length, x = function(i){ return n === 1 ? W/2 : pad + i * (W - 2*pad) / (n - 1); }, y = function(v){ return H - pad - v / max * (H - 2*pad); };
+    var line = rows.map(function(r,i){ return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(r.w).toFixed(1); }).join(" ");
+    var area = line + " L" + x(n-1).toFixed(1) + " " + (H-pad) + " L" + x(0).toFixed(1) + " " + (H-pad) + " Z";
+    var grid = "";
+    [0, .5, 1].forEach(function(f){ var yy = (pad + f*(H-2*pad)).toFixed(1); grid += '<line x1="0" x2="'+W+'" y1="'+yy+'" y2="'+yy+'" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>'; });
+    var lx = x(n-1), ly = y(rows[n-1].w);
+    svg.innerHTML = grid +
+      '<path d="'+area+'" fill="var(--accent-soft)" stroke="none"/>' +
+      '<path d="'+line+'" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke"/>' +
+      '<circle cx="'+lx+'" cy="'+ly+'" r="3.5" fill="var(--accent)"/>';
+    svg.setAttribute("aria-label", "Vitesse des " + n + " dernières séries, de " + rows[0].w + " à " + rows[n-1].w + " mots par minute, maximum de l'échelle " + max);
+  }
+
+  /* ---------- Boutons ---------- */
+  $("restart").onclick = function(){ choose(mode.id); };
+  $("again").onclick = function(){ choose(mode.id); };
+  $("skip").onclick = function(){
+    if(finished || mode.chrono) return;
+    idx++; if(idx >= items.length){ if(charsDone) done(); else choose(mode.id); } else { load(); focusEntry(); }
+  };
+
+  renderProgress();
+  choose(get("ahmed-mode") || "accents");
+  try{ entry.blur(); }catch(e){}
+  $("paused").hidden = false;
+})();
+</script>
+</body>
+</html>
