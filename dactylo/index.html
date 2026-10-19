@@ -105,6 +105,25 @@ summary{cursor:pointer;font-weight:600}
 .kt th{color:var(--muted);font-weight:500}
 .kt code{font-family:var(--mono)}
 kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--bg)}
+
+/* Profils */
+.who{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.who span{font-weight:600}
+.login{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;display:flex;justify-content:center;align-items:flex-start;
+  padding-block:8vh 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.card{width:min(100%,440px);background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 26px 22px;display:flex;flex-direction:column;gap:14px}
+.card h2{margin:0;font-size:1.45rem}
+.card p{margin:0;color:var(--muted)}
+.plist{display:flex;flex-direction:column;gap:8px}
+.plist button{font:inherit;text-align:left;cursor:pointer;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.plist button:hover{border-color:var(--accent)}
+.ini{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:700}
+label.f{display:flex;flex-direction:column;gap:4px;font-weight:500;font-size:.95rem}
+label.f input{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+label.f input:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.err{color:var(--err);font-weight:500;margin:0}
+.link{font:inherit;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline;align-self:flex-start}
+.link.danger{color:var(--err)}
 @media (prefers-reduced-motion:reduce){.target.focus span.c::before{animation:none}.bar i{transition:none}}
 </style>
 </head>
@@ -116,6 +135,7 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
       <h1>Coin dactylo</h1>
       <p class="sub">Dactylo avancée : accents, chiffres, courriers et textes longs.</p>
     </div>
+    <div class="who" id="who" hidden><span id="whoName"></span><button class="btn ghost" id="logout" type="button">Changer de profil</button></div>
   </header>
 
   <div class="layout">
@@ -193,6 +213,35 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
     </table>
     <p class="note">Sur le clavier Apple de l'iMac, la touche « Alt de droite » est la touche <kbd>alt / option</kbd> juste à droite de la barre d'espace, après <kbd>⌘ cmd</kbd>.</p>
   </details>
+</div>
+
+<div class="login" id="login">
+  <div class="card" id="vList">
+    <h2>Qui s'entraîne ?</h2>
+    <p>Choisis ton profil. Tes résultats restent sur cet appareil et toi seul les vois.</p>
+    <div class="plist" id="plist"></div>
+    <button class="btn" id="toCreate" type="button">Créer un profil</button>
+    <a class="link" href="../">← Retour à tous les jeux</a>
+  </div>
+  <form class="card" id="vPass" hidden>
+    <h2 id="passName"></h2>
+    <label class="f">Mot de passe<input type="password" id="pPass" autocomplete="current-password"></label>
+    <p class="err" id="passErr" hidden></p>
+    <div class="row"><button class="btn" type="submit">Se connecter</button><button class="btn ghost" type="button" id="passBack">Retour</button></div>
+    <button class="link danger" type="button" id="delAsk">Supprimer ce profil</button>
+    <p id="delInfo" hidden>Pour supprimer ce profil et tous ses résultats, tape son mot de passe ci-dessus puis clique sur « Confirmer la suppression ». C'est définitif.</p>
+    <button class="btn" type="button" id="delGo" hidden style="background:var(--err);border-color:var(--err)">Confirmer la suppression</button>
+  </form>
+  <form class="card" id="vCreate" hidden>
+    <h2>Nouveau profil</h2>
+    <label class="f">Prénom<input id="cPrenom" autocomplete="given-name" maxlength="40"></label>
+    <label class="f">Nom<input id="cNom" autocomplete="family-name" maxlength="40"></label>
+    <label class="f">Mot de passe (4 caractères au moins)<input type="password" id="cPass" autocomplete="new-password"></label>
+    <label class="f">Mot de passe, encore une fois<input type="password" id="cPass2" autocomplete="new-password"></label>
+    <p class="err" id="createErr" hidden></p>
+    <p>Note bien ton mot de passe : s'il est oublié, on ne peut pas le retrouver.</p>
+    <div class="row"><button class="btn" type="submit">Créer et commencer</button><button class="btn ghost" type="button" id="createBack">Retour</button></div>
+  </form>
 </div>
 
 <script>
@@ -278,7 +327,7 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
 
   /* ---------- Liste des exercices ---------- */
   function bestFor(id){
-    var h = getJSON("ahmed-hist", []), b = 0;
+    var h = getJSON(K("hist"), []), b = 0;
     h.forEach(function(r){ if(r.m === id && r.w > b) b = r.w; }); return b;
   }
   function renderModes(){
@@ -296,7 +345,7 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
 
   function choose(id){
     mode = MODES.filter(function(M){ return M.id === id; })[0] || MODES[0];
-    set("ahmed-mode", mode.id);
+    set(K("mode"), mode.id);
     if(mode.chrono){
       var all = []; MODES.forEach(function(M){ if(M.items && M.id !== "mots") all = all.concat(M.items); });
       items = [shuffle(all).join(" ")];
@@ -374,9 +423,9 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
   $("target").addEventListener("mousedown", function(e){ e.preventDefault(); focusEntry(); });
   $("target").addEventListener("focus", focusEntry);
   document.addEventListener("keydown", function(e){
-    if(document.activeElement === entry || e.ctrlKey || e.metaKey || e.altKey) return;
+ if(!user || document.activeElement === entry || e.ctrlKey || e.metaKey || e.altKey) return;
     var tag = document.activeElement && document.activeElement.tagName;
-    if(tag === "BUTTON" || tag === "SUMMARY" || tag === "A") return;
+    if(tag === "INPUT" || tag === "BUTTON" || tag === "SUMMARY" || tag === "A") return;
     if(e.key.length === 1) focusEntry();
   });
 
@@ -393,12 +442,12 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
       a < 92 ? "Ralentis un peu : la précision d'abord, la vitesse suit." :
       a >= 97 ? "Très propre. Tu peux pousser un peu plus vite." : "Bonne série.";
     $("rMsg").textContent = msg;
-    var h = getJSON("ahmed-hist", []);
+    var h = getJSON(K("hist"), []);
     h.push({ d: Date.now(), m: mode.id, w: w, a: a });
     if(h.length > 300) h = h.slice(-300);
-    set("ahmed-hist", JSON.stringify(h));
-    var mk = getJSON("ahmed-missed", {}); for(var k in missed) mk[k] = (mk[k]||0) + missed[k];
-    set("ahmed-missed", JSON.stringify(mk));
+    set(K("hist"), JSON.stringify(h));
+    var mk = getJSON(K("missed"), {}); for(var k in missed) mk[k] = (mk[k]||0) + missed[k];
+    set(K("missed"), JSON.stringify(mk));
     $("result").hidden = false; $("paused").hidden = true; entry.blur();
     $("prog").style.width = "100%";
     renderModes(); renderProgress();
@@ -408,7 +457,7 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
   /* ---------- Progrès ---------- */
   var NAMES = {}; MODES.forEach(function(M){ NAMES[M.id] = M.name; });
   function renderProgress(){
-    var h = getJSON("ahmed-hist", []);
+    var h = getJSON(K("hist"), []);
     if(!h.length){
       $("pBest").textContent = "–"; $("pAvg").textContent = "–"; $("pAcc").textContent = "–";
       $("spark").innerHTML = ""; $("pNote").textContent = "Termine une première série pour voir ta courbe.";
@@ -420,7 +469,7 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
       $("pNote").textContent = "Vitesse (mpm) des " + Math.min(20, h.length) + " dernières séries.";
       drawSpark(h.slice(-20));
     }
-    var mk = getJSON("ahmed-missed", {}), list = Object.keys(mk).sort(function(a,b){ return mk[b]-mk[a]; }).slice(0,8), wk = $("weak");
+    var mk = getJSON(K("missed"), {}), list = Object.keys(mk).sort(function(a,b){ return mk[b]-mk[a]; }).slice(0,8), wk = $("weak");
     wk.innerHTML = "";
     if(!list.length){ wk.innerHTML = '<p class="note">Rien pour l\'instant.</p>'; }
     list.forEach(function(c){ var s = document.createElement("span"); s.textContent = c; var sm = document.createElement("small"); sm.textContent = mk[c] + "×"; s.appendChild(sm); wk.appendChild(s); });
@@ -457,10 +506,83 @@ kbd{font-family:var(--mono);font-size:.85em;border:1px solid var(--line);border-
     idx++; if(idx >= items.length){ if(charsDone) done(); else choose(mode.id); } else { load(); focusEntry(); }
   };
 
-  renderProgress();
-  choose(get("ahmed-mode") || "accents");
-  try{ entry.blur(); }catch(e){}
-  $("paused").hidden = false;
+  /* ---------- Profils (gardés sur cet appareil, mot de passe jamais stocké en clair) ---------- */
+  var user = null, pending = null;
+  function K(k){ return "dactylo-" + user.id + "-" + k; }
+  function profils(){ return getJSON("dactylo-profils", []); }
+  function saveProfils(l){ set("dactylo-profils", JSON.stringify(l)); }
+  function b64(buf){ return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); }
+  function unb64(s){ return Uint8Array.from(atob(s), function(c){ return c.charCodeAt(0); }); }
+  function hacher(mdp, sel){
+    if(!(window.crypto && crypto.subtle)) return Promise.reject(new Error("crypto"));
+    return crypto.subtle.importKey("raw", new TextEncoder().encode(mdp), "PBKDF2", false, ["deriveBits"])
+      .then(function(k){ return crypto.subtle.deriveBits({ name:"PBKDF2", hash:"SHA-256", salt:sel, iterations:150000 }, k, 256); })
+      .then(b64);
+  }
+  function vue(id){ ["vList","vPass","vCreate"].forEach(function(v){ $(v).hidden = v !== id; }); }
+  function msg(id, t){ $(id).textContent = t; $(id).hidden = !t; }
+  function listeProfils(){
+    var l = profils(), box = $("plist"); box.innerHTML = "";
+    if(!l.length){ box.innerHTML = '<p>Aucun profil pour l\'instant sur cet appareil.</p>'; }
+    l.forEach(function(P){
+      var b = document.createElement("button"); b.type = "button";
+      b.innerHTML = '<span class="ini"></span><span></span>';
+      b.children[0].textContent = (P.prenom[0] || "?").toUpperCase(); b.children[1].textContent = P.prenom + " " + P.nom;
+      b.onclick = function(){ pending = P; $("passName").textContent = P.prenom + " " + P.nom; $("pPass").value = ""; msg("passErr", "");
+        $("delInfo").hidden = true; $("delGo").hidden = true; vue("vPass"); $("pPass").focus(); };
+      box.appendChild(b);
+    });
+  }
+  function ouvrirLogin(){
+    user = null; try{ sessionStorage.removeItem("dactylo-session"); }catch(e){}
+    clearInterval(timer); timer = null; finished = true; entry.blur();
+    $("who").hidden = true; $("login").hidden = false; listeProfils(); vue("vList");
+  }
+  function entrer(P){
+    user = P; try{ sessionStorage.setItem("dactylo-session", P.id); }catch(e){}
+    $("whoName").textContent = P.prenom + " " + P.nom; $("who").hidden = false; $("login").hidden = true;
+    renderProgress(); choose(get(K("mode")) || "accents");
+    try{ entry.blur(); }catch(e){} $("paused").hidden = false;
+  }
+  $("toCreate").onclick = function(){ ["cPrenom","cNom","cPass","cPass2"].forEach(function(i){ $(i).value = ""; }); msg("createErr", ""); vue("vCreate"); $("cPrenom").focus(); };
+  $("createBack").onclick = $("passBack").onclick = function(){ vue("vList"); };
+  $("vCreate").addEventListener("submit", function(e){
+    e.preventDefault();
+    var pr = $("cPrenom").value.trim(), no = $("cNom").value.trim(), m1 = $("cPass").value, m2 = $("cPass2").value;
+    if(!pr || !no) return msg("createErr", "Indique ton prénom et ton nom.");
+    if(m1.length < 4) return msg("createErr", "Le mot de passe doit avoir au moins 4 caractères.");
+    if(m1 !== m2) return msg("createErr", "Les deux mots de passe ne sont pas identiques.");
+    var l = profils();
+    if(l.some(function(P){ return P.prenom.toLowerCase() === pr.toLowerCase() && P.nom.toLowerCase() === no.toLowerCase(); }))
+      return msg("createErr", "Ce profil existe déjà sur cet appareil. Retourne en arrière pour t'y connecter.");
+    var sel = crypto.getRandomValues(new Uint8Array(16));
+    hacher(m1, sel).then(function(h){
+      var P = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), prenom: pr, nom: no, sel: b64(sel), h: h };
+      // Les séries faites avant la création des profils sont rattachées au premier profil créé.
+      if(!l.length){ ["hist","missed","mode"].forEach(function(k){ var v = get("ahmed-" + k); if(v != null){ set("dactylo-" + P.id + "-" + k, v); try{ localStorage.removeItem("ahmed-" + k); }catch(e){} } }); }
+      l.push(P); saveProfils(l); entrer(P);
+    }).catch(function(){ msg("createErr", "Ce navigateur ne permet pas de protéger le mot de passe. Ouvre la page avec Firefox ou Chrome à jour."); });
+  });
+  function verifier(){ return hacher($("pPass").value, unb64(pending.sel)).then(function(h){ return h === pending.h; }); }
+  $("vPass").addEventListener("submit", function(e){
+    e.preventDefault();
+    verifier().then(function(ok){ if(ok) entrer(pending); else { msg("passErr", "Mot de passe incorrect."); $("pPass").select(); } })
+      .catch(function(){ msg("passErr", "Ce navigateur ne permet pas de vérifier le mot de passe."); });
+  });
+  $("delAsk").onclick = function(){ $("delInfo").hidden = false; $("delGo").hidden = false; $("pPass").focus(); };
+  $("delGo").onclick = function(){
+    verifier().then(function(ok){
+      if(!ok) return msg("passErr", "Mot de passe incorrect : le profil n'a pas été supprimé.");
+      ["hist","missed","mode"].forEach(function(k){ try{ localStorage.removeItem("dactylo-" + pending.id + "-" + k); }catch(e){} });
+      saveProfils(profils().filter(function(P){ return P.id !== pending.id; }));
+      listeProfils(); vue("vList");
+    });
+  };
+  $("logout").onclick = ouvrirLogin;
+
+  var sid = null; try{ sid = sessionStorage.getItem("dactylo-session"); }catch(e){}
+  var dejaLa = profils().filter(function(P){ return P.id === sid; })[0];
+  if(dejaLa) entrer(dejaLa); else ouvrirLogin();
 })();
 </script>
 </body>
