@@ -74,7 +74,7 @@
     if(!("speechSynthesis" in window)) return;
     var vx = M.voixPour(lang || "fr");
     if(!vx && lang && lang !== "fr") return; // pas de voix dans cette langue : on se tait plutôt que de mal prononcer
-    speechSynthesis.cancel();
+    if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
     var morceaux = [].concat(texte), id = ++tour, rate = tresLent ? .5 : VITESSES[M.vitesse()];
     var pause = 700 + (1 - rate) * 1200;
     (function dire(i){

@@ -129,8 +129,8 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
   setTimeout(function(){ if(!voice) $("noVoice").hidden = false; }, 2000);
   function say(t){
     if(!("speechSynthesis" in window)) return;
-    speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(t); u.lang = voice ? voice.lang : "fr-FR"; if(voice) u.voice = voice; u.rate = .85; u.pitch = 1.15;
+    if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(t); u.lang = voice ? voice.lang : "fr-FR"; if(voice) u.voice = voice; u.rate = .85; if(!/Linux/.test(navigator.userAgent) || /Android/.test(navigator.userAgent)) u.pitch = 1.15;
     speechSynthesis.speak(u);
   }
   var actx = null;
@@ -189,7 +189,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
   }
   function consigne(t){ G.consigne = t; $("stage").querySelector(".prompt").textContent = t; say(t); }
   $("repeat").onclick = function(){ if(G) say(G.consigne); };
-  $("back").onclick = function(){ if(window.speechSynthesis) speechSynthesis.cancel(); $("vGame").hidden = true; $("vMenu").hidden = false; G = null; };
+  $("back").onclick = function(){ if(window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); $("vGame").hidden = true; $("vMenu").hidden = false; G = null; };
   $("toMenu").onclick = function(){ $("win").hidden = true; $("back").onclick(); };
   $("again").onclick = function(){ var j = G.j; $("win").hidden = true; start(j); };
 

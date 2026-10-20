@@ -122,14 +122,17 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   }
   chargerVoix(); if("speechSynthesis" in window) speechSynthesis.onvoiceschanged = chargerVoix;
   var tour = 0;
-  function stopVoix(){ tour++; if("speechSynthesis" in window) speechSynthesis.cancel(); }
+  function stopVoix(){ tour++; if("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); }
   // dit un texte avec la voix d'un personnage ; onMot(i) reçoit la position du mot prononcé
   function dire(texte, perso, rangPerso, onMot, fin){
     if(!("speechSynthesis" in window)){ if(fin) setTimeout(fin, 400); return; }
     var id = tour, u = new SpeechSynthesisUtterance(texte.replace(/[«»]/g, ""));
     var v = VOIX.length ? VOIX[(rangPerso || 0) % VOIX.length] : null;
     u.lang = v ? v.lang : "fr-FR"; if(v) u.voice = v;
-    u.pitch = perso ? perso.h : 1; u.rate = (perso ? perso.v : .9) * vitesse;
+    // sous Linux (voix Piper), changer la hauteur peut bloquer la voix : on ne change que sur tablette / téléphone
+    var linux = /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
+    if(!linux) u.pitch = perso ? perso.h : 1;
+    u.rate = linux ? .9 * vitesse : (perso ? perso.v : .9) * vitesse;
     var fait = false, finir = function(){ if(fait) return; fait = true; if(id === tour && fin) fin(); };
     u.onboundary = function(e){ if(id === tour && onMot && (e.name === "word" || e.name === undefined)) onMot(e.charIndex); };
     u.onend = finir; u.onerror = finir;

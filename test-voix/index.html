@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test de la voix</title>
+<style>
+:root{ color-scheme:dark; }
+body{margin:0;background:#1D2357;color:#FFF8E7;font-family:"Trebuchet MS",system-ui,sans-serif;padding:20px}
+h1{margin:0 0 6px;color:#FFD23F}
+p{color:#C9CCF2;margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;max-width:900px}
+button{font:inherit;font-size:1.1rem;font-weight:700;padding:14px;border:0;border-radius:14px;background:#272C6B;color:#FFF8E7;cursor:pointer;text-align:left}
+button b{display:block;font-size:.85rem;font-weight:400;color:#C9CCF2;margin-top:4px}
+button.ok{background:#1f6f68}button.ko{background:#8a2c4a}
+pre{background:#11163d;border-radius:12px;padding:12px;max-width:900px;white-space:pre-wrap;font-size:.95rem;min-height:120px}
+</style>
+</head>
+<body>
+<h1>🔊 Test de la voix</h1>
+<p>Touche chaque bouton, l'un après l'autre, et écoute. Ensuite, prends une photo de cette page (avec le journal en bas) et envoie-la.</p>
+<div class="grid" id="g"></div>
+<h3>Journal</h3>
+<pre id="log"></pre>
+<script>
+(function(){
+  var log = document.getElementById("log"), t0 = Date.now();
+  function L(m){ log.textContent += ((Date.now()-t0)/1000).toFixed(1) + "s  " + m + "\n"; }
+  if(!("speechSynthesis" in window)){ L("Ce navigateur n'a pas de synthèse vocale."); return; }
+  function voix(){ var v = speechSynthesis.getVoices(); return v.filter(function(x){ return /^fr/i.test(x.lang); })[0] || v[0]; }
+  setTimeout(function(){ var v = speechSynthesis.getVoices(); L("Voix trouvées : " + v.length + " → " + v.slice(0,6).map(function(x){ return x.name + " (" + x.lang + ")"; }).join(", ")); }, 800);
+  function dire(n, texte, opt, fini){
+    var u = new SpeechSynthesisUtterance(texte), v = voix(); if(v){ u.voice = v; u.lang = v.lang; } else u.lang = "fr-FR";
+    if(opt && opt.pitch) u.pitch = opt.pitch; if(opt && opt.rate) u.rate = opt.rate;
+    u.onstart = function(){ L(n + " : la voix commence"); };
+    u.onend = function(){ L(n + " : terminé ✓"); if(fini) fini(); };
+    u.onerror = function(e){ L(n + " : ERREUR " + (e.error || "")); if(fini) fini(); };
+    speechSynthesis.speak(u); L(n + " : envoyé");
+  }
+  var TESTS = [
+    ["1. Phrase simple", "Bonjour, ceci est un test.", function(n){ dire(n, "Bonjour, ceci est un test."); }],
+    ["2. Avec apostrophe", "C'est l'heure de jouer.", function(n){ dire(n, "C'est l'heure de jouer."); }],
+    ["3. Guillemets et …", "« Oh ! » dit le lapin…", function(n){ dire(n, "« Oh ! » dit le lapin… Il saute."); }],
+    ["4. Voix aiguë", "hauteur 1.6", function(n){ dire(n, "Je suis une petite souris.", { pitch:1.6 }); }],
+    ["5. Voix grave", "hauteur 0.6", function(n){ dire(n, "Je suis un gros ours.", { pitch:.6 }); }],
+    ["6. Voix lente", "vitesse 0.6", function(n){ dire(n, "Je parle très lentement.", { rate:.6 }); }],
+    ["7. Trois phrases à la suite", "comme dans les histoires", function(n){ dire(n+"a", "Première phrase.", null, function(){ setTimeout(function(){ dire(n+"b", "Deuxième phrase.", null, function(){ setTimeout(function(){ dire(n+"c", "Troisième phrase."); }, 400); }); }, 400); }); }],
+    ["8. Couper puis reparler", "comme quand on tourne la page", function(n){ dire(n+"a", "Cette phrase va être coupée au milieu, elle est très longue, très très longue."); setTimeout(function(){ speechSynthesis.cancel(); L(n + " : coupé"); setTimeout(function(){ dire(n+"b", "Me revoilà après la coupure."); }, 600); }, 1500); }]
+  ];
+  TESTS.forEach(function(t){
+    var b = document.createElement("button"); b.innerHTML = t[0] + "<b>" + t[1].replace(/</g,"&lt;") + "</b>";
+    b.onclick = function(){ L("— " + t[0]); t[2](t[0].split(".")[0]); };
+    document.getElementById("g").appendChild(b);
+  });
+  L("Prêt. Navigateur : " + navigator.userAgent.replace(/^Mozilla\/5.0 /, ""));
+})();
+</script>
+</body>
+</html>
