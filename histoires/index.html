@@ -133,7 +133,10 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
     var fait = false, finir = function(){ if(fait) return; fait = true; if(id === tour && fin) fin(); };
     u.onboundary = function(e){ if(id === tour && onMot && (e.name === "word" || e.name === undefined)) onMot(e.charIndex); };
     u.onend = finir; u.onerror = finir;
-    setTimeout(finir, 2500 + texte.length * 110 / u.rate); // si « fin » n'arrive jamais
+    // on attend que la voix ait vraiment fini (ordinateurs lents), sans temps fixe
+    var t0 = Date.now();
+    (function veille(){ if(fait || id !== tour) return; var occupe = speechSynthesis.speaking || speechSynthesis.pending;
+      if((!occupe && Date.now() - t0 > 1200) || Date.now() - t0 > 60000) return finir(); setTimeout(veille, 300); })();
     speechSynthesis.speak(u);
   }
   var vitesse = 1;

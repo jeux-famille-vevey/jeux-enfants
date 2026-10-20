@@ -82,7 +82,11 @@
       var u = new SpeechSynthesisUtterance(morceaux[i]); u.lang = vx ? vx.lang : "fr-FR"; if(vx) u.voice = vx; u.rate = rate;
       var suite = false, go = function(){ if(suite) return; suite = true; setTimeout(function(){ dire(i+1); }, pause); };
       u.onend = go; u.onerror = go;
-      setTimeout(go, 1500 + morceaux[i].length * 160 / rate); // au cas où « fin » n'arrive jamais
+      // On attend que la voix ait vraiment fini (les ordinateurs lents mettent du temps à préparer la phrase),
+      // au lieu d'un temps fixe qui faisait commencer la phrase suivante trop tôt.
+      var t0 = Date.now();
+      (function veille(){ if(suite || id !== tour) return; var occupe = speechSynthesis.speaking || speechSynthesis.pending;
+        if((!occupe && Date.now() - t0 > 1200) || Date.now() - t0 > 60000) return go(); setTimeout(veille, 300); })();
       speechSynthesis.speak(u);
     })(0);
   };
