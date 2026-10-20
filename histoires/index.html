@@ -123,15 +123,40 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   chargerVoix(); if("speechSynthesis" in window) speechSynthesis.onvoiceschanged = chargerVoix;
   var tour = 0;
   var enCours = 0; // phrases envoyées dont on n'a pas encore reçu la fin
-  function stopVoix(){ tour++; if("speechSynthesis" in window && (enCours > 0 || speechSynthesis.speaking || speechSynthesis.pending)){ J("coupe la voix"); speechSynthesis.cancel(); enCours = 0; } }
+  function stopVoix(){ tour++; if(lecteur){ lecteur.onended = lecteur.onerror = null; try{ lecteur.pause(); }catch(e){} }
+    if("speechSynthesis" in window && (enCours > 0 || speechSynthesis.speaking || speechSynthesis.pending)){ J("coupe la voix"); speechSynthesis.cancel(); enCours = 0; } }
   // dit un texte avec la voix d'un personnage ; onMot(i) reçoit la position du mot prononcé
   // journal de diagnostic : ouvrir la page avec ?debug à la fin de l'adresse
   var DEBUG = /debug/.test(location.search), t00 = Date.now(), garde = [];
   function J(m){ if(!DEBUG) return; var d = document.getElementById("journal");
-    if(!d){ d = document.createElement("pre"); d.id = "journal"; d.style.cssText = "position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;margin:0;background:rgba(0,0,0,.85);color:#9f9;font-size:12px;padding:6px;z-index:99;white-space:pre-wrap;user-select:text"; document.body.appendChild(d); }
+    if(!d){ d = document.createElement("pre"); d.id = "journal"; d.style.cssText = "position:fixed;left:0;right:0;top:0;max-height:26vh;overflow:auto;margin:0;background:rgba(0,0,0,.85);color:#9f9;font-size:12px;padding:6px;z-index:99;white-space:pre-wrap;user-select:text"; document.body.appendChild(d); }
     d.textContent += ((Date.now()-t00)/1000).toFixed(1) + "s " + m + "\n"; d.scrollTop = d.scrollHeight; }
-  J("Version de la voix : 3 (attend la vraie fin de chaque phrase)");
-  function dire(texte, perso, rangPerso, onMot, fin){
+  J("Version de la voix : 4 (voix enregistrées)");
+
+  /* Les histoires sont enregistrées à l'avance (dossier sons/, fait par outils/enregistrer-histoires.py) :
+     l'appareil n'a qu'à jouer le fichier. S'il manque, on se rabat sur la voix de l'appareil. */
+  function slug(m){ return m.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  var lecteur = null; // un seul lecteur, réutilisé (les tablettes l'autorisent après le premier toucher)
+  function dire(texte, perso, rangPerso, onMot, fin, src){
+    if(!src || !window.Audio) return direVoix(texte, perso, rangPerso, onMot, fin);
+    var id = tour, court = texte.slice(0, 22), fait = false, propre = texte.replace(/[«»]/g, "");
+    if(!lecteur) lecteur = new Audio();
+    var a = lecteur;
+    var finir = function(){ if(fait) return; fait = true; J("fin : " + court); if(id === tour && fin) fin(); };
+    var secours = function(pourquoi){ if(fait) return; fait = true; J("pas d'enregistrement (" + pourquoi + "), voix de l'appareil : " + court);
+      if(id === tour) direVoix(texte, perso, rangPerso, onMot, fin); };
+    a.onended = finir;
+    a.onerror = function(){ secours("fichier"); };
+    a.src = src; a.preservesPitch = true; a.mozPreservesPitch = true; a.webkitPreservesPitch = true;
+    a.defaultPlaybackRate = a.playbackRate = vitesse;
+    J("joue : " + court);
+    var pr = a.play(); if(pr && pr.catch) pr.catch(function(e){ if(e && e.name === "AbortError") return; secours(e && e.name); });
+    // surligner les mots au fil de la lecture (au prorata du texte)
+    if(onMot) (function suivre(){ if(fait || id !== tour) return;
+      if(a.duration && isFinite(a.duration)) onMot(Math.min(propre.length - 1, Math.floor(a.currentTime / a.duration * propre.length * 1.04)));
+      requestAnimationFrame(suivre); })();
+  }
+  function direVoix(texte, perso, rangPerso, onMot, fin){
     if(!("speechSynthesis" in window)){ if(fin) setTimeout(fin, 400); return; }
     var id = tour, u = new SpeechSynthesisUtterance(texte.replace(/[«»]/g, ""));
     garde.push(u); if(garde.length > 20) garde.shift(); // garder une référence : sinon le navigateur peut « oublier » la phrase en cours
@@ -216,12 +241,12 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   var B = null, P = 0, mode = store("histoire-mode") || "ecoute", enLecture = false;
   function majMode(){ $("mode").textContent = mode === "ecoute" ? "🎧 J'écoute" : "📖 Je lis"; }
   $("mode").onclick = function(){ mode = mode === "ecoute" ? "lis" : "ecoute"; store("histoire-mode", mode); majMode(); stopVoix(); enLecture = false; majLire();
-    dire(mode === "ecoute" ? "J'écoute l'histoire." : "Je lis tout seul. Touche un mot pour l'entendre.", null, 0); };
+    dire(mode === "ecoute" ? "J'écoute l'histoire." : "Je lis tout seul. Touche un mot pour l'entendre.", null, 0, null, null, "sons/commun/" + (mode === "ecoute" ? "ecoute" : "lis") + ".mp3"); };
   function ouvrir(L){
     B = L; P = 0; $("lib").hidden = true; $("reader").hidden = false; $("fin").hidden = true; $("rTitre").textContent = L.titre; majMode();
     var d = $("dots"); d.innerHTML = ""; L.pages.forEach(function(){ d.appendChild(document.createElement("i")); });
     afficher();
-    if(mode === "ecoute"){ enLecture = true; majLire(); dire(L.titre, null, 0, null, function(){ setTimeout(lirePage, 500); }); }
+    if(mode === "ecoute"){ enLecture = true; majLire(); dire(L.titre, null, 0, null, function(){ setTimeout(lirePage, 500); }, "sons/" + L.id + "/titre.mp3"); }
   }
   function rangPerso(cle){ var k = Object.keys(B.persos); return Math.max(0, k.indexOf(cle)); }
   function afficher(){
@@ -237,7 +262,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
       txt.split(/( +)/).forEach(function(m){
         if(/^ +$/.test(m) || !m){ p.appendChild(document.createTextNode(m)); pos += m.length; return; }
         var sp = document.createElement("span"); sp.className = "mot"; sp.textContent = m; sp.dataset.d = pos; sp.dataset.f = pos + m.length;
-        sp.onclick = function(){ stopVoix(); enLecture = false; majLire(); surligner(sp); var w = m.replace(/[«»!?.,…:;"]/g, ""); if(w) dire(w, perso.h ? perso : B.persos.narr, rangPerso(l[0])); };
+        sp.onclick = function(){ stopVoix(); enLecture = false; majLire(); surligner(sp); var w = m.replace(/[«»!?.,…:;"]/g, ""); if(w) dire(w, perso.h ? perso : B.persos.narr, rangPerso(l[0]), null, null, slug(w) ? "sons/mots/" + slug(w) + ".mp3" : null); };
         p.appendChild(sp); pos += m.length;
       });
       t.appendChild(p);
@@ -263,7 +288,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
       dire(pg.l[i][1], B.persos[pg.l[i][0]], rangPerso(pg.l[i][0]), function(ci){
         var orig = carte[ci] != null ? carte[ci] : ci;
         for(var m = 0; m < mots.length; m++){ if(orig < +mots[m].dataset.f){ surligner(mots[m]); break; } }
-      }, function(){ setTimeout(function(){ ligne(i + 1); }, 350); });
+      }, function(){ setTimeout(function(){ ligne(i + 1); }, 350); }, "sons/" + B.id + "/p" + P + "-" + i + ".mp3");
     })(0);
   }
   function majLire(){ $("lire").textContent = enLecture ? "⏸" : "🔊"; $("lire").setAttribute("aria-label", enLecture ? "Pause" : "Lire la page"); }
@@ -291,17 +316,18 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
       q.c.forEach(function(c, i){
         var b = document.createElement("button"); b.className = "pick" + (/^[^a-zA-Z0-9À-ÿ\s']+$/.test(c) ? " emoji" : ""); b.textContent = c;
         b.onclick = function(){
-          if(i === q.r){ b.classList.add("good"); yay(); dire("Bravo !", L.persos.narr, 0); qi++; setTimeout(poser, 1300); }
-          else { b.classList.remove("nope"); void b.offsetWidth; b.classList.add("nope"); dire("Essaie encore !", L.persos.narr, 0); }
+          if(i === q.r){ b.classList.add("good"); yay(); dire("Bravo !", L.persos.narr, 0, null, null, "sons/commun/bravo.mp3"); qi++; setTimeout(poser, 1300); }
+          else { b.classList.remove("nope"); void b.offsetWidth; b.classList.add("nope"); dire("Essaie encore !", L.persos.narr, 0, null, null, "sons/commun/encore.mp3"); }
         };
         $("rep").appendChild(b);
       });
-      $("redire").onclick = function(){ dire(q.q, L.persos.narr, 0); };
-      dire(q.q, L.persos.narr, 0);
+      var sq = "sons/" + L.id + "/q" + qi + ".mp3";
+      $("redire").onclick = function(){ stopVoix(); dire(q.q, L.persos.narr, 0, null, null, sq); };
+      dire(q.q, L.persos.narr, 0, null, null, sq);
     }
     function bravo(){
       f.innerHTML = '<div style="font-size:5rem">🏆</div><h1>Bravo !</h1><p class="sub">Tu as bien écouté l\'histoire.</p><div class="row"><button class="tile" style="background:var(--sun)" id="relire">🔁 Relire</button><button class="tile" style="background:#B9B3F5" id="autres">📚 Autres histoires</button></div>';
-      yay(); dire("Bravo ! Tu as bien écouté l'histoire !", L.persos.narr, 0);
+      yay(); dire("Bravo ! Tu as bien écouté l'histoire !", L.persos.narr, 0, null, null, "sons/commun/bravo-fin.mp3");
       $("relire").onclick = function(){ ouvrir(L); };
       $("autres").onclick = function(){ $("fermer").click(); };
     }

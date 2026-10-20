@@ -1,12 +1,14 @@
 /* Les histoires. Chaque page : { s: scène, l: [[qui, texte], …] }
    Scène : { f: fond, p: [[emoji, x, y, taille, animation]] }  (x, y en % de l'image ; animation : "saut", "balance", "vole", "")
    Fonds : prairie, jardin, foret, nuit, chambre, route, pluie, village, ferme
-   Personnages : voix (hauteur, vitesse) et couleur du texte. */
+   Personnages : voix (hauteur, vitesse) et couleur du texte.
+   vx : voix enregistrée (jessica, pierre, siwis, miro) avec un décalage en demi-tons, ex. "siwis+3".
+   Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
   id:"pompon", titre:"Pompon et la carotte géante", couverture:{ f:"jardin", p:[["🐰",30,72,22,"saut"],["🥕",62,66,30,"balance"]] }, age:"3-6 ans",
-  persos:{ narr:{ nom:"", h:1, v:.9 }, pompon:{ nom:"Pompon", h:1.5, v:1, c:"#FF8FB8" }, herisson:{ nom:"Hérisson", h:1.25, v:.95, c:"#FF9F1C" },
-           poule:{ nom:"Poulette", h:1.8, v:1.05, c:"#FFD23F" }, ours:{ nom:"Gros Ours", h:.6, v:.8, c:"#C9A27A" } },
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, pompon:{ nom:"Pompon", h:1.5, v:1, c:"#FF8FB8", vx:"siwis+3" }, herisson:{ nom:"Hérisson", h:1.25, v:.95, c:"#FF9F1C", vx:"miro+3" },
+           poule:{ nom:"Poulette", h:1.8, v:1.05, c:"#FFD23F", vx:"jessica+5" }, ours:{ nom:"Gros Ours", h:.6, v:.8, c:"#C9A27A", vx:"miro-4" } },
   pages:[
     { s:{ f:"prairie", p:[["🐰",45,72,20,"saut"]] }, l:[["narr","Il était une fois un petit lapin qui s'appelait Pompon."],["narr","Pompon adorait les carottes."]] },
     { s:{ f:"jardin", p:[["🐰",28,74,18,""],["🥕",62,66,30,"balance"]] }, l:[["narr","Un matin, dans son jardin, Pompon trouva une carotte géante !"],["pompon","« Oh ! Qu'elle est grosse ! Je vais la tirer ! »"]] },
@@ -21,7 +23,7 @@ window.LIVRES = [
 },
 {
   id:"zoe", titre:"Zoé, la petite voiture rouge", couverture:{ f:"route", p:[["🚗",40,72,24,"saut"],["🚦",78,58,22,""]] }, age:"3-6 ans",
-  persos:{ narr:{ nom:"", h:1, v:.9 }, zoe:{ nom:"Zoé", h:1.45, v:1.05, c:"#FF6F9F" }, camion:{ nom:"Grand Camion", h:.55, v:.8, c:"#4CC9F0" }, tracteur:{ nom:"Tracteur", h:.8, v:.85, c:"#6FD08C" } },
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, zoe:{ nom:"Zoé", h:1.45, v:1.05, c:"#FF6F9F", vx:"siwis+3" }, camion:{ nom:"Grand Camion", h:.55, v:.8, c:"#4CC9F0", vx:"miro-4" }, tracteur:{ nom:"Tracteur", h:.8, v:.85, c:"#6FD08C", vx:"pierre" } },
   pages:[
     { s:{ f:"route", p:[["🚗",40,74,20,"saut"]] }, l:[["narr","Zoé est une petite voiture rouge."],["zoe","« Vroum vroum ! J'adore rouler ! »"]] },
     { s:{ f:"route", p:[["🚗",22,76,16,""],["🚚",64,70,30,""]] }, l:[["narr","Sur la route, Zoé rencontre Grand Camion."],["camion","« Tu es bien petite pour rouler toute seule ! »"],["zoe","« Petite, mais rapide ! »"]] },
@@ -37,7 +39,7 @@ window.LIVRES = [
 },
 {
   id:"ours", titre:"Petit Ours ne veut pas dormir", couverture:{ f:"nuit", p:[["🐻",44,72,22,"balance"],["🌙",80,22,16,""]] }, age:"2-5 ans",
-  persos:{ narr:{ nom:"", h:1, v:.85 }, petit:{ nom:"Petit Ours", h:1.4, v:1, c:"#C9A27A" }, maman:{ nom:"Maman Ourse", h:1.05, v:.85, c:"#FF8FB8" } },
+  persos:{ narr:{ nom:"", h:1, v:.85, vx:"miro" }, petit:{ nom:"Petit Ours", h:1.4, v:1, c:"#C9A27A", vx:"siwis+4" }, maman:{ nom:"Maman Ourse", h:1.05, v:.85, c:"#FF8FB8", vx:"jessica" } },
   pages:[
     { s:{ f:"nuit", p:[["🐻",44,74,20,"saut"]] }, l:[["narr","C'est le soir. Le soleil est parti se coucher."],["petit","« Moi, je ne veux pas dormir ! Je veux jouer ! »"]] },
     { s:{ f:"chambre", p:[["🐻",30,72,18,""],["🛁",62,74,22,""]] }, l:[["maman","« D'abord, un bon bain tout chaud. »"],["narr","Plouf ! Petit Ours fait des bulles."],["petit","« Mais je ne veux toujours pas dormir ! »"]] },
@@ -51,8 +53,8 @@ window.LIVRES = [
 },
 {
   id:"chaton", titre:"Le chaton qui cherchait sa maman", couverture:{ f:"village", p:[["🐱",44,74,20,"saut"],["🐶",74,74,16,""]] }, age:"2-5 ans",
-  persos:{ narr:{ nom:"", h:1, v:.9 }, chaton:{ nom:"Chaton", h:1.7, v:1, c:"#FFD23F" }, chien:{ nom:"Chien", h:.75, v:.95, c:"#C9A27A" }, canard:{ nom:"Canard", h:1.3, v:1.1, c:"#6FD08C" },
-           vache:{ nom:"Vache", h:.6, v:.8, c:"#FFF8E7" }, maman:{ nom:"Maman Chat", h:1.15, v:.9, c:"#FF8FB8" } },
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, chaton:{ nom:"Chaton", h:1.7, v:1, c:"#FFD23F", vx:"siwis+5" }, chien:{ nom:"Chien", h:.75, v:.95, c:"#C9A27A", vx:"miro-3" }, canard:{ nom:"Canard", h:1.3, v:1.1, c:"#6FD08C", vx:"pierre+3" },
+           vache:{ nom:"Vache", h:.6, v:.8, c:"#FFF8E7", vx:"jessica-5" }, maman:{ nom:"Maman Chat", h:1.15, v:.9, c:"#FF8FB8", vx:"siwis-1" } },
   pages:[
     { s:{ f:"village", p:[["🐱",46,76,18,"balance"]] }, l:[["narr","Un petit chaton s'est perdu dans le village."],["chaton","« Miaou… Où est ma maman ? »"]] },
     { s:{ f:"village", p:[["🐱",28,76,16,""],["🐶",62,74,22,"saut"]] }, l:[["chaton","« Bonjour. Es-tu ma maman ? »"],["chien","« Ouaf ouaf ! Non, je suis un chien. Ta maman ne fait pas ouaf. »"]] },
