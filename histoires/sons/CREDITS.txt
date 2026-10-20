@@ -3,4 +3,4 @@ Voix enregistrées avec Piper (https://github.com/rhasspy/piper), modèles conve
 - siwis : fr_FR-siwis-medium — jeu de données SIWIS (Université d'Édimbourg), licence CC BY 4.0
 - miro : fr_FR-miro-high — OpenVoiceOS, licence CC BY-NC-SA 4.0 (usage non commercial)
 Les enregistrements de ce dossier sont partagés sous licence CC BY-NC-SA 4.0, pour un usage familial et éducatif.
-Pour les refaire : outils/enregistrer-histoires.py
+Pour les refaire : outils/enregistrer-histoires.py (histoires) et outils/enregistrer-petits.py (coin des petits)

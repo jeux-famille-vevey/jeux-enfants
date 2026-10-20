@@ -127,7 +127,22 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
   function pickVoice(){ if(!("speechSynthesis" in window)) return null; return window.voixTriees("fr")[0] || null; }
   if("speechSynthesis" in window){ voice = pickVoice(); speechSynthesis.onvoiceschanged = function(){ voice = pickVoice(); }; }
   setTimeout(function(){ if(!voice) $("noVoice").hidden = false; }, 2000);
+  /* Les phrases sont enregistrées à l'avance (dossier sons/, fait par outils/enregistrer-petits.py) :
+     l'appareil n'a qu'à jouer le fichier, c'est immédiat même sur un vieil ordinateur.
+     Si un enregistrement manque, on se rabat sur la voix de l'appareil. */
+  function slug(t){ return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  var lecteur = null, nSay = 0;
+  function tais(){ nSay++; if(lecteur){ lecteur.onerror = null; try{ lecteur.pause(); }catch(e){} }
+    if(window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); }
   function say(t){
+    var k = ++nSay;
+    if(!window.Audio || !slug(t)) return sayVoix(t);
+    if(!lecteur) lecteur = new Audio();
+    lecteur.onerror = function(){ if(k === nSay) sayVoix(t); };
+    lecteur.src = "sons/" + slug(t) + ".mp3";
+    var p = lecteur.play(); if(p && p.catch) p.catch(function(e){ if(k === nSay && !(e && e.name === "AbortError")) sayVoix(t); });
+  }
+  function sayVoix(t){
     if(!("speechSynthesis" in window)) return;
     if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(t); u.lang = voice ? voice.lang : "fr-FR"; if(voice) u.voice = voice; u.rate = .85; if(!/Linux/.test(navigator.userAgent) || /Android/.test(navigator.userAgent)) u.pitch = 1.15;
@@ -154,7 +169,9 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
   var FORMES = { rond:{f:0, d:'<circle cx="50" cy="50" r="42"/>'}, carré:{f:0, d:'<rect x="10" y="10" width="80" height="80" rx="6"/>'},
     triangle:{f:0, d:'<polygon points="50,8 94,90 6,90"/>'}, étoile:{f:1, d:'<polygon points="50,5 61,38 96,38 68,58 79,92 50,72 21,92 32,58 4,38 39,38"/>'},
     cœur:{f:0, d:'<path d="M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C40 8 47 14 50 22 C53 14 60 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88Z"/>'} };
-  var OBJETS = [["🍎","pommes"],["🍌","bananes"],["🚗","voitures"],["⭐","étoiles"],["🎈","ballons"],["🐟","poissons"],["🌸","fleurs"],["🍓","fraises"],["🐞","coccinelles"]];
+  var OBJETS = [["🍎","pommes","une pomme"],["🍌","bananes","une banane"],["🚗","voitures","une voiture"],["⭐","étoiles","une étoile"],["🎈","ballons","un ballon"],["🐟","poissons","un poisson"],["🌸","fleurs","une fleur"],["🍓","fraises","une fraise"],["🐞","coccinelles","une coccinelle"]];
+  // « de » + article : du chien, de la pomme, de l'avion
+  function deNom(n){ return /^le /.test(n) ? "du " + n.slice(3) : "de " + n; }
   var NOMBRES = ["zéro","un","deux","trois","quatre","cinq","six","sept","huit","neuf","dix"];
   var VOYELLES = ["A","E","I","O","U"];
   var LETTRES = "ABCDEFGHIJKLMNOPRSTUVZ".split("");
@@ -187,16 +204,16 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
     var d = $("dots"); d.innerHTML = ""; for(var i=0;i<ROUNDS;i++) d.appendChild(document.createElement("i"));
     if(j.id === "memory"){ d.innerHTML = ""; memory(); } else if(j.id === "course"){ d.innerHTML = ""; course(); } else next();
   }
-  function consigne(t){ G.consigne = t; $("stage").querySelector(".prompt").textContent = t; say(t); }
-  $("repeat").onclick = function(){ if(G) say(G.consigne); };
-  $("back").onclick = function(){ if(window.speechSynthesis && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); $("vGame").hidden = true; $("vMenu").hidden = false; G = null; };
+  function consigne(t){ G.consigne = G.parle = t; $("stage").querySelector(".prompt").textContent = t; say(t); }
+  $("repeat").onclick = function(){ if(G) say(G.parle || G.consigne); };
+  $("back").onclick = function(){ tais(); $("vGame").hidden = true; $("vMenu").hidden = false; G = null; };
   $("toMenu").onclick = function(){ $("win").hidden = true; $("back").onclick(); };
   $("again").onclick = function(){ var j = G.j; $("win").hidden = true; start(j); };
 
   function good(btn){
     G.locked = true; if(btn) btn.classList.add("good"); yay(); var b = R(BRAVO); say(b); party(14);
     G.round++; var dots = $("dots").children; if(dots[G.round-1]) dots[G.round-1].classList.add("on");
-    setTimeout(function(){ if(G.round >= ROUNDS) finish(); else next(); }, 1500);
+    var ce = G; setTimeout(function(){ if(G !== ce) return; if(G.round >= ROUNDS) finish(); else next(); }, 1500); // rien si on a quitté le jeu entre-temps
   }
   function oops(btn){ boop(); if(btn){ btn.classList.remove("nope"); void btn.offsetWidth; btn.classList.add("nope"); } say("Essaie encore !"); }
   function finish(){
@@ -242,7 +259,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
     }
     nums.forEach(function(x){
       var b = document.createElement("button"); b.className = "pick num"; b.textContent = x;
-      b.onclick = function(){ if(G.locked) return; if(x === n){ good(b); setTimeout(function(){ say(NOMBRES[n] + " " + obj[1] + " !"); }, 500); } else oops(b); };
+      b.onclick = function(){ if(G.locked) return; if(x === n){ good(b); setTimeout(function(){ say(n === 1 ? obj[2] + " !" : NOMBRES[n] + " " + obj[1] + " !"); }, 500); } else oops(b); };
       $("opts").appendChild(b);
     });
     consigne("Combien de " + obj[1] + " ? Touche-les pour compter !");
@@ -257,7 +274,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
       b.onclick = function(){ if(G.locked) return; if(l === cible) good(b); else { oops(b); setTimeout(function(){ say("Ça, c'est le " + l.toLowerCase() + ". Trouve le " + cible.toLowerCase() + " !"); }, 700); } };
       $("opts").appendChild(b);
     });
-    G.consigne = "Trouve la lettre " + cible + " !";
+    G.consigne = "Trouve la lettre " + cible + " !"; G.parle = "Trouve la lettre… " + cible.toLowerCase() + " !";
     $("stage").querySelector(".prompt").textContent = G.consigne;
     say("Trouve la lettre… " + cible.toLowerCase() + " !");
   }
@@ -270,7 +287,7 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
       b.onclick = function(){ if(G.locked) return; if(o === cible){ b.innerHTML = o[0]; good(b); } else oops(b); };
       $("opts").appendChild(b);
     });
-    consigne("Trouve l'ombre de " + cible[1] + " !");
+    consigne("Trouve l'ombre " + deNom(cible[1]) + " !");
   }
   /* --- dessin d'une voiture vue de côté (pour le parking) --- */
   function carSvg(col, label){
@@ -390,7 +407,9 @@ h1{margin:4px 0 2px;text-align:center;font-size:clamp(2.2rem,7vmin,3.6rem);color
       var secousse = choc > 0 ? Math.sin(now/30) * 6 : 0;
       dessinVehicule(ctx, v_type, px + secousse, py, lw, v_col);
       if(reste <= 0 && !fini){ fini = true; document.removeEventListener("keydown", clav);
-        setTimeout(function(){ if(G !== monId) return; finish(); $("winText").textContent = "Tu as ramassé " + etoiles + " étoiles !"; say("Bravo ! Tu as ramassé " + etoiles + " étoiles !"); }, 600); return; }
+        setTimeout(function(){ if(G !== monId) return; finish(); var ram = etoiles === 1 ? "une étoile" : etoiles + " étoiles";
+          if(etoiles === 0){ $("winText").textContent = "Aucune étoile cette fois !"; say("Oh ! Aucune étoile cette fois. On réessaie ?"); }
+          else { $("winText").textContent = "Tu as ramassé " + ram + " !"; say("Bravo ! Tu as ramassé " + ram + " !"); } }, 600); return; }
       requestAnimationFrame(boucle);
     }
     var v_type = v.id, v_col = v.c;
