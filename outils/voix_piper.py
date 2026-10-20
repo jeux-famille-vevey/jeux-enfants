@@ -30,12 +30,18 @@ def voix(nom):
     return _charges[chemin]
 
 
+# mots que la voix prononce mal : on lui donne une écriture « phonétique » (le texte affiché ne change pas)
+PRONONCIATION = {"taekwondo": "tékwondo", "Taekwondo": "Tékwondo"}
+
+
 def enregistrer(texte, vx, vitesse, sortie):
     """vx : "siwis+3" = voix siwis, 3 demi-tons plus haut. vitesse : 1 = normale, plus petit = plus lent."""
     from piper import SynthesisConfig
     m = re.match(r"([a-z]+)([+-]\d+)?$", vx)
     nom, demi = m.group(1), int(m.group(2) or 0)
     _, locuteur, base = MODELES[nom]
+    for mot, dit in PRONONCIATION.items():
+        texte = re.sub(r"\b%s\b" % mot, dit, texte)
     with tempfile.TemporaryDirectory() as tmp:
         brut = os.path.join(tmp, "brut.wav")
         with wave.open(brut, "wb") as w:

@@ -1,10 +1,30 @@
 /* Les histoires. Chaque page : { s: scène, l: [[qui, texte], …] }
    Scène : { f: fond, p: [[emoji, x, y, taille, animation]] }  (x, y en % de l'image ; animation : "saut", "balance", "vole", "")
-   Fonds : prairie, jardin, foret, nuit, chambre, route, pluie, village, ferme
+   Fonds : prairie, jardin, foret, nuit, chambre, route, pluie, village, ferme, ecole, stade, dojo
+   cache:true : le livre n'apparaît pas encore dans la bibliothèque (aperçu avec histoires/?livre=<id>)
    Personnages : voix (hauteur, vitesse) et couleur du texte.
    vx : voix enregistrée (jessica, pierre, siwis, miro) avec un décalage en demi-tons, ex. "siwis+3".
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
+{
+  id:"mikael", cache:true, titre:"Mikael et le ballon magique", couverture:{ f:"stade", p:[["👦",36,72,24,"saut"],["⚽",60,56,14,"vole"],["🧌",82,70,22,""]] }, age:"3-6 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, mikael:{ nom:"Mikael", h:1.4, v:1, c:"#4CC9F0", vx:"siwis+3" }, balou:{ nom:"Balou", h:1.6, v:1.05, c:"#FFD23F", vx:"jessica+5" },
+           grognon:{ nom:"Le géant Grognon", h:.55, v:.8, c:"#6FD08C", vx:"miro-4" } },
+  pages:[
+    { s:{ f:"chambre", p:[["👦",42,72,22,"saut"],["⚽",64,80,10,""],["🥋",80,60,12,""]] }, l:[["narr","Voici Mikael. Il a cinq ans et il est en 2P."],["narr","Mikael adore jouer au foot, faire du taekwondo… et aller à l'école."]] },
+    { s:{ f:"ecole", p:[["👦",30,72,20,""],["⚽",62,78,12,"balance"],["✨",68,58,8,"vole"]] }, l:[["narr","Un matin, à l'école, Mikael voit un ballon qui brille sous un banc."],["balou","« Bonjour, Mikael ! Je suis Balou, le ballon magique ! »"],["mikael","« Un ballon qui parle ? Waouh ! »"]] },
+    { s:{ f:"stade", p:[["👦",34,72,20,""],["⚽",56,60,12,"vole"]] }, l:[["balou","« Le géant Grognon a pris tous les ballons des enfants. Plus personne ne peut jouer ! Veux-tu m'aider ? »"],["mikael","« Oui ! Je suis prêt ! »"]] },
+    { s:{ f:"foret", p:[["👦",30,74,18,""],["⚽",44,62,10,"vole"],["🪧",66,70,18,""]] }, l:[["narr","Pouf ! Balou emmène Mikael dans la forêt magique. Sur un panneau, il y a des lettres."],["mikael","« G… R… O… C'est le chemin de Grognon ! »"],["narr","Heureusement, Mikael a bien appris ses lettres à l'école."]] },
+    { s:{ f:"foret", p:[["👦",18,74,18,"saut"],["🌊",36,86,16,"balance"],["🌊",50,86,16,""],["🌊",64,86,16,"balance"],["⚽",80,62,10,"vole"]] }, l:[["narr","Mais voilà une grande rivière !"],["narr","Mikael fait comme au taekwondo : il salue, il respire, il se concentre… et il saute. Hop !"],["mikael","« J'ai réussi ! Je suis de l'autre côté ! »"]] },
+    { s:{ f:"nuit", p:[["⛰️",84,72,34,""],["🌳",56,66,34,""],["🔑",58,30,8,"balance"],["👦",22,74,18,""],["🔒",80,78,10,""]] }, l:[["narr","Devant la grotte du géant, les ballons sont enfermés. La clé est accrochée tout en haut d'un arbre."],["balou","« Vise bien, Mikael ! »"],["narr","Mikael tire, comme au foot. Pan ! La clé tombe. Clic ! La porte s'ouvre."]] },
+    { s:{ f:"nuit", p:[["👦",28,74,16,""],["🧌",66,66,32,"balance"]] }, l:[["grognon","« Qui est là ? »"],["narr","Mikael a un peu peur. Mais il respire bien fort."],["mikael","« Bonjour, Monsieur Grognon. Pourquoi avez-vous pris tous les ballons ? »"]] },
+    { s:{ f:"nuit", p:[["👦",28,74,16,""],["🧌",64,68,30,""],["💧",58,48,6,"vole"]] }, l:[["grognon","« Parce que personne ne veut jouer avec moi. Je suis trop grand… »"],["mikael","« Moi, je veux bien jouer avec toi ! Mais il faut rendre les ballons. »"],["grognon","« C'est promis ! »"]] },
+    { s:{ f:"stade", p:[["🧌",82,66,24,"balance"],["👦",40,72,18,"saut"],["⚽",62,74,10,"vole"],["🎉",50,30,10,"vole"]] }, l:[["narr","Le samedi, tous les enfants jouent un grand match. Grognon est le gardien de but."],["narr","Mikael respire, se concentre… et tire. But !"],["grognon","« Bravo, petit champion ! C'est la première fois que je joue avec des amis ! »"]] },
+    { s:{ f:"chambre", p:[["👦",40,72,18,""],["⚽",60,78,10,"balance"],["⭐",24,22,8,"vole"],["🏆",76,72,12,""]] }, l:[["balou","« Merci, Mikael. Grâce à toi, tous les enfants peuvent jouer. Tu es un vrai héros ! »"],["narr","Ce soir-là, Mikael s'endort en souriant. Peut-être qu'une nouvelle aventure l'attend demain… Fin."]] }
+  ],
+  quiz:[ { q:"Comment s'appelle le ballon magique ?", c:["Balou","Pompon","Zoé"], r:0 }, { q:"Comment Mikael a-t-il traversé la rivière ?", c:["En bateau","Avec un saut de taekwondo","À la nage"], r:1 },
+         { q:"Pourquoi le géant avait-il pris les ballons ?", c:["Il avait faim","Personne ne jouait avec lui","Il aimait les couleurs"], r:1 } ]
+},
 {
   id:"pompon", titre:"Pompon et la carotte géante", couverture:{ f:"jardin", p:[["🐰",30,72,22,"saut"],["🥕",62,66,30,"balance"]] }, age:"3-6 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, pompon:{ nom:"Pompon", h:1.5, v:1, c:"#FF8FB8", vx:"siwis+3" }, herisson:{ nom:"Hérisson", h:1.25, v:.95, c:"#FF9F1C", vx:"miro+3" },
