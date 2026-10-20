@@ -1,0 +1,209 @@
+/* Personnages dessinés en entier (SVG), pour les histoires.
+   Dans une scène : ["@mikael", x, y, taille, animation, "tenue,pose,visage"]
+   Le point (0,0) est sous les pieds ; un personnage mesure 200 unités de haut avant mise à l'échelle.
+   Poses : debout, joie, tir, saut, coup, triste, peur, salut, court
+   Visages : sourire, rire, triste, surpris, dort, fache */
+(function(){
+  "use strict";
+
+  /* ---------- outils ---------- */
+  function ligne(x1, y1, x2, y2, coul, ep){ return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + coul + '" stroke-width="' + ep + '" stroke-linecap="round"/>'; }
+  function chemin(d, coul, ep){ return '<path d="' + d + '" fill="none" stroke="' + coul + '" stroke-width="' + ep + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  function rond(x, y, r, coul, extra){ return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + coul + '"' + (extra || "") + '/>'; }
+  function ovale(x, y, rx, ry, coul, extra){ return '<ellipse cx="' + x + '" cy="' + y + '" rx="' + rx + '" ry="' + ry + '" fill="' + coul + '"' + (extra || "") + '/>'; }
+  var TRAIT = "#2B2140";
+
+  /* une jambe : hanche -> genou -> cheville, avec la chaussure au bout */
+  function jambe(h, g, c, coulPant, coulPeau, ep, chaussure, sens){
+    var s = chemin("M" + h[0] + " " + h[1] + " L" + g[0] + " " + g[1] + " L" + c[0] + " " + c[1], coulPant, ep);
+    if(chaussure === "pieds") s += ovale(c[0] + 4 * sens, c[1] + 3, 10, 6, coulPeau);
+    else if(chaussure === "chaussons") s += ovale(c[0] + 5 * sens, c[1] + 3, 12, 7, "#FF8FB8");
+    else s += ovale(c[0] + 6 * sens, c[1] + 3, 14, 8, chaussure) + ovale(c[0] + 6 * sens, c[1] + 8, 14, 3, "#FFFFFF");
+    return s;
+  }
+  function bras(e, c, m, coulManche, coulPeau, longue){
+    // e : épaule, c : coude, m : main
+    var s = chemin("M" + e[0] + " " + e[1] + " L" + c[0] + " " + c[1] + " L" + m[0] + " " + m[1], longue ? coulManche : coulPeau, 12);
+    if(!longue) s += chemin("M" + e[0] + " " + e[1] + " L" + (e[0] + (c[0] - e[0]) * .45) + " " + (e[1] + (c[1] - e[1]) * .45), coulManche, 15);
+    return s + rond(m[0], m[1], 7.5, coulPeau);
+  }
+
+  /* ---------- Mikael (et les copains, avec d'autres couleurs) ---------- */
+  var POSES = {
+    //        bras gauche [épaule, coude, main]      bras droit                         jambe gauche [hanche, genou, cheville]   jambe droite
+    debout: { bg:[[-27,-112],[-34,-92],[-36,-72]], bd:[[27,-112],[34,-92],[36,-72]], jg:[[-11,-62],[-12,-36],[-12,-10]], jd:[[11,-62],[12,-36],[12,-10]] },
+    joie:   { bg:[[-27,-112],[-42,-130],[-46,-152]], bd:[[27,-112],[42,-130],[46,-152]], jg:[[-11,-62],[-14,-36],[-16,-10]], jd:[[11,-62],[14,-36],[16,-10]] },
+    saut:   { bg:[[-27,-112],[-44,-126],[-50,-146]], bd:[[27,-112],[44,-126],[50,-146]], jg:[[-11,-62],[-24,-44],[-14,-24]], jd:[[11,-62],[24,-44],[14,-24]] },
+    tir:    { bg:[[-27,-112],[-46,-106],[-58,-96]], bd:[[27,-112],[36,-94],[30,-76]], jg:[[-11,-62],[-14,-36],[-18,-10]], jd:[[11,-62],[34,-50],[56,-40]] },
+    court:  { bg:[[-27,-112],[-40,-98],[-30,-82]], bd:[[27,-112],[38,-120],[50,-108]], jg:[[-11,-62],[-26,-40],[-34,-18]], jd:[[11,-62],[18,-36],[8,-10]] },
+    coup:   { bg:[[-27,-112],[-30,-96],[-14,-100]], bd:[[27,-112],[22,-98],[8,-106]], jg:[[-11,-62],[-16,-36],[-18,-10]], jd:[[11,-62],[42,-76],[74,-86]] },
+    triste: { bg:[[-27,-110],[-30,-90],[-24,-70]], bd:[[27,-110],[30,-90],[24,-70]], jg:[[-11,-62],[-10,-36],[-10,-10]], jd:[[11,-62],[10,-36],[10,-10]] },
+    peur:   { bg:[[-27,-112],[-36,-120],[-20,-134]], bd:[[27,-112],[36,-120],[20,-134]], jg:[[-11,-62],[-16,-36],[-20,-10]], jd:[[11,-62],[16,-36],[20,-10]] },
+    salut:  { bg:[[-27,-112],[-26,-94],[-4,-102]], bd:[[27,-112],[26,-94],[4,-102]], jg:[[-11,-62],[-11,-36],[-11,-10]], jd:[[11,-62],[11,-36],[11,-10]] }
+  };
+  var TENUES = {
+    foot:    { haut:"#3D7BD9", bas:"#1D2357", jambe:"peau", chaussure:"#E5484D", manche:"courte", numero:"5" },
+    kimono:  { haut:"#FAFAF5", bas:"#FAFAF5", jambe:"pant", chaussure:"pieds", manche:"longue", ceinture:"#FFD23F" },
+    pyjama:  { haut:"#8EC5FF", bas:"#8EC5FF", jambe:"pant", chaussure:"chaussons", manche:"longue", etoiles:true },
+    ecole:   { haut:"#FF9F1C", bas:"#3D4A8F", jambe:"pant", chaussure:"#2B2140", manche:"courte", sac:true }
+  };
+
+  function visage(cx, cy, expr, peau){
+    var s = "";
+    // yeux
+    if(expr === "dort"){ s += chemin("M" + (cx-17) + " " + (cy-1) + " q5 5 10 0", TRAIT, 2.6) + chemin("M" + (cx+7) + " " + (cy-1) + " q5 5 10 0", TRAIT, 2.6); }
+    else {
+      var ry = expr === "surpris" ? 8.5 : 7.5;
+      [-12, 12].forEach(function(dx){ s += ovale(cx + dx, cy - 1, 6.2, ry, "#FFFFFF") + rond(cx + dx + 1, cy, 4.2, "#2B2140") + rond(cx + dx + 2.5, cy - 2, 1.5, "#FFFFFF"); });
+    }
+    // sourcils
+    if(expr === "triste") s += chemin("M" + (cx-18) + " " + (cy-12) + " l9 -4", TRAIT, 2.4) + chemin("M" + (cx+18) + " " + (cy-12) + " l-9 -4", TRAIT, 2.4);
+    else if(expr === "fache") s += chemin("M" + (cx-18) + " " + (cy-15) + " l10 4", TRAIT, 3) + chemin("M" + (cx+18) + " " + (cy-15) + " l-10 4", TRAIT, 3);
+    else if(expr === "surpris") s += chemin("M" + (cx-18) + " " + (cy-15) + " q6 -4 11 0", TRAIT, 2.2) + chemin("M" + (cx+7) + " " + (cy-15) + " q6 -4 11 0", TRAIT, 2.2);
+    else s += chemin("M" + (cx-17) + " " + (cy-12) + " q5 -3 10 0", TRAIT, 2.2) + chemin("M" + (cx+7) + " " + (cy-12) + " q5 -3 10 0", TRAIT, 2.2);
+    // joues et nez
+    s += ovale(cx - 20, cy + 9, 6, 3.6, "#FF7A8A", ' opacity=".45"') + ovale(cx + 20, cy + 9, 6, 3.6, "#FF7A8A", ' opacity=".45"');
+    s += chemin("M" + (cx-1) + " " + (cy+4) + " q3 3 0 5", "rgba(0,0,0,.35)", 2);
+    // bouche
+    var by = cy + 15;
+    if(expr === "rire") s += '<path d="M' + (cx-11) + ' ' + (by-2) + ' Q' + cx + ' ' + (by+14) + ' ' + (cx+11) + ' ' + (by-2) + 'Z" fill="#8A2C4A"/>' + ovale(cx, by + 6, 5, 3, "#FF8FA3");
+    else if(expr === "triste") s += chemin("M" + (cx-8) + " " + (by+4) + " q8 -7 16 0", TRAIT, 2.6);
+    else if(expr === "surpris") s += ovale(cx, by + 2, 5, 6, "#8A2C4A");
+    else if(expr === "dort") s += ovale(cx, by + 1, 3.5, 2.5, "#8A2C4A");
+    else if(expr === "fache") s += chemin("M" + (cx-8) + " " + (by+2) + " l16 0", TRAIT, 2.6);
+    else s += chemin("M" + (cx-9) + " " + by + " q9 8 18 0", TRAIT, 2.6);
+    return s;
+  }
+
+  function enfant(opts, couleurs){
+    var o = (opts || "").split(","), tenue = TENUES[o[0]] || TENUES.foot, pose = POSES[o[1]] || POSES.debout, expr = o[2] || "sourire";
+    var peau = couleurs.peau, chev = couleurs.cheveux, haut = couleurs.haut || tenue.haut, bas = couleurs.bas || tenue.bas;
+    var pant = tenue.jambe === "pant", longue = tenue.manche === "longue", s = "";
+    // sac d'école (derrière)
+    if(tenue.sac) s += '<rect x="-34" y="-118" width="26" height="40" rx="8" fill="#E5484D" stroke="' + TRAIT + '" stroke-width="2"/>';
+    // jambes
+    s += jambe(pose.jg[0], pose.jg[1], pose.jg[2], pant ? bas : peau, peau, pant ? 15 : 12, tenue.chaussure, -1);
+    s += jambe(pose.jd[0], pose.jd[1], pose.jd[2], pant ? bas : peau, peau, pant ? 15 : 12, tenue.chaussure, 1);
+    if(!pant){ // chaussettes
+      [pose.jg, pose.jd].forEach(function(j){ var c = j[2], g = j[1]; s += chemin("M" + (c[0] + (g[0]-c[0])*.35) + " " + (c[1] + (g[1]-c[1])*.35) + " L" + c[0] + " " + c[1], "#FFFFFF", 13); });
+    }
+    // short / bas du kimono
+    s += '<path d="M-27 -72 L27 -72 L29 -50 L4 -50 L0 -58 L-4 -50 L-29 -50Z" fill="' + bas + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
+    // corps
+    s += '<path d="M-26 -120 Q0 -128 26 -120 L30 -70 Q0 -64 -30 -70Z" fill="' + haut + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
+    if(tenue.numero) s += '<text x="0" y="-84" text-anchor="middle" font-size="26" font-weight="700" fill="#FFFFFF" font-family="Fredoka, Arial, sans-serif">' + tenue.numero + '</text>' +
+      '<path d="M-26 -120 Q0 -128 26 -120 L27 -114 Q0 -121 -27 -114Z" fill="#FFFFFF"/>';
+    if(o[0] === "kimono") s += chemin("M-14 -122 L4 -86", "#D9D9D0", 3) + chemin("M14 -122 L-4 -96", "#D9D9D0", 3) + '<rect x="-30" y="-78" width="60" height="9" rx="3" fill="' + tenue.ceinture + '"/>' +
+      chemin("M4 -72 l6 16", tenue.ceinture, 5) + chemin("M-2 -72 l-5 15", tenue.ceinture, 5);
+    if(tenue.etoiles) [[-12,-104],[12,-92],[-6,-82],[16,-112]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="11" text-anchor="middle" fill="#FFD23F">★</text>'; });
+    // bras
+    s += bras(pose.bg[0], pose.bg[1], pose.bg[2], haut, peau, longue) + bras(pose.bd[0], pose.bd[1], pose.bd[2], haut, peau, longue);
+    // cou et tête
+    var penche = o[1] === "triste" ? 8 : o[1] === "salut" ? 10 : 0;
+    s += '<rect x="-7" y="-128" width="14" height="12" fill="' + peau + '"/>';
+    s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + "</g>";
+    return s;
+  }
+  function tete(peau, chev, expr){
+    var s = rond(-32, -150, 7.5, peau) + rond(32, -150, 7.5, peau);
+    s += rond(0, -152, 33, peau, ' stroke="' + TRAIT + '" stroke-width="2"');
+    // cheveux courts et bouclés
+    s += '<path d="M-34 -150 Q-36 -190 0 -190 Q36 -190 34 -150 Q30 -168 14 -172 Q0 -164 -14 -172 Q-30 -168 -34 -150Z" fill="' + chev + '"/>';
+    for(var i = 0; i < 9; i++){ var a = Math.PI * (1.05 + i * .1), r = 31; s += rond(Math.cos(a) * r, -156 + Math.sin(a) * r, 8.5, chev); }
+    return s + visage(0, -148, expr, peau);
+  }
+  /* l'enfant couché dans son lit (pour la fin des histoires) */
+  function lit(opts, couleurs){
+    var expr = (opts || "").split(",")[2] || "dort", s = "";
+    s += '<rect x="-150" y="-150" width="22" height="150" rx="8" fill="#8A5A3B"/><rect x="134" y="-96" width="18" height="96" rx="8" fill="#8A5A3B"/>';
+    s += '<rect x="-136" y="-70" width="280" height="30" rx="8" fill="#A9744A"/>';
+    s += '<rect x="-130" y="-98" width="268" height="32" rx="12" fill="#FFFFFF" stroke="' + TRAIT + '" stroke-width="2"/>';
+    s += ovale(-88, -110, 42, 18, "#FFF3D6", ' stroke="' + TRAIT + '" stroke-width="2"');
+    s += '<g transform="translate(-84 26) rotate(-72 0 -150)">' + tete(couleurs.peau, couleurs.cheveux, expr) + '</g>';
+    s += '<path d="M-56 -88 Q-56 -136 0 -136 L134 -136 Q146 -136 146 -122 L146 -78 Q40 -64 -56 -78Z" fill="#8EC5FF" stroke="' + TRAIT + '" stroke-width="2"/>';
+    [[-20,-112],[30,-100],[80,-118],[110,-92],[0,-90]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="16" text-anchor="middle" fill="#FFD23F">★</text>'; });
+    s += chemin("M-56 -124 L146 -124", "#6FA8E8", 4);
+    return s;
+  }
+
+  /* ---------- Balou, le ballon magique ---------- */
+  function balou(opts){
+    var expr = (opts || "").split(",")[2] || "rire", s = "";
+    s += rond(0, -100, 94, "#FFD23F", ' opacity=".22"') + rond(0, -100, 80, "#FFE27A", ' opacity=".25"');
+    s += rond(0, -100, 70, "#FFFFFF", ' stroke="' + TRAIT + '" stroke-width="4"');
+    // pentagones du ballon (dans le haut et sur les côtés, le visage reste dégagé)
+    s += '<polygon points="0,-168 16,-157 10,-140 -10,-140 -16,-157" fill="#2B2140"/>';
+    s += '<polygon points="-66,-118 -50,-124 -44,-106 -56,-92 -68,-98" fill="#2B2140"/>';
+    s += '<polygon points="66,-118 50,-124 44,-106 56,-92 68,-98" fill="#2B2140"/>';
+    s += '<polygon points="-30,-38 -14,-34 -14,-31 -40,-38" fill="#2B2140"/><polygon points="30,-38 14,-34 14,-31 40,-38" fill="#2B2140"/>';
+    s += chemin("M0 -140 L0 -128 M-16 -157 L-40 -150 M16 -157 L40 -150 M-44 -106 L-28 -96 M44 -106 L28 -96", "#2B2140", 2.5);
+    // visage
+    [-22, 22].forEach(function(dx){ s += ovale(dx, -100, 12, 15, "#FFFFFF", ' stroke="' + TRAIT + '" stroke-width="2.5"') + rond(dx + 2, -97, 8, "#2B2140") + rond(dx + 5, -101, 3, "#FFFFFF"); });
+    s += ovale(-36, -76, 9, 5, "#FF7A8A", ' opacity=".55"') + ovale(36, -76, 9, 5, "#FF7A8A", ' opacity=".55"');
+    if(expr === "surpris") s += ovale(0, -66, 8, 10, "#8A2C4A");
+    else s += '<path d="M-18 -76 Q0 -50 18 -76Z" fill="#8A2C4A"/>' + ovale(0, -62, 7, 4, "#FF8FA3");
+    // petites étincelles
+    [[-84,-164],[86,-150],[-90,-50],[80,-40]].forEach(function(p, i){ s += '<path d="M' + p[0] + ' ' + (p[1]-12) + ' L' + (p[0]+4) + ' ' + (p[1]-4) + ' L' + (p[0]+12) + ' ' + p[1] + ' L' + (p[0]+4) + ' ' + (p[1]+4) + ' L' + p[0] + ' ' + (p[1]+12) + ' L' + (p[0]-4) + ' ' + (p[1]+4) + ' L' + (p[0]-12) + ' ' + p[1] + ' L' + (p[0]-4) + ' ' + (p[1]-4) + 'Z" fill="#FFD23F"/>'; });
+    return s;
+  }
+
+  /* ---------- le géant Grognon ---------- */
+  function grognon(opts){
+    var o = (opts || "").split(","), pose = o[1] || "debout", expr = o[2] || "sourire", s = "";
+    var peau = "#9CCB7A", tunique = "#B86B3A", pant = "#5B4A8F", botte = "#5A3A22", gants = pose === "gardien";
+    // jambes
+    s += '<rect x="-46" y="-70" width="34" height="56" rx="12" fill="' + pant + '"/><rect x="12" y="-70" width="34" height="56" rx="12" fill="' + pant + '"/>';
+    s += ovale(-32, -10, 26, 12, botte) + ovale(32, -10, 26, 12, botte);
+    // bras (derrière le ventre quand ils pendent)
+    var bras2 = { debout:[[-58,-140],[-74,-100],[-70,-66]], joie:[[-58,-140],[-86,-170],[-92,-206]], gardien:[[-58,-140],[-96,-150],[-120,-170]], triste:[[-58,-136],[-62,-100],[-40,-80]], fache:[[-58,-140],[-80,-110],[-56,-96]] }[pose] || [[-58,-140],[-74,-100],[-70,-66]];
+    [-1, 1].forEach(function(sens){
+      var p = bras2.map(function(q){ return [q[0] * sens, q[1]]; });
+      s += chemin("M" + p[0][0] + " " + p[0][1] + " L" + p[1][0] + " " + p[1][1] + " L" + p[2][0] + " " + p[2][1], peau, 24);
+      s += chemin("M" + p[0][0] + " " + p[0][1] + " L" + (p[0][0] + (p[1][0]-p[0][0])*.5) + " " + (p[0][1] + (p[1][1]-p[0][1])*.5), tunique, 28);
+      s += rond(p[2][0], p[2][1], gants ? 19 : 16, gants ? "#FFD23F" : peau, gants ? ' stroke="' + TRAIT + '" stroke-width="3"' : "");
+    });
+    // ventre et tunique
+    s += '<path d="M-60 -150 Q0 -170 60 -150 Q80 -100 62 -62 Q0 -48 -62 -62 Q-80 -100 -60 -150Z" fill="' + tunique + '" stroke="' + TRAIT + '" stroke-width="3"/>';
+    s += '<rect x="-66" y="-92" width="132" height="14" rx="6" fill="#5A3A22"/><rect x="-12" y="-95" width="24" height="20" rx="4" fill="#FFD23F"/>';
+    s += chemin("M-30 -140 l6 24 M30 -140 l-6 24", "#8E4E26", 3);
+    // tête
+    s += rond(-46, -196, 13, peau, ' stroke="' + TRAIT + '" stroke-width="2.5"') + rond(46, -196, 13, peau, ' stroke="' + TRAIT + '" stroke-width="2.5"');
+    s += rond(0, -196, 46, peau, ' stroke="' + TRAIT + '" stroke-width="3"');
+    s += '<path d="M-30 -236 Q-20 -256 -6 -238 Q4 -260 14 -238 Q28 -254 32 -232 Q0 -246 -30 -236Z" fill="#7A4B2E"/>';
+    // barbe
+    s += '<path d="M-40 -186 Q-44 -146 0 -140 Q44 -146 40 -186 Q30 -166 0 -166 Q-30 -166 -40 -186Z" fill="#7A4B2E"/>';
+    // yeux
+    if(expr === "dort"){ s += chemin("M-26 -204 q8 6 16 0 M10 -204 q8 6 16 0", TRAIT, 3); }
+    else [-17, 17].forEach(function(dx){ s += ovale(dx, -204, 9, 10, "#FFFFFF") + rond(dx + (expr === "triste" ? 0 : 1), -202, 5.5, "#2B2140") + rond(dx + 3, -205, 2, "#FFFFFF"); });
+    // gros sourcils
+    if(expr === "fache") s += chemin("M-32 -224 L-8 -214 M32 -224 L8 -214", "#5A3A22", 7);
+    else if(expr === "triste") s += chemin("M-30 -214 L-8 -222 M30 -214 L8 -222", "#5A3A22", 7);
+    else s += chemin("M-30 -220 Q-18 -228 -6 -220 M30 -220 Q18 -228 6 -220", "#5A3A22", 7);
+    // nez et bouche
+    s += ovale(0, -186, 10, 8, "#86B866", ' stroke="' + TRAIT + '" stroke-width="2"');
+    if(expr === "triste") s += chemin("M-12 -164 q12 -9 24 0", "#4A2A1A", 3.5) + '<path d="M-26 -194 q-4 8 0 12 q4 -4 0 -12Z" fill="#7FD3FF"/>';
+    else if(expr === "fache") s += chemin("M-14 -166 l28 0", "#4A2A1A", 4);
+    else if(expr === "rire") s += '<path d="M-16 -172 Q0 -150 16 -172Z" fill="#8A2C4A"/>';
+    else s += chemin("M-14 -170 q14 10 28 0", "#4A2A1A", 3.5);
+    return s;
+  }
+
+  var MIKAEL = { peau:"#C98E62", cheveux:"#22150F" }; // couleurs de Mikael : faciles à changer ici
+  var COPAINS = [
+    { peau:"#F2C9A0", cheveux:"#E0A43A", haut:"#E5484D" },
+    { peau:"#8D5B3C", cheveux:"#1E1410", haut:"#3FA34D" },
+    { peau:"#E8B98E", cheveux:"#6B3E23", haut:"#8E5BC4" }
+  ];
+  window.DESSINS = {
+    // couleurs de Mikael : faciles à changer ici
+    mikael: function(opts){ return enfant(opts, MIKAEL); },
+    mikaelLit: function(opts){ return lit(opts, MIKAEL); },
+    copain1: function(opts){ return enfant(opts, COPAINS[0]); },
+    copain2: function(opts){ return enfant(opts, COPAINS[1]); },
+    copain3: function(opts){ return enfant(opts, COPAINS[2]); },
+    balou: balou,
+    grognon: grognon
+  };
+  // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
+  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200 };
+})();

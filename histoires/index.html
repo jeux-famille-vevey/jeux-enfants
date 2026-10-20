@@ -99,6 +99,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
 
 <section id="fin" hidden></section>
 
+<script src="persos.js"></script>
 <script src="livres.js"></script>
 <script>
 (function(){
@@ -206,6 +207,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
     chambre: function(){ return '<rect width="800" height="500" fill="#F6D6B8"/><rect x="0" y="380" width="800" height="120" fill="#C98E5A"/>' + (function(){ var s = ""; for(var x=0;x<800;x+=80) s += '<rect x="' + x + '" y="380" width="2" height="120" fill="#B07A4A"/>'; return s; })() +
       '<rect x="80" y="70" width="190" height="160" rx="10" fill="#1E2660" stroke="#FFF8E7" stroke-width="12"/><line x1="175" y1="70" x2="175" y2="230" stroke="#FFF8E7" stroke-width="8"/><circle cx="230" cy="110" r="18" fill="#FFF3B0"/>' +
       '<rect x="560" y="250" width="220" height="140" rx="14" fill="#8EC5FF"/><rect x="560" y="230" width="60" height="60" rx="14" fill="#FFF8E7"/><rect x="540" y="200" width="20" height="190" rx="6" fill="#7A4B2E"/>'; },
+    chambreVide: function(){ return FONDS.chambre().replace(/<rect x="560" y="250"[^>]*\/><rect x="560" y="230"[^>]*\/><rect x="540" y="200"[^>]*\/>/, ""); }, // la chambre sans son lit
     route: function(){ return ciel("#7CC8FF","#D7F0FF") + soleil(680, 80) + nuage(100, 70) + collines("#7BCB6B","#5DB55A") + maison(70, 300, "#FFE1A8", "#E5484D") + maison(600, 300, "#CFE8FF", "#3D7BD9") + route(); },
     pluie: function(){ var s = ciel("#8A93A8","#C3C8D4") + nuage(80, 60, 1.3) + nuage(420, 40, 1.5) + collines("#6E9C6A","#5E8A5B") + route() + '<g class="pluie" stroke="#DCEBFF" stroke-width="3" opacity=".8">';
       for(var i=0;i<40;i++){ var x = (i*53)%800, y = (i*37)%380; s += '<line x1="' + x + '" y1="' + y + '" x2="' + (x-6) + '" y2="' + (y+22) + '"/>'; } return s + "</g>"; },
@@ -240,6 +242,12 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
     var s = '<svg viewBox="0 0 800 500" role="img" aria-hidden="true">' + (FONDS[sc.f] || FONDS.prairie)();
     (sc.p || []).forEach(function(p){
       var x = p[1]*8, y = p[2]*5 + 40, t = p[3]*8; // + 40 : les pieds posés sur le sol
+      if(p[0].charAt(0) === "@" && window.DESSINS && DESSINS[p[0].slice(1)]){ // personnage dessiné en entier (persos.js)
+        var nom = p[0].slice(1), h = t * 1.25, sol = y + t * .08, k = h / ((window.DESSINS_HAUTEUR || {})[nom] || 200);
+        s += '<g class="' + (p[4] || "") + '"><ellipse cx="' + x + '" cy="' + sol + '" rx="' + (h * .2) + '" ry="' + (h * .035) + '" fill="rgba(0,0,0,.18)"/>' +
+          '<g transform="translate(' + x + ' ' + sol + ') scale(' + k.toFixed(3) + ')">' + DESSINS[nom](p[5] || "") + "</g></g>";
+        return;
+      }
       s += '<g class="' + (p[4] || "") + '"><ellipse cx="' + x + '" cy="' + (y + t*.08) + '" rx="' + (t*.32) + '" ry="' + (t*.06) + '" fill="rgba(0,0,0,.18)"/>' +
         '<text x="' + x + '" y="' + y + '" font-size="' + t + '" text-anchor="middle">' + p[0] + "</text></g>";
     });
