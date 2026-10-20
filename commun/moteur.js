@@ -61,7 +61,9 @@
       voix = trouverVoix(lang); if(voix || !("speechSynthesis" in window)) return ok(!!voix);
       var fini = false;
       speechSynthesis.onvoiceschanged = function(){ if(fini) return; voix = trouverVoix(lang); voixLangue = {}; if(voix){ fini = true; ok(true); } };
-      setTimeout(function(){ if(!fini){ fini = true; voix = trouverVoix(lang); ok(!!voix); } }, 1800);
+      // Firefox sous Linux peut annoncer 0 voix alors que la voix par défaut fonctionne :
+      // dans ce cas on considère qu'il y a une voix française.
+      setTimeout(function(){ if(!fini){ fini = true; voix = trouverVoix(lang); ok(!!voix || ((!lang || lang === "fr") && speechSynthesis.getVoices().length === 0)); } }, 2500);
     });
   };
   // vitesse de la voix (réglable) : 0 = normale, 1 = lente, 2 = très lente
