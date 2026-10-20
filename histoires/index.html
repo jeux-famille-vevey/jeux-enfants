@@ -130,6 +130,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   function J(m){ if(!DEBUG) return; var d = document.getElementById("journal");
     if(!d){ d = document.createElement("pre"); d.id = "journal"; d.style.cssText = "position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;margin:0;background:rgba(0,0,0,.85);color:#9f9;font-size:12px;padding:6px;z-index:99;white-space:pre-wrap;user-select:text"; document.body.appendChild(d); }
     d.textContent += ((Date.now()-t00)/1000).toFixed(1) + "s " + m + "\n"; d.scrollTop = d.scrollHeight; }
+  J("Version de la voix : 3 (attend la vraie fin de chaque phrase)");
   function dire(texte, perso, rangPerso, onMot, fin){
     if(!("speechSynthesis" in window)){ if(fin) setTimeout(fin, 400); return; }
     var id = tour, u = new SpeechSynthesisUtterance(texte.replace(/[«»]/g, ""));
