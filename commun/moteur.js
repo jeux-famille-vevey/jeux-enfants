@@ -80,6 +80,7 @@
     (function dire(i){
       if(id !== tour || i >= morceaux.length) return;
       var u = new SpeechSynthesisUtterance(morceaux[i]); u.lang = vx ? vx.lang : "fr-FR"; if(vx) u.voice = vx; u.rate = rate;
+      M._garde = (M._garde || []).concat([u]).slice(-20); // garder une référence pour ne pas perdre la fin de phrase
       var suite = false, go = function(){ if(suite) return; suite = true; setTimeout(function(){ dire(i+1); }, pause); };
       u.onend = go; u.onerror = go;
       // On attend que la voix ait vraiment fini (les ordinateurs lents mettent du temps à préparer la phrase),

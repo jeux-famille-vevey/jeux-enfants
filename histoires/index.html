@@ -122,24 +122,33 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   }
   chargerVoix(); if("speechSynthesis" in window) speechSynthesis.onvoiceschanged = chargerVoix;
   var tour = 0;
-  function stopVoix(){ tour++; if("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); }
+  function stopVoix(){ tour++; if("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)){ J("coupe la voix"); speechSynthesis.cancel(); } }
   // dit un texte avec la voix d'un personnage ; onMot(i) reçoit la position du mot prononcé
+  // journal de diagnostic : ouvrir la page avec ?debug à la fin de l'adresse
+  var DEBUG = /debug/.test(location.search), t00 = Date.now(), garde = [];
+  function J(m){ if(!DEBUG) return; var d = document.getElementById("journal");
+    if(!d){ d = document.createElement("pre"); d.id = "journal"; d.style.cssText = "position:fixed;left:0;right:0;bottom:0;max-height:38vh;overflow:auto;margin:0;background:rgba(0,0,0,.85);color:#9f9;font-size:12px;padding:6px;z-index:99;white-space:pre-wrap;user-select:text"; document.body.appendChild(d); }
+    d.textContent += ((Date.now()-t00)/1000).toFixed(1) + "s " + m + "\n"; d.scrollTop = d.scrollHeight; }
   function dire(texte, perso, rangPerso, onMot, fin){
     if(!("speechSynthesis" in window)){ if(fin) setTimeout(fin, 400); return; }
     var id = tour, u = new SpeechSynthesisUtterance(texte.replace(/[«»]/g, ""));
+    garde.push(u); if(garde.length > 20) garde.shift(); // garder une référence : sinon le navigateur peut « oublier » la phrase en cours
+    var court = texte.slice(0, 22);
     var v = VOIX.length ? VOIX[(rangPerso || 0) % VOIX.length] : null;
     u.lang = v ? v.lang : "fr-FR"; if(v) u.voice = v;
     // sous Linux (voix Piper), changer la hauteur peut bloquer la voix : on ne change que sur tablette / téléphone
     var linux = /Linux/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
     if(!linux) u.pitch = perso ? perso.h : 1;
     u.rate = linux ? .9 * vitesse : (perso ? perso.v : .9) * vitesse;
-    var fait = false, finir = function(){ if(fait) return; fait = true; if(id === tour && fin) fin(); };
+    var fait = false, finir = function(pourquoi){ if(fait) return; fait = true; J("fin (" + pourquoi + ") : " + court + (id !== tour ? " [ancienne]" : "")); if(id === tour && fin) fin(); };
     u.onboundary = function(e){ if(id === tour && onMot && (e.name === "word" || e.name === undefined)) onMot(e.charIndex); };
-    u.onend = finir; u.onerror = finir;
+    u.onstart = function(){ J("commence : " + court); };
+    u.onend = function(){ finir("onend"); }; u.onerror = function(e){ finir("erreur " + (e && e.error)); };
     // on attend que la voix ait vraiment fini (ordinateurs lents), sans temps fixe
     var t0 = Date.now();
     (function veille(){ if(fait || id !== tour) return; var occupe = speechSynthesis.speaking || speechSynthesis.pending;
-      if((!occupe && Date.now() - t0 > 1200) || Date.now() - t0 > 60000) return finir(); setTimeout(veille, 300); })();
+      if(!occupe && Date.now() - t0 > 1200) return finir("plus occupée"); if(Date.now() - t0 > 60000) return finir("60 s"); setTimeout(veille, 300); })();
+    J("envoie : " + court + " (parle=" + speechSynthesis.speaking + ", attente=" + speechSynthesis.pending + ")");
     speechSynthesis.speak(u);
   }
   var vitesse = 1;
@@ -255,7 +264,7 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   function suivante(auto){
     stopVoix(); if(!auto){ enLecture = mode === "ecoute"; }
     if(P >= B.pages.length - 1){ enLecture = false; majLire(); store("histoire-lu-" + B.id, "1"); quiz(); return; }
-    P++; afficher(); tone(520, .08, .06); majLire();
+    P++; J("— page " + (P+1)); afficher(); tone(520, .08, .06); majLire();
     if(enLecture) setTimeout(lirePage, 400);
   }
   $("suiv").onclick = function(){ audio(); suivante(false); };
