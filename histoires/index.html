@@ -122,7 +122,8 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
   }
   chargerVoix(); if("speechSynthesis" in window) speechSynthesis.onvoiceschanged = chargerVoix;
   var tour = 0;
-  function stopVoix(){ tour++; if("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)){ J("coupe la voix"); speechSynthesis.cancel(); } }
+  var enCours = 0; // phrases envoyées dont on n'a pas encore reçu la fin
+  function stopVoix(){ tour++; if("speechSynthesis" in window && (enCours > 0 || speechSynthesis.speaking || speechSynthesis.pending)){ J("coupe la voix"); speechSynthesis.cancel(); enCours = 0; } }
   // dit un texte avec la voix d'un personnage ; onMot(i) reçoit la position du mot prononcé
   // journal de diagnostic : ouvrir la page avec ?debug à la fin de l'adresse
   var DEBUG = /debug/.test(location.search), t00 = Date.now(), garde = [];
@@ -142,14 +143,19 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
     u.rate = linux ? .9 * vitesse : (perso ? perso.v : .9) * vitesse;
     var fait = false, finir = function(pourquoi){ if(fait) return; fait = true; J("fin (" + pourquoi + ") : " + court + (id !== tour ? " [ancienne]" : "")); if(id === tour && fin) fin(); };
     u.onboundary = function(e){ if(id === tour && onMot && (e.name === "word" || e.name === undefined)) onMot(e.charIndex); };
-    u.onstart = function(){ J("commence : " + court); };
-    u.onend = function(){ finir("onend"); }; u.onerror = function(e){ finir("erreur " + (e && e.error)); };
-    // on attend que la voix ait vraiment fini (ordinateurs lents), sans temps fixe
-    var t0 = Date.now();
-    (function veille(){ if(fait || id !== tour) return; var occupe = speechSynthesis.speaking || speechSynthesis.pending;
-      if(!occupe && Date.now() - t0 > 1200) return finir("plus occupée"); if(Date.now() - t0 > 60000) return finir("60 s"); setTimeout(veille, 300); })();
-    J("envoie : " + court + " (parle=" + speechSynthesis.speaking + ", attente=" + speechSynthesis.pending + ")");
-    speechSynthesis.speak(u);
+    // On attend le signal « fin » de la voix. On ne se fie PAS à speechSynthesis.speaking :
+    // sous Linux (Firefox + Piper) il reste à false même quand la phrase est encore en préparation.
+    var commence = false, t0 = Date.now();
+    u.onstart = function(){ commence = true; J("commence : " + court); };
+    u.onend = function(){ enCours = Math.max(0, enCours - 1); finir("onend"); };
+    u.onerror = function(e){ enCours = Math.max(0, enCours - 1); finir("erreur " + (e && e.error)); };
+    (function veille(){ if(fait || id !== tour) return;
+      var ecoule = Date.now() - t0;
+      // filets de sécurité très larges : la voix n'a jamais commencé (45 s) ou ne finit jamais (90 s)
+      if((!commence && ecoule > 45000) || ecoule > 90000){ J("bloquée, on relance"); speechSynthesis.cancel(); enCours = 0; return finir("sécurité"); }
+      setTimeout(veille, 500); })();
+    J("envoie : " + court);
+    enCours++; speechSynthesis.speak(u);
   }
   var vitesse = 1;
 

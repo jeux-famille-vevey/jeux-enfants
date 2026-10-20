@@ -69,25 +69,26 @@
   M.vitesse = function(v){ if(v != null) ecrire("mot-voix-vitesse", String(v)); var x = parseInt(lire("mot-voix-vitesse") || "1", 10); return x >= 0 && x <= 2 ? x : 1; };
   M.nomVitesse = function(){ return ["normale","lente","très lente"][M.vitesse()]; };
   // texte = une phrase ou une liste de morceaux, dits l'un après l'autre avec une pause entre chacun
-  var tour = 0;
+  var tour = 0, enCours = 0;
   M.parler = function(texte, tresLent, lang){
     if(!("speechSynthesis" in window)) return;
     var vx = M.voixPour(lang || "fr");
     if(!vx && lang && lang !== "fr") return; // pas de voix dans cette langue : on se tait plutôt que de mal prononcer
-    if(speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+    if(enCours > 0 || speechSynthesis.speaking || speechSynthesis.pending){ speechSynthesis.cancel(); enCours = 0; }
     var morceaux = [].concat(texte), id = ++tour, rate = tresLent ? .5 : VITESSES[M.vitesse()];
     var pause = 700 + (1 - rate) * 1200;
     (function dire(i){
       if(id !== tour || i >= morceaux.length) return;
       var u = new SpeechSynthesisUtterance(morceaux[i]); u.lang = vx ? vx.lang : "fr-FR"; if(vx) u.voice = vx; u.rate = rate;
       M._garde = (M._garde || []).concat([u]).slice(-20); // garder une référence pour ne pas perdre la fin de phrase
-      var suite = false, go = function(){ if(suite) return; suite = true; setTimeout(function(){ dire(i+1); }, pause); };
-      u.onend = go; u.onerror = go;
-      // On attend que la voix ait vraiment fini (les ordinateurs lents mettent du temps à préparer la phrase),
-      // au lieu d'un temps fixe qui faisait commencer la phrase suivante trop tôt.
-      var t0 = Date.now();
-      (function veille(){ if(suite || id !== tour) return; var occupe = speechSynthesis.speaking || speechSynthesis.pending;
-        if((!occupe && Date.now() - t0 > 1200) || Date.now() - t0 > 60000) return go(); setTimeout(veille, 300); })();
+      var suite = false, commence = false, t0 = Date.now(), go = function(){ if(suite) return; suite = true; setTimeout(function(){ dire(i+1); }, pause); };
+      u.onstart = function(){ commence = true; };
+      u.onend = function(){ enCours = Math.max(0, enCours - 1); go(); };
+      u.onerror = function(){ enCours = Math.max(0, enCours - 1); go(); };
+      // On attend le signal « fin » de la voix (pas speechSynthesis.speaking, faux sous Linux + Piper).
+      (function veille(){ if(suite || id !== tour) return; var e = Date.now() - t0;
+        if((!commence && e > 45000) || e > 90000){ speechSynthesis.cancel(); enCours = 0; return go(); } setTimeout(veille, 500); })();
+      enCours++;
       speechSynthesis.speak(u);
     })(0);
   };
