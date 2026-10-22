@@ -485,18 +485,55 @@ window.addEventListener("keyup", (e) => { touches[e.key.toLowerCase()] = false; 
   b.addEventListener("pointerdown", on); b.addEventListener("pointerup", off); b.addEventListener("pointercancel", off); b.addEventListener("pointerleave", off);
 });
 let manetteAvant = {};
+/* Manette : on lit toutes les manettes branchées et on garde les vraies.
+   Sous Linux, une manette PS4 apparaît en 3 morceaux (manette, capteurs de mouvement, pavé tactile) :
+   on ignore les deux derniers. Firefox ne range pas toujours les boutons dans l'ordre « standard » :
+   on accepte donc plusieurs façons d'accélérer (R2, ✕, joystick vers le haut, flèche haut). */
+const gachettesVues = {};
+function vraiesManettes(){
+  return Array.from(navigator.getGamepads ? navigator.getGamepads() : []).filter(g => g && g.connected && g.buttons.length >= 6 && !/motion|touchpad|accel|gyro|sensor/i.test(g.id));
+}
 function lireManette(){
-  const gp = (navigator.getGamepads ? navigator.getGamepads() : []).find(g => g && g.connected);
-  if(!gp) return null;
-  const b = (i) => gp.buttons[i] ? (gp.buttons[i].value || (gp.buttons[i].pressed ? 1 : 0)) : 0;
-  let dir = gp.axes[0] || 0; if(Math.abs(dir) < .15) dir = 0;
-  if(b(14)) dir = -1; if(b(15)) dir = 1;
-  const m = { dir: -dir, gaz: Math.max(b(7), b(0)), frein: Math.max(b(6), b(2) > .5 ? 1 : 0), turbo: b(1) > .5 || b(5) > .5 || b(3) > .5, start: b(9) > .5, croix: b(0) > .5 };
+  const pads = vraiesManettes();
+  if(!pads.length) return null;
+  const m = { dir: 0, gaz: 0, frein: 0, turbo: false, start: false, croix: false, nom: pads[0].id };
+  pads.forEach(gp => {
+    const std = gp.mapping === "standard";
+    const b = (i) => gp.buttons[i] ? (gp.buttons[i].value || (gp.buttons[i].pressed ? 1 : 0)) : 0;
+    const ax = (i) => gp.axes[i] || 0;
+    // gâchettes analogiques (manette non « standard ») : au repos à -1 ; on ne s'y fie qu'une fois vues au repos
+    const gach = (i) => { const v = ax(i); const k = gp.index + ":" + i; if(v < -.9) gachettesVues[k] = true; return gachettesVues[k] ? clamp((v + 1) / 2, 0, 1) : 0; };
+    let dir = ax(0); if(Math.abs(dir) < .18) dir = 0;
+    let gaz = Math.max(b(7), b(0), ax(1) < -.55 ? 1 : 0), frein = Math.max(b(6), ax(1) > .7 ? 1 : 0);
+    if(std){ if(b(14)) dir = -1; if(b(15)) dir = 1; if(b(12)) gaz = 1; if(b(13)) frein = 1; }
+    else{
+      if(gp.axes.length > 6){ if(Math.abs(ax(6)) > .5) dir = Math.sign(ax(6)); if(ax(7) < -.5) gaz = 1; if(ax(7) > .5) frein = 1; }
+      if(gp.axes.length > 5){ gaz = Math.max(gaz, gach(5) > .3 ? gach(5) : 0); frein = Math.max(frein, gach(2) > .3 ? 1 : 0); }
+    }
+    if(Math.abs(dir) > Math.abs(m.dir)) m.dir = -dir;
+    m.gaz = Math.max(m.gaz, gaz); m.frein = Math.max(m.frein, frein);
+    m.turbo = m.turbo || b(1) > .5 || b(2) > .5 || b(3) > .5 || b(5) > .5;
+    m.start = m.start || b(9) > .5;
+    m.croix = m.croix || b(0) > .5 || b(1) > .5;
+  });
   // appuis « nouveaux » (pour les menus)
   const nouv = (k) => m[k] && !manetteAvant[k];
   m.nStart = nouv("start"); m.nCroix = nouv("croix");
   manetteAvant = { start: m.start, croix: m.croix };
   return m;
+}
+// petite fenêtre de diagnostic : course3d/?manette
+let diagManette = null;
+function majDiagManette(){
+  if(!diagManette){ diagManette = document.createElement("pre"); diagManette.style.cssText = "position:fixed;left:8px;bottom:8px;z-index:50;margin:0;padding:10px;max-width:96vw;white-space:pre-wrap;background:rgba(0,0,0,.85);color:#9f9;font:14px monospace;border-radius:10px;pointer-events:none"; document.body.appendChild(diagManette); }
+  const tous = Array.from(navigator.getGamepads ? navigator.getGamepads() : []).filter(Boolean);
+  let t = "Manettes vues par le navigateur : " + tous.length + (tous.length ? "" : "\n→ Appuie sur un bouton de la manette.");
+  tous.forEach(g => { t += "\n\n#" + g.index + " " + g.id + "\n   rangement : " + (g.mapping || "non standard") + (vraiesManettes().includes(g) ? "  (utilisée)" : "  (ignorée)") +
+    "\n   boutons appuyés : " + (g.buttons.map((x, i) => (x.pressed || x.value > .1) ? i : null).filter(x => x !== null).join(", ") || "aucun") +
+    "\n   axes : " + Array.from(g.axes).map(a => a.toFixed(2)).join("  "); });
+  const m = lireManette();
+  if(m) t += "\n\nLe jeu comprend : tourner " + m.dir.toFixed(2) + "  accélérer " + m.gaz.toFixed(2) + "  freiner " + m.frein.toFixed(2) + "  turbo " + (m.turbo ? "oui" : "non");
+  diagManette.textContent = t;
 }
 function commandesJoueur(c){
   const niv = course.niv, gp = lireManette();
@@ -835,7 +872,10 @@ function boucle(maintenant){
     if(gp && gp.nCroix){ if(etat === "menu") $("go").click(); else if(etat === "fin") $("rejouer").click(); }
     if(gp && gp.nStart && etat === "pause") basculerPause();
   }
+  if(PARAMS.has("manette")) majDiagManette();
   if(etat === "menu"){
+    const nb = vraiesManettes().length, el = $("etatManette");
+    if(el) el.textContent = nb ? "🎮 Manette connectée ! Appuie sur ✕ pour lancer la course." : "🎮 Manette branchée ? Appuie sur un de ses boutons pour la réveiller.";
     angleVitrine += dt * .5;
     const p = piste.P[0], n = piste.Nrm[0], t = piste.T[0];
     const base = new THREE.Vector3(p.x, 0, p.z).addScaledVector(t, 14);
