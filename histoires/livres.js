@@ -8,7 +8,7 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
-  id:"mikael", cache:true, titre:"Mikael et le ballon magique", couverture:{ f:"stade", p:[["@mikael",32,74,25,"saut","foot,joie,rire"],["@balou",56,44,12,"vole",",,rire"],["@grognon",80,72,30,"","x,joie,rire"]] }, age:"3-6 ans",
+  id:"mikael", titre:"Mikael et le ballon magique", couverture:{ f:"stade", p:[["@mikael",32,74,25,"saut","foot,joie,rire"],["@balou",56,44,12,"vole",",,rire"],["@grognon",80,72,30,"","x,joie,rire"]] }, age:"3-6 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, mikael:{ nom:"Mikael", h:1.4, v:1, c:"#4CC9F0", vx:"siwis+3" }, balou:{ nom:"Balou", h:1.6, v:1.05, c:"#FFD23F", vx:"jessica+5" },
            grognon:{ nom:"Le géant Grognon", h:.55, v:.8, c:"#6FD08C", vx:"miro-4" } },
   pages:[
