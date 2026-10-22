@@ -14,3 +14,4 @@ Petits jeux éducatifs en français, sans publicité ni compte.
 - `dactylo/` : le Coin dactylo, dactylo avancée pour adultes avec profils (prénom, nom, mot de passe) ; résultats gardés sur l'appareil, mot de passe jamais stocké en clair
 - `commun/voix.js` : voix naturelle Piper (fr_FR-siwis-medium) calculée dans le navigateur, téléchargée une fois puis gardée sur l'appareil ; sinon, meilleure voix du navigateur. `commun/piper/` : moteur (licences dans LICENCES.txt)
 - `course3d/` : Super Course 3D, course de voitures et motos en 3D (Three.js, dans `course3d/lib/`). Voix du présentateur : `outils/enregistrer-course.py`.
+- `foot3d/` : Super Foot 3D, match à 3 contre 3 en 3D (même Three.js, manettes via `commun/manette.js`). Voix : `outils/enregistrer-foot.py`.

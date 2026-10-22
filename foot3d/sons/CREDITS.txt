@@ -1,0 +1,6 @@
+Voix enregistrées avec Piper (https://github.com/rhasspy/piper), modèles convertis par sherpa-onnx.
+- jessica, pierre : fr_FR-upmc-medium — jeu de données UPMC, licence CC BY-SA 4.0
+- siwis : fr_FR-siwis-medium — jeu de données SIWIS (Université d'Édimbourg), licence CC BY 4.0
+- miro : fr_FR-miro-high — OpenVoiceOS, licence CC BY-NC-SA 4.0 (usage non commercial)
+Les enregistrements de ce dossier sont partagés sous licence CC BY-NC-SA 4.0, pour un usage familial et éducatif.
+Pour les refaire : outils/enregistrer-foot.py

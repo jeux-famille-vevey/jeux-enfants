@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Super Foot 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --sun:#FFD23F; --tang:#FF9F1C; --ink:#FFF8E7; --soft:#C9CCF2; --night:#1D2357; --panel:rgba(29,35,87,.82);
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#1D2357;color:var(--ink);font-family:var(--font);user-select:none;-webkit-user-select:none}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+[hidden]{display:none !important}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+
+#menu{position:fixed;inset:0;display:flex;pointer-events:none}
+#menu .panneau{pointer-events:auto;width:min(470px,100%);height:100%;overflow:auto;padding:18px 20px 24px;
+  background:linear-gradient(90deg,rgba(29,35,87,.96),rgba(29,35,87,.88) 80%,rgba(29,35,87,0))}
+#menu h1{margin:4px 0 2px;font-size:clamp(2rem,5.5vw,2.9rem);line-height:1;color:var(--sun);text-shadow:0 4px 0 var(--tang)}
+#menu .sous{margin:0 0 12px;color:var(--soft)}
+#menu h2{font-size:1.02rem;margin:14px 0 7px;color:var(--soft);font-weight:600}
+.choix{display:flex;flex-wrap:wrap;gap:8px}
+.choix button{background:#2E3580;border-radius:16px;padding:9px 13px;font-weight:600;font-size:1.02rem;border:3px solid transparent;display:flex;align-items:center;gap:7px}
+.choix button .e{font-size:1.5rem;line-height:1}
+.choix button small{display:block;font-weight:500;font-size:.78rem;color:var(--soft)}
+.choix button.on{border-color:var(--sun);background:#3A429A}
+.choix .pastille{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.6);display:inline-block}
+#go{position:sticky;bottom:6px;z-index:2;margin-top:18px;width:100%;padding:14px;border-radius:20px;font-size:1.5rem;font-weight:700;color:var(--night);
+  background:linear-gradient(100deg,var(--sun),var(--tang));box-shadow:0 6px 0 #c9771a}
+#go:active{transform:translateY(3px);box-shadow:0 3px 0 #c9771a}
+.aide{margin-top:12px;color:var(--soft);font-size:.9rem;line-height:1.45}
+.aide b{color:var(--ink)}
+#etatManette{margin-top:8px;font-weight:600;color:#9EE6A8}
+#accueil{position:fixed;top:12px;right:14px;pointer-events:auto;background:var(--panel);border-radius:999px;padding:8px 14px;font-weight:600;text-decoration:none;color:var(--ink)}
+
+#hud{position:fixed;inset:0;pointer-events:none}
+#score{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;background:var(--panel);border-radius:20px;padding:8px 16px;font-weight:700;font-size:1.25rem;white-space:nowrap}
+#score .num{font-size:2rem;min-width:1.2em;text-align:center}
+#score .eq{display:flex;align-items:center;gap:7px}
+#score .pastille{width:16px;height:16px;border-radius:50%;border:2px solid #fff}
+#temps{position:absolute;top:72px;left:50%;transform:translateX(-50%);background:var(--panel);border-radius:14px;padding:4px 12px;font-weight:700;font-variant-numeric:tabular-nums}
+#annonce{position:absolute;top:30%;left:0;right:0;text-align:center;font-size:clamp(3rem,13vw,8rem);font-weight:700;color:var(--sun);
+  text-shadow:0 6px 0 var(--tang),0 10px 30px rgba(0,0,0,.4);opacity:0;transition:opacity .2s}
+#annonce.on{opacity:1}
+#annonce small{display:block;font-size:.3em;color:#fff;text-shadow:0 3px 8px rgba(0,0,0,.6)}
+#aideJeu{position:absolute;bottom:12px;left:12px;background:var(--panel);border-radius:14px;padding:6px 12px;font-size:.9rem;color:var(--soft)}
+#aideJeu b{color:var(--ink)}
+#pause{position:absolute;top:10px;right:12px;width:52px;height:52px;border-radius:50%;background:var(--panel);font-size:1.5rem;pointer-events:auto}
+#jauge{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);width:120px;height:12px;border-radius:999px;background:var(--panel);overflow:hidden;opacity:0;transition:opacity .15s}
+#jauge.on{opacity:1}#jauge i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3FA34D,var(--sun),#E5484D)}
+
+/* tablette : joystick à gauche, boutons à droite */
+#tactile{position:fixed;inset:0;pointer-events:none}
+#stick{position:absolute;left:24px;bottom:24px;width:150px;height:150px;border-radius:50%;background:rgba(29,35,87,.45);border:4px solid rgba(255,255,255,.35);pointer-events:auto;touch-action:none}
+#stick i{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.75)}
+.tb{position:absolute;width:96px;height:96px;border-radius:50%;background:rgba(29,35,87,.55);border:4px solid rgba(255,255,255,.35);font-size:1.05rem;font-weight:700;pointer-events:auto;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.tb span{font-size:2rem}
+.tb.on{background:rgba(255,210,63,.6)}
+#bTir{right:24px;bottom:24px}#bPasse{right:136px;bottom:24px}#bSprint{right:24px;bottom:136px}
+
+.ecran{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(18,22,60,.6);padding:16px}
+.carte{background:#272C6B;border-radius:28px;padding:22px 26px;width:min(480px,100%);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.carte h1{margin:0;font-size:clamp(2.2rem,8vw,3.2rem);color:var(--sun)}
+.carte .big{font-size:4rem;line-height:1}
+.boutons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.boutons button,.boutons a{padding:12px 18px;border-radius:16px;font-weight:700;font-size:1.1rem;background:#3A429A;color:var(--ink);text-decoration:none}
+.boutons .prim{background:linear-gradient(100deg,var(--sun),var(--tang));color:var(--night)}
+#chargement,#erreur3d{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:#1D2357;font-size:1.3rem;color:var(--soft)}
+@media (max-width:700px){ #menu .panneau{background:rgba(29,35,87,.93)} #score{font-size:1rem} #aideJeu{display:none} }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="chargement">Chargement du stade… ⚽</div>
+<div id="erreur3d" hidden>Cet ordinateur ne peut pas afficher la 3D dans ce navigateur.<br>Essaie avec Firefox ou Chrome à jour.</div>
+
+<div id="menu" hidden>
+  <div class="panneau">
+    <h1>Super Foot 3D</h1>
+    <p class="sous">Un match à 3 contre 3. Marque plus de buts que l'autre équipe !</p>
+    <h2>🧑 Joueur</h2><div class="choix" id="cJoueur"></div>
+    <h2>🎚️ Difficulté</h2><div class="choix" id="cNiveau"></div>
+    <h2>👕 Ton maillot</h2><div class="choix" id="cMaillot"></div>
+    <h2>🆚 Adversaire</h2><div class="choix" id="cAdv"></div>
+    <div id="etatManette"></div>
+    <button id="go">⚽ Coup d'envoi !</button>
+    <div class="aide" id="aide"></div>
+  </div>
+  <a id="accueil" href="../">🏠 Les jeux</a>
+</div>
+
+<div id="hud" hidden>
+  <div id="score"><span class="eq" id="eqA"></span><span class="num" id="sA">0</span><span>-</span><span class="num" id="sB">0</span><span class="eq" id="eqB"></span></div>
+  <div id="temps">2:00</div>
+  <div id="annonce"></div>
+  <div id="jauge"><i></i></div>
+  <div id="aideJeu"></div>
+  <button id="pause" aria-label="Pause">⏸</button>
+</div>
+<div id="tactile" hidden>
+  <div id="stick"><i></i></div>
+  <button class="tb" id="bTir"><span>⚽</span>Tir</button>
+  <button class="tb" id="bPasse"><span>➡️</span>Passe</button>
+  <button class="tb" id="bSprint"><span>🏃</span>Sprint</button>
+</div>
+
+<div class="ecran" id="ecranPause" hidden>
+  <div class="carte"><h1>Pause</h1>
+    <div class="boutons"><button class="prim" id="reprendre">▶ Continuer</button><button id="abandon">🏠 Menu</button></div></div>
+</div>
+<div class="ecran" id="ecranFin" hidden>
+  <div class="carte"><div class="big" id="finEmoji">🏆</div><h1 id="finTitre">Victoire !</h1>
+    <p id="finScore" style="font-size:2rem;font-weight:700;margin:8px 0"></p><p id="finTexte" style="color:var(--soft);margin:0"></p>
+    <div class="boutons"><button class="prim" id="rejouer">🔁 Rejouer</button><button id="versMenu">⚽ Menu</button><a href="../">🏠 Les jeux</a></div></div>
+</div>
+
+<script type="module" src="jeu.js"></script>
+</body>
+</html>
