@@ -2,6 +2,7 @@
    Tout est dessiné en code : toboggan, îles volantes, personnage, décors. */
 import * as THREE from "../course3d/lib/three.module.min.js";
 import { lireManette, vraiesManettes } from "../commun/manette.js";
+import { mergeGeometries } from "../course3d/lib/BufferGeometryUtils.js";
 
 const $ = (id) => document.getElementById(id);
 const PARAMS = new URLSearchParams(location.search);
@@ -54,7 +55,11 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(66, 1, .3, 1800);
 function redimensionner(){ renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
-function appliquerQualite(){ renderer.setPixelRatio(qualite === "haute" ? Math.min(devicePixelRatio || 1, 1.5) : qualite === "moyenne" ? 1 : .7); redimensionner(); }
+function appliquerQualite(){
+  renderer.setPixelRatio(qualite === "haute" ? Math.min(devicePixelRatio || 1, 1.25) : qualite === "moyenne" ? .9 : .65);
+  camera.far = qualite === "basse" ? 700 : 1800; camera.updateProjectionMatrix();
+  redimensionner();
+}
 addEventListener("resize", redimensionner);
 const hemi = new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.4); scene.add(hemi);
 const soleil = new THREE.DirectionalLight(0xffffff, 1.9); soleil.position.set(40, 100, -30); scene.add(soleil);
@@ -207,11 +212,9 @@ function construireMonde(idx){
   }
 
   // étoiles : en lignes au milieu, en arcs dans les virages, en l'air au-dessus des trous ; quelques diamants
-  const mEtoile = mat("#FFD23F", { emissive: "#FFB000", emissiveIntensity: .55, roughness: .3, flatShading: false });
   const ajouterEtoile = (s, th, h, gemme) => {
-    const m = gemme ? new THREE.Mesh(new THREE.OctahedronGeometry(.55), mat("#FF4FB0", { emissive: "#FF2F90", emissiveIntensity: .5, roughness: .2 })) : new THREE.Mesh(GEO_ETOILE, mEtoile);
-    m.position.copy(surfaceS(s, th, h + .9)); niveau3D.add(m);
-    piste.etoiles.push({ s, th, h: h + .9, m, pris: false, valeur: gemme ? 5 : 1 }); piste.total += gemme ? 5 : 1;
+    if(s > piste.longueur - 2) return;
+    piste.etoiles.push({ s, th, h: h + .9, pos: surfaceS(s, th, h + .9), pris: false, valeur: gemme ? 5 : 1 }); piste.total += gemme ? 5 : 1;
   };
   for(let s = 40; s < piste.longueur - 60; s += 26 + r() * 20){
     if(dansTrou(s) || dansTrou(s + 12)) continue;
@@ -224,6 +227,13 @@ function construireMonde(idx){
   }
   trous.forEach(t => { for(let k = 0; k < 5; k++){ const u = (k + .5) / 5; ajouterEtoile(t[0] + u * (t[1] - t[0]), 0, Math.sin(u * Math.PI) * 3.2); } });
   for(let k = 0; k < 5; k++){ const s = piste.longueur * (.15 + k * .17) + r() * 20; if(!dansTrou(s)) ajouterEtoile(s, (r() < .5 ? -1 : 1) * 1.0, 0, true); }
+  // toutes les étoiles (et tous les diamants) en un seul objet chacun : beaucoup plus rapide à dessiner
+  const etoilesN = piste.etoiles.filter(e => e.valeur === 1), gemmesN = piste.etoiles.filter(e => e.valeur > 1);
+  piste.imEtoiles = new THREE.InstancedMesh(GEO_ETOILE, mat("#FFD23F", { emissive: "#FFB000", emissiveIntensity: .55, roughness: .3, flatShading: false }), Math.max(1, etoilesN.length));
+  piste.imGemmes = new THREE.InstancedMesh(new THREE.OctahedronGeometry(.55), mat("#FF4FB0", { emissive: "#FF2F90", emissiveIntensity: .5, roughness: .2 }), Math.max(1, gemmesN.length));
+  etoilesN.forEach((e, k) => { e.im = piste.imEtoiles; e.k = k; }); gemmesN.forEach((e, k) => { e.im = piste.imGemmes; e.k = k; });
+  piste.etoiles.forEach(e => majEtoile(e, 0));
+  [piste.imEtoiles, piste.imGemmes].forEach(im => { im.userData.dynamique = true; im.frustumCulled = false; niveau3D.add(im); });
 
   // obstacles (on peut les éviter ou sauter par-dessus)
   const nbObs = niv.obstacles + idx * 2;
@@ -257,7 +267,7 @@ function construireMonde(idx){
   portail.position.set(fin.x, fin.y + 5, fin.z + 12); niveau3D.add(portail);
   const voile = new THREE.Mesh(new THREE.CircleGeometry(4.6, 40), new THREE.MeshBasicMaterial({ color: MONDES[(idx + 1) % 5].carte, transparent: true, opacity: .55, side: THREE.DoubleSide }));
   voile.position.copy(portail.position); niveau3D.add(voile);
-  piste.portail = portail; piste.voile = voile;
+  piste.portail = portail; piste.voile = voile; portail.userData.dynamique = voile.userData.dynamique = true;
   const nuages = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshLambertMaterial({ color: idx >= 3 ? (idx === 3 ? "#7A4A4A" : "#4A4A8A") : "#FFFFFF", transparent: true, opacity: .9 }), 160);
   const dm = new THREE.Object3D();
   for(let k = 0; k < 160; k++){
@@ -268,6 +278,33 @@ function construireMonde(idx){
   niveau3D.add(nuages);
   decorLointain(W, r);
   particules(W);
+  fusionnerDecor();
+}
+/* Le décor ne bouge pas : on regroupe tous les objets de même matière en un seul,
+   pour que l'ordinateur n'ait que quelques dizaines de choses à dessiner au lieu de centaines. */
+function fusionnerDecor(){
+  niveau3D.updateMatrixWorld(true);
+  const groupes = new Map(), aEnlever = [];
+  niveau3D.traverse(o => {
+    if(!o.isMesh || o.isInstancedMesh || o.userData.dynamique) return;
+    let g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+    for(const nom of Object.keys(g.attributes)) if(!["position", "normal", "uv"].includes(nom)) g.deleteAttribute(nom);
+    if(!g.attributes.normal) g.computeVertexNormals();
+    if(!g.attributes.uv) g.setAttribute("uv", new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
+    g.applyMatrix4(o.matrixWorld);
+    const k = o.material.uuid; if(!groupes.has(k)) groupes.set(k, { m: o.material, g: [] });
+    groupes.get(k).g.push(g); aEnlever.push(o);
+  });
+  aEnlever.forEach(o => o.parent.remove(o));
+  groupes.forEach(({ m, g }) => { const fus = mergeGeometries(g, false); if(fus){ fus.computeBoundingSphere(); niveau3D.add(new THREE.Mesh(fus, m)); } g.forEach(x => x.dispose()); });
+  // les groupes vides restants
+  for(let i = niveau3D.children.length - 1; i >= 0; i--){ const c = niveau3D.children[i]; if(c.isGroup && !c.children.length) niveau3D.remove(c); }
+}
+const _o = new THREE.Object3D();
+function majEtoile(e, t){
+  if(e.pris){ _o.scale.setScalar(0); }
+  else { _o.position.copy(e.pos); _o.rotation.set(0, t * 2.5 + e.s, 0); _o.scale.setScalar(1); }
+  _o.updateMatrix(); e.im.setMatrixAt(e.k, _o.matrix); e.im.instanceMatrix.needsUpdate = true;
 }
 /* point sur la surface du toboggan : indice i (ou distance s), angle th, hauteur h au-dessus de la surface */
 function surface(i, th, h){
@@ -299,7 +336,7 @@ function obstacle3D(id, r){
     const chap = maille(new THREE.SphereGeometry(.95, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), "#E5484D"); chap.position.y = .95; g.add(chap);
     for(let k = 0; k < 5; k++){ const p = maille(new THREE.SphereGeometry(.14, 8, 6), "#FFFFFF"); const a = k * 1.3; p.position.set(Math.cos(a) * .55, 1.45 - (k % 2) * .2, Math.sin(a) * .55); g.add(p); }
   }else if(id === "glace"){ // bloc de glace
-    const b = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.3, 1.2), new THREE.MeshStandardMaterial({ color: "#A8E4FF", roughness: .1, metalness: .1, transparent: true, opacity: .8 })); b.position.y = .65; b.rotation.y = r() * .6; g.add(b);
+    const b = maille(new THREE.BoxGeometry(1.5, 1.3, 1.2), "#A8E4FF", { roughness: .1, metalness: .1, transparent: true, opacity: .8 }); b.position.y = .65; b.rotation.y = r() * .6; g.add(b);
     const pingouin = maille(new THREE.SphereGeometry(.35, 10, 8), "#22232B"); pingouin.position.set(0, 1.6, 0); pingouin.scale.y = 1.3; g.add(pingouin);
     const ventre = maille(new THREE.SphereGeometry(.26, 10, 8), "#FFFFFF"); ventre.position.set(0, 1.55, .16); ventre.scale.y = 1.2; g.add(ventre);
     const bec = maille(new THREE.ConeGeometry(.08, .2, 6), "#FF9F1C"); bec.rotation.x = Math.PI / 2; bec.position.set(0, 1.78, .36); g.add(bec);
@@ -338,10 +375,11 @@ function objetDecor(id, r){
     if(k < .5){ const s = maille(new THREE.ConeGeometry(1.1, 3.2, 7), "#3E7D5A"); s.position.y = 1.8; g.add(s); const n = maille(new THREE.ConeGeometry(.75, 1.4, 7), "#FFFFFF"); n.position.y = 3.2; g.add(n); }
     else if(k < .8){ [[0, .7, .8], [0, 1.8, .55], [0, 2.6, .38]].forEach(b => { const s = maille(new THREE.SphereGeometry(b[2], 12, 10), "#FFFFFF", { flatShading: false }); s.position.y = b[1]; g.add(s); });
       const nez = maille(new THREE.ConeGeometry(.08, .4, 6), "#FF8C1A"); nez.rotation.x = Math.PI / 2; nez.position.set(0, 2.6, .45); g.add(nez); }
-    else { const c = new THREE.Mesh(new THREE.OctahedronGeometry(1.2), new THREE.MeshStandardMaterial({ color: "#A8E4FF", roughness: .1, transparent: true, opacity: .85 })); c.position.y = 1.4; c.scale.y = 1.7; g.add(c); }
+    else { const c = maille(new THREE.OctahedronGeometry(1.2), "#A8E4FF", { roughness: .1, transparent: true, opacity: .85 }); c.position.y = 1.4; c.scale.y = 1.7; g.add(c); }
   }else if(id === "bonbons"){
     if(k < .5){ const b = maille(new THREE.CylinderGeometry(.08, .08, 3, 6), "#FFFFFF"); b.position.y = 1.5; g.add(b);
-      const sucette = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .3, 20), new THREE.MeshStandardMaterial({ map: texture(128, 128, (c) => { const cl = ["#FF4FB0", "#FFFFFF", "#4CC9F0", "#FFFFFF"]; for(let i = 0; i < 8; i++){ c.fillStyle = cl[i % 4]; c.beginPath(); c.moveTo(64, 64); c.arc(64, 64, 64, i * Math.PI / 4, (i + 1) * Math.PI / 4); c.fill(); } }), roughness: .3 }));
+      if(!M.sucette) M.sucette = new THREE.MeshStandardMaterial({ map: texture(128, 128, (c) => { const cl = ["#FF4FB0", "#FFFFFF", "#4CC9F0", "#FFFFFF"]; for(let i = 0; i < 8; i++){ c.fillStyle = cl[i % 4]; c.beginPath(); c.moveTo(64, 64); c.arc(64, 64, 64, i * Math.PI / 4, (i + 1) * Math.PI / 4); c.fill(); } }), roughness: .3 });
+      const sucette = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .3, 20), M.sucette);
       sucette.rotation.x = Math.PI / 2; sucette.position.y = 3.2; g.add(sucette); }
     else if(k < .8){ const d = maille(new THREE.TorusGeometry(.8, .4, 10, 20), "#E8B07A", { flatShading: false }); d.rotation.x = Math.PI / 2; d.position.y = .4; g.add(d); const gl = maille(new THREE.TorusGeometry(.8, .3, 10, 20), "#FF8FC8", { flatShading: false }); gl.rotation.x = Math.PI / 2; gl.position.y = .6; g.add(gl); }
     else { const c = maille(new THREE.ConeGeometry(.8, 2.2, 12), "#E8B07A"); c.rotation.x = Math.PI; c.position.y = 1.1; g.add(c); const bo = maille(new THREE.SphereGeometry(.85, 12, 10), "#FFF0F6", { flatShading: false }); bo.position.y = 2.3; g.add(bo); }
@@ -492,7 +530,7 @@ function maj(dt){
     piste.etoiles.forEach(e => {
       if(e.pris || Math.abs(e.s - J.s) > 1.4) return;
       if(Math.abs(e.th - J.th) * RP < 1.2 && Math.abs(e.h - (J.h + .9)) < 1.4){
-        e.pris = true; e.m.visible = false; J.etoiles += e.valeur;
+        e.pris = true; majEtoile(e, 0); J.etoiles += e.valeur;
         J.combo = J.comboT > 0 ? J.combo + 1 : 1; J.comboT = 1.2; son.etoile(J.combo, e.valeur > 1); majEtoiles();
         if(e.valeur > 1) bonus("💎 +5 !"); else if(J.combo === 5) bonus("✨ Super série !");
       }
@@ -560,7 +598,7 @@ function placer(dt){
   camera.fov = lerp(camera.fov, 64 + clamp(jeu.v / 30, 0, 1) * 12 + (jeu.boost > 0 ? 6 : 0), clamp(dt * 3, 0, 1)); camera.updateProjectionMatrix();
   // étoiles qui tournent, portail qui brille
   const t = performance.now() / 1000;
-  piste.etoiles.forEach(e => { if(!e.pris && Math.abs(e.s - jeu.s) < 160) e.m.rotation.y = t * 2.5 + e.s; });
+  piste.etoiles.forEach(e => { if(!e.pris && Math.abs(e.s - jeu.s) < 110) majEtoile(e, t); });
   if(piste.portail){ piste.portail.rotation.z = t; piste.voile.material.opacity = .4 + Math.sin(t * 3) * .15; }
 }
 
@@ -716,7 +754,7 @@ function boucleImages(now){
     $("progres").firstChild.style.width = Math.round(clamp(jeu.s / piste.longueur, 0, 1) * 100) + "%";
     if(annonceT > 0){ annonceT -= dt; if(annonceT <= 0) annoncer("", 0); }
     if(bonusT > 0){ bonusT -= dt; if(bonusT <= 0) $("bonus").classList.remove("on"); }
-    if(!fps.fait){ fps.n++; fps.t += dt; if(fps.t > 4){ if(fps.n / fps.t < 28 && qualite !== "basse"){ qualite = qualite === "haute" ? "moyenne" : "basse"; ecrire("tobo-qualite", qualite); appliquerQualite(); fps = { n: 0, t: 0, fait: false }; } else fps.fait = true; } }
+    if(!fps.fait){ fps.n++; fps.t += dt; if(fps.t > 2.5){ if(fps.n / fps.t < 40 && qualite !== "basse"){ qualite = qualite === "haute" ? "moyenne" : "basse"; ecrire("tobo-qualite", qualite); appliquerQualite(); fps = { n: 0, t: 0, fait: false }; } else fps.fait = true; } }
   }else if(etat === "fin"){
     jeu.finT += dt; placer(dt);
   }
@@ -730,4 +768,4 @@ construireMonde(choix.monde);
 remplirMenu();
 $("chargement").hidden = true; etat = "menu"; $("menu").hidden = false;
 requestAnimationFrame(boucleImages);
-if(TEST) window.__jeu = { get etat(){ return etat; }, get jeu(){ return jeu; }, get piste(){ return piste; }, choix, demarrer, scene, camera, MONDES };
+if(TEST) window.__jeu = { renderer, get etat(){ return etat; }, get jeu(){ return jeu; }, get piste(){ return piste; }, choix, demarrer, scene, camera, MONDES };
