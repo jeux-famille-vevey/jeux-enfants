@@ -39,13 +39,15 @@
     coup:   { bg:[[-27,-112],[-30,-96],[-14,-100]], bd:[[27,-112],[22,-98],[8,-106]], jg:[[-11,-62],[-16,-36],[-18,-10]], jd:[[11,-62],[42,-76],[74,-86]] },
     triste: { bg:[[-27,-110],[-30,-90],[-24,-70]], bd:[[27,-110],[30,-90],[24,-70]], jg:[[-11,-62],[-10,-36],[-10,-10]], jd:[[11,-62],[10,-36],[10,-10]] },
     peur:   { bg:[[-27,-112],[-36,-120],[-20,-134]], bd:[[27,-112],[36,-120],[20,-134]], jg:[[-11,-62],[-16,-36],[-20,-10]], jd:[[11,-62],[16,-36],[20,-10]] },
-    salut:  { bg:[[-27,-112],[-26,-94],[-4,-102]], bd:[[27,-112],[26,-94],[4,-102]], jg:[[-11,-62],[-11,-36],[-11,-10]], jd:[[11,-62],[11,-36],[11,-10]] }
+    salut:  { bg:[[-27,-112],[-26,-94],[-4,-102]], bd:[[27,-112],[26,-94],[4,-102]], jg:[[-11,-62],[-11,-36],[-11,-10]], jd:[[11,-62],[11,-36],[11,-10]] },
+    vol:    { bg:[[-27,-112],[-36,-138],[-34,-166]], bd:[[27,-112],[34,-138],[30,-168]], jg:[[-11,-62],[-20,-40],[-30,-22]], jd:[[11,-62],[6,-38],[2,-16]] }
   };
   var TENUES = {
     foot:    { haut:"#3D7BD9", bas:"#1D2357", jambe:"peau", chaussure:"#E5484D", manche:"courte", numero:"5" },
     kimono:  { haut:"#FAFAF5", bas:"#FAFAF5", jambe:"pant", chaussure:"pieds", manche:"longue", ceinture:"#FFD23F" },
     pyjama:  { haut:"#8EC5FF", bas:"#8EC5FF", jambe:"pant", chaussure:"chaussons", manche:"longue", etoiles:true },
-    ecole:   { haut:"#FF9F1C", bas:"#3D4A8F", jambe:"pant", chaussure:"#2B2140", manche:"courte", sac:true }
+    ecole:   { haut:"#FF9F1C", bas:"#3D4A8F", jambe:"pant", chaussure:"#2B2140", manche:"courte", sac:true },
+    heros:   { haut:"#8E5BC4", bas:"#5A3A9A", jambe:"pant", chaussure:"#FFD23F", manche:"longue", cape:"#FF4FB0", logo:true }
   };
 
   function visage(cx, cy, expr, peau){
@@ -79,6 +81,10 @@
     var o = (opts || "").split(","), tenue = TENUES[o[0]] || TENUES.foot, pose = POSES[o[1]] || POSES.debout, expr = o[2] || "sourire";
     var peau = couleurs.peau, chev = couleurs.cheveux, haut = couleurs.haut || tenue.haut, bas = couleurs.bas || tenue.bas;
     var pant = tenue.jambe === "pant", longue = tenue.manche === "longue", s = "";
+    // cape de super-héros (derrière)
+    if(tenue.cape) s += '<path d="M-24 -120 Q-46 -70 -44 -24 Q-22 -32 0 -22 Q22 -32 46 -26 Q46 -70 24 -120Z" fill="' + tenue.cape + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
+    // cheveux longs (derrière la tête)
+    if(couleurs.longs) s += '<path d="M-36 -160 Q-40 -110 -30 -100 L30 -100 Q40 -110 36 -160Z" fill="' + couleurs.cheveux + '"/>';
     // sac d'école (derrière)
     if(tenue.sac) s += '<rect x="-34" y="-118" width="26" height="40" rx="8" fill="#E5484D" stroke="' + TRAIT + '" stroke-width="2"/>';
     // jambes
@@ -95,6 +101,7 @@
       '<path d="M-26 -120 Q0 -128 26 -120 L27 -114 Q0 -121 -27 -114Z" fill="#FFFFFF"/>';
     if(o[0] === "kimono") s += chemin("M-14 -122 L4 -86", "#D9D9D0", 3) + chemin("M14 -122 L-4 -96", "#D9D9D0", 3) + '<rect x="-30" y="-78" width="60" height="9" rx="3" fill="' + tenue.ceinture + '"/>' +
       chemin("M4 -72 l6 16", tenue.ceinture, 5) + chemin("M-2 -72 l-5 15", tenue.ceinture, 5);
+    if(tenue.logo) s += '<path d="M0 -116 L5 -104 L18 -104 L8 -96 L12 -84 L0 -91 L-12 -84 L-8 -96 L-18 -104 L-5 -104Z" fill="#FFD23F" stroke="' + TRAIT + '" stroke-width="1.5"/>';
     if(tenue.etoiles) [[-12,-104],[12,-92],[-6,-82],[16,-112]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="11" text-anchor="middle" fill="#FFD23F">★</text>'; });
     // bras
     s += bras(pose.bg[0], pose.bg[1], pose.bg[2], haut, peau, longue) + bras(pose.bd[0], pose.bd[1], pose.bd[2], haut, peau, longue);
@@ -188,6 +195,44 @@
     return s;
   }
 
+  /* ---------- Zouli et les extraterrestres ---------- */
+  var COUL_ALIEN = ["#7BE495", "#7FD3FF", "#FF9FD0", "#FFD23F"];
+  function alien(opts){
+    var o = (opts || "").split(","), pose = o[1] || "debout", expr = o[2] || "sourire", c = COUL_ALIEN[(+o[3] || 0) % 4], s = "";
+    var fonce = "rgba(0,0,0,.18)";
+    // trois petites jambes
+    [-18, 0, 18].forEach(function(x){ s += chemin("M" + x + " -30 L" + (x * 1.2) + " -6", c, 11) + ovale(x * 1.2, -4, 9, 5, "#5A3A9A"); });
+    // bras
+    var b = { debout:[[-26,-62],[-40,-40]], joie:[[-26,-66],[-44,-100]], salut:[[-26,-62],[-40,-40]], surpris:[[-26,-66],[-40,-86]] }[pose] || [[-26,-62],[-40,-40]];
+    var bd = pose === "salut" || pose === "joie" ? [[26,-66],[44,-100]] : pose === "surpris" ? [[26,-66],[40,-86]] : [[26,-62],[40,-40]];
+    s += chemin("M" + b[0][0] + " " + b[0][1] + " L" + b[1][0] + " " + b[1][1], c, 9) + rond(b[1][0], b[1][1], 6, c);
+    s += chemin("M" + bd[0][0] + " " + bd[0][1] + " L" + bd[1][0] + " " + bd[1][1], c, 9) + rond(bd[1][0], bd[1][1], 6, c);
+    // corps en forme de poire, avec un petit ventre
+    s += ovale(0, -54, 30, 30, c, ' stroke="' + TRAIT + '" stroke-width="2.5"') + ovale(0, -48, 18, 16, "rgba(255,255,255,.35)");
+    // antennes
+    [-1, 1].forEach(function(k){ s += chemin("M" + (k * 12) + " -146 Q" + (k * 22) + " -170 " + (k * 26) + " -184", TRAIT, 2.5) + rond(k * 26, -186, 7, "#FFD23F", ' stroke="' + TRAIT + '" stroke-width="2"'); });
+    // grosse tête
+    s += ovale(0, -112, 40, 36, c, ' stroke="' + TRAIT + '" stroke-width="2.5"');
+    // grands yeux
+    [-16, 16].forEach(function(x){ s += ovale(x, -116, 12, expr === "surpris" ? 16 : 14, "#FFFFFF", ' stroke="' + TRAIT + '" stroke-width="2"') + rond(x + 1, -113, 7.5, "#2B2140") + rond(x + 4, -117, 2.6, "#FFFFFF"); });
+    s += ovale(-28, -98, 6, 3.5, "#FF7A8A", ' opacity=".5"') + ovale(28, -98, 6, 3.5, "#FF7A8A", ' opacity=".5"');
+    if(expr === "rire") s += '<path d="M-12 -96 Q0 -80 12 -96Z" fill="#8A2C4A"/>';
+    else if(expr === "surpris") s += ovale(0, -92, 5, 6, "#8A2C4A");
+    else s += chemin("M-10 -96 q10 8 20 0", TRAIT, 2.6);
+    void fonce;
+    return s;
+  }
+  /* ---------- la soucoupe volante ---------- */
+  function soucoupe(opts){
+    var o = (opts || "").split(","), s = "";
+    if(o[1] === "rayon") s += '<path d="M-30 -40 L30 -40 L80 120 L-80 120Z" fill="#FFF3A0" opacity=".45"/>';
+    s += ovale(0, -68, 44, 40, "#BFEFFF", ' stroke="' + TRAIT + '" stroke-width="3" opacity=".9"') + ovale(-14, -82, 12, 8, "#FFFFFF", ' opacity=".7"');
+    s += rond(0, -60, 14, "#7BE495", ' stroke="' + TRAIT + '" stroke-width="2"') + rond(-5, -63, 3, "#2B2140") + rond(5, -63, 3, "#2B2140");
+    s += ovale(0, -40, 100, 26, "#C9CED8", ' stroke="' + TRAIT + '" stroke-width="3"') + ovale(0, -46, 96, 12, "#E8ECF2");
+    ["#FF4FB0", "#FFD23F", "#4CC9F0", "#7BE495", "#FF9F1C"].forEach(function(c, k){ s += rond(-64 + k * 32, -34, 7, c, ' stroke="' + TRAIT + '" stroke-width="1.5"'); });
+    return s;
+  }
+
   var MIKAEL = { peau:"#C98E62", cheveux:"#22150F" }; // couleurs de Mikael : faciles à changer ici
   var COPAINS = [
     { peau:"#F2C9A0", cheveux:"#E0A43A", haut:"#E5484D" },
@@ -202,8 +247,11 @@
     copain2: function(opts){ return enfant(opts, COPAINS[1]); },
     copain3: function(opts){ return enfant(opts, COPAINS[2]); },
     balou: balou,
-    grognon: grognon
+    grognon: grognon,
+    zouli: alien,
+    soucoupe: soucoupe,
+    etoile: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#4A2C1A", longs:true }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
-  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200 };
+  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110 };
 })();

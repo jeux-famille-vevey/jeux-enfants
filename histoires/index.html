@@ -208,6 +208,41 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
       '<rect x="80" y="70" width="190" height="160" rx="10" fill="#1E2660" stroke="#FFF8E7" stroke-width="12"/><line x1="175" y1="70" x2="175" y2="230" stroke="#FFF8E7" stroke-width="8"/><circle cx="230" cy="110" r="18" fill="#FFF3B0"/>' +
       '<rect x="560" y="250" width="220" height="140" rx="14" fill="#8EC5FF"/><rect x="560" y="230" width="60" height="60" rx="14" fill="#FFF8E7"/><rect x="540" y="200" width="20" height="190" rx="6" fill="#7A4B2E"/>'; },
     chambreVide: function(){ return FONDS.chambre().replace(/<rect x="560" y="250"[^>]*\/><rect x="560" y="230"[^>]*\/><rect x="540" y="200"[^>]*\/>/, ""); }, // la chambre sans son lit
+    // Vevey : le lac Léman, les montagnes en face, la fourchette dans l'eau et le quai
+    vevey: function(){ var s = ciel("#7CC8FF","#E2F4FF") + soleil(120, 70) + nuage(560, 50, .8);
+      s += '<path d="M0 250 L90 170 L160 225 L250 130 L330 210 L420 150 L520 225 L610 160 L700 215 L800 175 V300 H0Z" fill="#8C9BB5"/>' +
+        '<path d="M250 130 L225 152 L245 150 L262 160 L272 142Z M420 150 L400 168 L428 164 L440 172Z M610 160 L592 176 L620 172Z" fill="#FFFFFF"/>' +
+        '<path d="M0 262 Q200 248 400 262 T800 258 V300 H0Z" fill="#6E9C6A"/>';
+      s += '<rect x="0" y="292" width="800" height="118" fill="#3C8FD9"/>';
+      for(var i = 0; i < 14; i++) s += '<rect x="' + ((i * 97) % 760) + '" y="' + (308 + (i * 23) % 90) + '" width="' + (30 + (i % 3) * 14) + '" height="3" rx="1.5" fill="#BFE6FF" opacity=".7"/>';
+      // la fourchette géante dans le lac
+      s += '<g transform="translate(640 0)"><rect x="-5" y="248" width="10" height="130" rx="4" fill="#D7DCE4" stroke="#8A90A0" stroke-width="2"/>' +
+        '<path d="M-22 250 Q-22 228 -16 210 M-7 250 L-7 205 M7 250 L7 205 M22 250 Q22 228 16 210" stroke="#D7DCE4" stroke-width="7" stroke-linecap="round" fill="none"/>' +
+        '<path d="M-24 246 Q0 262 24 246 L24 256 Q0 270 -24 256Z" fill="#D7DCE4"/><ellipse cx="0" cy="380" rx="26" ry="6" fill="#BFE6FF" opacity=".8"/></g>';
+      // quai, barrière, lampadaires, arbres
+      s += '<rect x="0" y="410" width="800" height="90" fill="#C9C2B4"/><rect x="0" y="404" width="800" height="10" fill="#9E9688"/>';
+      for(var x = 10; x < 800; x += 26) s += '<rect x="' + x + '" y="388" width="4" height="18" fill="#4A4E5E"/>';
+      s += '<rect x="0" y="386" width="800" height="4" fill="#4A4E5E"/>';
+      [90, 360, 520].forEach(function(x){ s += '<rect x="' + x + '" y="330" width="5" height="80" fill="#2E3580"/><circle cx="' + (x + 2.5) + '" cy="328" r="9" fill="#FFF3B0" stroke="#2E3580" stroke-width="3"/>'; });
+      return s + arbre(230, 350, .9) + arbre(740, 352, .8); },
+    piscine: function(){ var s = '<rect width="800" height="500" fill="#2E9BDB"/>';
+      for(var x = 0; x < 800; x += 50) s += '<rect x="' + x + '" y="0" width="2" height="500" fill="#62BCEB" opacity=".5"/>';
+      for(var y = 0; y < 500; y += 50) s += '<rect x="0" y="' + y + '" width="800" height="2" fill="#62BCEB" opacity=".5"/>';
+      for(var k = 0; k < 9; k++) s += '<path d="M' + (k * 100 - 40) + ' ' + (60 + (k % 3) * 120) + ' q30 -14 60 0 t60 0" stroke="#BFE9FF" stroke-width="4" fill="none" opacity=".55"/>';
+      [150, 330].forEach(function(y){ for(var x = 0; x < 800; x += 24) s += '<circle cx="' + x + '" cy="' + y + '" r="8" fill="' + ((x / 24) % 2 ? "#E5484D" : "#FFFFFF") + '"/>'; });
+      for(var b = 0; b < 26; b++) s += '<circle cx="' + ((b * 131) % 800) + '" cy="' + ((b * 67) % 480) + '" r="' + (4 + b % 6) + '" fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".7"/>';
+      return s + '<rect x="0" y="0" width="800" height="18" fill="#FFFFFF" opacity=".35"/>'; },
+    plage: function(){ var s = ciel("#7CC8FF","#E2F4FF") + soleil(680, 80) + nuage(140, 60) + '<rect x="0" y="250" width="800" height="120" fill="#3C9BE0"/>';
+      s += '<path d="M0 340 Q100 320 200 340 T400 340 T600 340 T800 340 V500 H0Z" fill="#FFFFFF" opacity=".85"/><path d="M0 350 Q100 332 200 350 T400 350 T600 350 T800 350 V500 H0Z" fill="#F2D49A"/>';
+      for(var i = 0; i < 18; i++) s += '<circle cx="' + ((i * 89) % 800) + '" cy="' + (380 + (i * 37) % 110) + '" r="2.5" fill="#D9B477"/>';
+      // parasol
+      s += '<rect x="96" y="250" width="6" height="170" fill="#8A5A3B"/><path d="M20 262 Q99 180 178 262Z" fill="#E5484D"/><path d="M60 262 Q99 196 99 190 Q99 196 138 262Z" fill="#FFFFFF"/>';
+      return s; },
+    espace: function(){ var s = ciel("#070A2A","#2A2266");
+      for(var i = 0; i < 70; i++) s += '<circle cx="' + ((i * 137) % 800) + '" cy="' + ((i * 71) % 500) + '" r="' + (1 + i % 3 * .7) + '" fill="#FFFFFF" opacity="' + (.5 + (i % 4) * .15) + '"/>';
+      s += '<circle cx="150" cy="120" r="60" fill="#E8E8F0"/><circle cx="130" cy="105" r="12" fill="#C9C9D6"/><circle cx="170" cy="140" r="9" fill="#C9C9D6"/><circle cx="160" cy="95" r="6" fill="#C9C9D6"/>';
+      s += '<circle cx="640" cy="360" r="70" fill="#E07A4A"/><ellipse cx="640" cy="360" rx="120" ry="20" fill="none" stroke="#FFD9A0" stroke-width="8" transform="rotate(-15 640 360)"/>';
+      return s + '<circle cx="680" cy="90" r="28" fill="#3C8FD9"/><path d="M664 80 q10 -10 22 0 q-6 12 -14 10Z M676 100 q12 -4 16 4 q-10 6 -16 -4Z" fill="#6CC04A"/>'; },
     route: function(){ return ciel("#7CC8FF","#D7F0FF") + soleil(680, 80) + nuage(100, 70) + collines("#7BCB6B","#5DB55A") + maison(70, 300, "#FFE1A8", "#E5484D") + maison(600, 300, "#CFE8FF", "#3D7BD9") + route(); },
     pluie: function(){ var s = ciel("#8A93A8","#C3C8D4") + nuage(80, 60, 1.3) + nuage(420, 40, 1.5) + collines("#6E9C6A","#5E8A5B") + route() + '<g class="pluie" stroke="#DCEBFF" stroke-width="3" opacity=".8">';
       for(var i=0;i<40;i++){ var x = (i*53)%800, y = (i*37)%380; s += '<line x1="' + x + '" y1="' + y + '" x2="' + (x-6) + '" y2="' + (y+22) + '"/>'; } return s + "</g>"; },

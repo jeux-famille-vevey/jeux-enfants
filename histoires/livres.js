@@ -1,12 +1,34 @@
 /* Les histoires. Chaque page : { s: scène, l: [[qui, texte], …] }
    Scène : { f: fond, p: [[emoji, x, y, taille, animation]] }  (x, y en % de l'image ; animation : "saut", "balance", "vole", "")
    Personnage dessiné en entier : ["@mikael", x, y, taille, animation, "tenue,pose,visage"] (voir persos.js)
-   Fonds : prairie, jardin, foret, nuit, chambre, route, pluie, village, ferme, ecole, stade, dojo, chambreVide
+   Fonds : prairie, jardin, foret, nuit, chambre, route, pluie, village, ferme, ecole, stade, dojo, chambreVide, vevey, piscine, plage, espace
    cache:true : le livre n'apparaît pas encore dans la bibliothèque (aperçu avec histoires/?livre=<id>)
    Personnages : voix (hauteur, vitesse) et couleur du texte.
    vx : voix enregistrée (jessica, pierre, siwis, miro) avec un décalage en demi-tons, ex. "siwis+3".
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
+{
+  id:"zouli", cache:true, titre:"Les extraterrestres de Vevey", auteur:"Une histoire imaginée par Aleyah", couverture:{ f:"vevey", p:[["@soucoupe",62,28,13,"vole","x,rayon"],["@zouli",44,80,20,"saut","x,joie,rire,0"],["@etoile",22,80,23,"","heros,debout,sourire"]] }, age:"4-10 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, zouli:{ nom:"Zouli", h:1.6, v:1.05, c:"#7BE495", vx:"jessica+6" }, etoile:{ nom:"Super Étoile", h:1.2, v:.95, c:"#FF8FD0", vx:"siwis" },
+           gens:{ nom:"Les gens de Vevey", h:.9, v:1.1, c:"#FFD23F", vx:"miro" } },
+  pages:[
+    { s:{ f:"vevey", p:[["@copain1",28,82,20,"","foot,debout,sourire"],["@copain3",44,84,19,"balance","ecole,debout,rire"]] }, l:[["narr","Un matin, à Vevey, le soleil brillait sur le lac."],["narr","Les gens se promenaient sur le quai, tout près de la grande fourchette plantée dans l'eau."]] },
+    { s:{ f:"vevey", p:[["@soucoupe",30,30,12,"vole","x,rayon"],["@soucoupe",72,20,9,"vole","x"],["@zouli",34,84,16,"saut","x,joie,rire,0"],["@zouli",50,85,14,"saut","x,salut,sourire,1"]] }, l:[["narr","Tout à coup, des soucoupes volantes apparurent dans le ciel !"],["narr","Des dizaines de petits extraterrestres descendirent sur le quai."]] },
+    { s:{ f:"vevey", p:[["@copain1",20,82,20,"saut","foot,peur,surpris"],["@copain2",36,84,19,"saut","ecole,peur,surpris"],["@zouli",74,83,17,"","x,debout,surpris,2"]] }, l:[["gens","« Au secours ! Des extraterrestres ! Ils viennent nous attaquer ! »"],["narr","Tout le monde eut très peur et courut se cacher."]] },
+    { s:{ f:"vevey", p:[["@zouli",28,83,17,"balance","x,salut,rire,0"],["@zouli",50,85,16,"saut","x,joie,sourire,1"],["@zouli",72,83,17,"balance","x,salut,sourire,3"]] }, l:[["narr","Mais les extraterrestres avaient l'air tout étonnés."],["narr","Ils agitaient leurs petites antennes… et ils souriaient."]] },
+    { s:{ f:"vevey", p:[["@etoile",58,46,25,"vole","heros,vol,sourire"],["@zouli",24,85,16,"","x,debout,surpris,0"]] }, l:[["narr","Alors, dans le ciel, une cape rose apparut. C'était Super Étoile, la super-héroïne de Vevey !"],["etoile","« N'ayez pas peur, je m'en occupe ! »"]] },
+    { s:{ f:"vevey", p:[["@etoile",34,83,25,"","heros,debout,sourire"],["@zouli",62,85,17,"","x,debout,sourire,0"]] }, l:[["narr","Super Étoile se posa devant le plus petit des extraterrestres. Elle ne se battit pas : elle lui posa une question."],["etoile","« Bonjour. Pourquoi êtes-vous venus sur la Terre ? »"]] },
+    { s:{ f:"vevey", p:[["@etoile",22,84,23,"","heros,debout,surpris"],["@zouli",54,83,21,"balance","x,salut,rire,0"]] }, l:[["zouli","« Bip bip ! Je m'appelle Zouli. Nous ne sommes pas méchants ! »"],["zouli","« Sur notre planète, nous sommes tout seuls. Nous voulons juste… avoir des amis. »"]] },
+    { s:{ f:"vevey", p:[["@etoile",22,83,24,"saut","heros,joie,rire"],["@copain1",44,85,18,"","foot,debout,sourire"],["@copain2",58,85,18,"","ecole,salut,sourire"],["@zouli",78,84,17,"saut","x,joie,rire,0"]] }, l:[["etoile","« Des amis ? Ça, on sait faire, à Vevey ! »"],["narr","Un par un, les gens sortirent de leurs cachettes et dirent bonjour aux extraterrestres."]] },
+    { s:{ f:"stade", p:[["@zouli",30,80,17,"saut","x,joie,rire,1"],["⚽",50,76,6,"vole"],["@copain2",66,82,19,"","foot,tir,rire"],["@zouli",84,82,16,"","x,debout,sourire,2"]] }, l:[["narr","L'après-midi, tout le monde joua au foot. Avec leurs trois jambes, les extraterrestres couraient très vite !"],["zouli","« But ! Bip bip ! »"]] },
+    { s:{ f:"piscine", p:[["@zouli",36,62,18,"vole","x,joie,rire,0"],["@copain1",64,70,19,"vole","foot,vol,rire"],["❤️",48,30,6,"vole"],["❤️",58,22,5,"vole"]] }, l:[["narr","Ensuite, ils plongèrent tout au fond de la piscine."],["narr","Les extraterrestres savaient faire des bulles en forme de cœur !"]] },
+    { s:{ f:"plage", p:[["🏰",52,82,22,""],["@zouli",30,86,16,"saut","x,joie,rire,3"],["@copain3",76,86,18,"","ecole,joie,rire"],["@etoile",88,86,18,"","heros,salut,sourire"]] }, l:[["narr","À la plage, ils construisirent un château de sable géant, avec des tours… et des antennes."]] },
+    { s:{ f:"espace", p:[["@soucoupe",48,56,17,"vole","x"],["🚀",22,70,8,"vole"]] }, l:[["narr","Et depuis ce jour, les habitants de Vevey et les extraterrestres font des voyages ensemble."],["narr","Sur la Lune, sur Mars… et retour à Vevey pour le goûter !"]] },
+    { s:{ f:"nuit", p:[["@etoile",38,82,24,"","heros,debout,rire"],["@zouli",60,84,18,"saut","x,joie,rire,0"],["❤️",49,36,8,"vole"]] }, l:[["etoile","« Tu vois, il ne faut pas avoir peur de ceux qui sont différents. »"],["zouli","« Bip bip ! Merci, mon amie ! »"],["narr","Et tout Vevey devint ami avec les extraterrestres. Fin."]] }
+  ],
+  quiz:[ { q:"Pourquoi les extraterrestres sont-ils venus sur la Terre ?", c:["Pour attaquer","Pour avoir des amis","Pour boire le lac"], r:1 }, { q:"Comment s'appelle le petit extraterrestre ?", c:["Zouli","Balou","Pompon"], r:0 },
+         { q:"Qu'ont-ils construit à la plage ?", c:["🏰","🚗","🍕"], r:0 }, { q:"Combien de jambes ont les extraterrestres ?", c:["2","3","4"], r:1 } ]
+},
 {
   id:"mikael", titre:"Mikael et le ballon magique", couverture:{ f:"stade", p:[["@mikael",32,74,25,"saut","foot,joie,rire"],["@balou",56,44,12,"vole",",,rire"],["@grognon",80,72,30,"","x,joie,rire"]] }, age:"3-6 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, mikael:{ nom:"Mikael", h:1.4, v:1, c:"#4CC9F0", vx:"siwis+3" }, balou:{ nom:"Balou", h:1.6, v:1.05, c:"#FFD23F", vx:"jessica+5" },
