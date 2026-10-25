@@ -3,6 +3,7 @@
 import * as THREE from "../course3d/lib/three.module.min.js";
 import { lireManette, vraiesManettes } from "../commun/manette.js";
 import { mergeGeometries } from "../course3d/lib/BufferGeometryUtils.js";
+import { profils, avatarDe, creerAvatar } from "../commun/avatar.js";
 
 const $ = (id) => document.getElementById(id);
 const PARAMS = new URLSearchParams(location.search);
@@ -14,11 +15,8 @@ const lerp = (a, b, t) => a + (b - a) * t;
 function hasard(seed){ let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 
 /* ======================= réglages ======================= */
-const JOUEURS = [
-  { id:"mikael", nom:"Mikael", e:"⚽", niveau:"tranquille", peau:"#C98E62", cheveux:"#22150F", haut:"#3D7BD9" },
-  { id:"aleyah", nom:"Aleyah", e:"⭐", niveau:"normal", peau:"#C98E62", cheveux:"#22150F", haut:"#FF8FB8", longs:true },
-  { id:"invite", nom:"Invité", e:"🙂", niveau:"normal", peau:"#E8B98E", cheveux:"#6B3E23", haut:"#3FA34D" }
-];
+// les joueurs et leur personnage viennent de l'atelier « Mon personnage » (commun/avatar.js)
+const JOUEURS = profils().map(p => Object.assign({}, p, { niveau: p.id === "mikael" ? "tranquille" : "normal" }));
 const NIVEAUX = {
   tranquille: { nom:"Tranquille", e:"🐢", desc:"doucement", v:14.5, obstacles:8, perte:0 },
   normal:     { nom:"Normal", e:"🛷", desc:"plus vite", v:19, obstacles:14, perte:3 },
@@ -74,46 +72,20 @@ function mat(c, o){ const k = c + JSON.stringify(o || {}); if(!M[k]) M[k] = new 
 function maille(geo, c, o){ return new THREE.Mesh(geo, mat(c, o)); }
 
 /* ======================= le personnage sur sa bouée ======================= */
-function texVisage(peau){
-  return texture(512, 256, (g, w, h) => {
-    g.fillStyle = peau; g.fillRect(0, 0, w, h);
-    const cx = w * .25, cy = h * .5;
-    [-1, 1].forEach(s => {
-      g.fillStyle = "#FFFFFF"; g.beginPath(); g.ellipse(cx + s * 26, cy - 6, 15, 19, 0, 0, 7); g.fill();
-      g.fillStyle = "#2B2140"; g.beginPath(); g.ellipse(cx + s * 26 + 2, cy - 3, 9, 12, 0, 0, 7); g.fill();
-      g.fillStyle = "#FFFFFF"; g.beginPath(); g.arc(cx + s * 26 + 5, cy - 8, 3.5, 0, 7); g.fill();
-      g.strokeStyle = "#2B2140"; g.lineWidth = 5; g.lineCap = "round"; g.beginPath(); g.moveTo(cx + s * 14, cy - 32); g.quadraticCurveTo(cx + s * 26, cy - 40, cx + s * 38, cy - 31); g.stroke();
-      g.fillStyle = "rgba(255,110,130,.45)"; g.beginPath(); g.ellipse(cx + s * 44, cy + 22, 13, 8, 0, 0, 7); g.fill();
-    });
-    g.fillStyle = "#8A2C4A"; g.beginPath(); g.moveTo(cx - 20, cy + 26); g.quadraticCurveTo(cx, cy + 54, cx + 20, cy + 26); g.closePath(); g.fill();
-  });
-}
 function creerGlisseur(J, couleurBouee){
-  const g = new THREE.Group(), corps = new THREE.Group(); g.add(corps);
+  const g = new THREE.Group();
   // bouée rayée
   const tb = texture(256, 32, (c, w, h) => { for(let i = 0; i < 8; i++){ c.fillStyle = i % 2 ? "#FFFFFF" : couleurBouee; c.fillRect(i * w / 8, 0, w / 8 + 1, h); } }, true);
   const bouee = new THREE.Mesh(new THREE.TorusGeometry(.78, .32, 12, 28), new THREE.MeshStandardMaterial({ map: tb, roughness: .35 }));
   bouee.rotation.x = Math.PI / 2; bouee.position.y = .32; g.add(bouee);
-  // enfant assis
-  const peau = J.peau, haut = J.haut;
-  corps.add(maille(new THREE.BoxGeometry(.62, .66, .38), haut).translateY(.88));
-  [-1, 1].forEach(s => {
-    const jambe = maille(new THREE.BoxGeometry(.22, .2, .62), "#3D4A8F"); jambe.position.set(s * .17, .58, .32); corps.add(jambe);
-    const pied = maille(new THREE.BoxGeometry(.24, .22, .2), "#E5484D"); pied.position.set(s * .17, .6, .68); corps.add(pied);
-  });
-  const bras = [];
-  [-1, 1].forEach(s => { const b = new THREE.Group(); b.position.set(s * .38, 1.12, 0);
-    const m = maille(new THREE.BoxGeometry(.17, .55, .19), haut); m.position.y = -.24; b.add(m);
-    const main = maille(new THREE.BoxGeometry(.17, .17, .19), peau); main.position.y = -.55; b.add(main);
-    b.rotation.z = s * .55; corps.add(b); bras.push(b); });
-  const tete = new THREE.Mesh(new THREE.SphereGeometry(.34, 20, 14), new THREE.MeshStandardMaterial({ map: texVisage(peau), roughness: .7 }));
-  tete.position.y = 1.5; corps.add(tete);
-  const chev = new THREE.Mesh(new THREE.SphereGeometry(.365, 16, 10, 0, Math.PI * 2, 0, Math.PI * .47), mat(J.cheveux)); chev.position.y = 1.52; chev.rotation.x = -.36; corps.add(chev);
-  if(J.longs) { const q = maille(new THREE.BoxGeometry(.6, .55, .18), J.cheveux); q.position.set(0, 1.3, -.22); corps.add(q); }
+  // le personnage de l'enfant, assis
+  const av = creerAvatar(avatarDe(J.id), { pose: "assis", numero: J.numero });
+  av.scale.setScalar(.82); av.position.set(0, .12, -.05); g.add(av);
+  av.userData.bras.forEach((b, k) => { b.rotation.z = (k ? 1 : -1) * .55; });
   // ombre douce
   const om = new THREE.Mesh(new THREE.CircleGeometry(.95, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .22, depthWrite: false }));
   om.rotation.x = -Math.PI / 2; om.position.y = .02; g.add(om);
-  g.userData = { corps, bras, bouee, ombre: om };
+  g.userData = { corps: av.userData.corps, bras: av.userData.bras, bouee, ombre: om };
   return g;
 }
 
@@ -714,6 +686,9 @@ function remplirMenu(){
   boutons("cJoueur", JOUEURS.map(j => [j.id, j]), "joueur", (j) => '<span class="e">' + j.e + "</span>" + j.nom, () => {
     choix.niveau = lire("tobo-niveau-" + choix.joueur, (JOUEURS.find(j => j.id === choix.joueur) || JOUEURS[0]).niveau);
     choix.monde = Math.min(parseInt(lire("tobo-monde-" + choix.joueur, "0"), 10) || 0, debloque()); construireMonde(choix.monde); });
+  const perso = document.createElement("button"); perso.innerHTML = '<span class="e">✏️</span>Mon personnage';
+  perso.onclick = () => { location.href = "../avatar/?profil=" + encodeURIComponent(choix.joueur) + "&retour=../toboggan/"; };
+  $("cJoueur").appendChild(perso);
   const bb = $("cBouee"); bb.innerHTML = "";
   BOUEES.forEach(c => { const b = document.createElement("button"); b.innerHTML = '<span class="pastille" style="background:' + c + '"></span>'; if(c === choix.bouee) b.className = "on";
     b.onclick = () => { choix.bouee = c; ecrire("tobo-bouee", c); remplirMenu(); }; bb.appendChild(b); });

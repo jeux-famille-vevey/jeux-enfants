@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Mon personnage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --sun:#FFD23F; --tang:#FF9F1C; --ink:#FFF8E7; --soft:#C9CCF2; --night:#1D2357; --panel:#272C6B;
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#1D2357;color:var(--ink);font-family:var(--font);user-select:none;-webkit-user-select:none}
+[hidden]{display:none !important}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+#app{display:flex;height:100%}
+#scene{position:relative;flex:1 1 55%;min-width:0;background:linear-gradient(#6EC1FF,#CDEBFF)}
+#scene canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#panneau{flex:0 0 min(560px,45%);display:flex;flex-direction:column;background:#1D2357;min-height:0}
+header{padding:12px 16px 6px}
+h1{margin:0;font-size:clamp(1.6rem,4vw,2.2rem);color:var(--sun);text-shadow:0 3px 0 var(--tang)}
+.profils{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.profils button{background:#2E3580;border-radius:999px;padding:7px 13px;font-weight:600;border:3px solid transparent}
+.profils button.on{border-color:var(--sun);background:#3A429A}
+.onglets{display:flex;gap:4px;padding:8px 10px 0;overflow-x:auto;scrollbar-width:none}
+.onglets button{flex:0 0 auto;background:#272C6B;border-radius:14px 14px 0 0;padding:8px 10px;font-size:1.5rem;line-height:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:64px}
+.onglets button small{font-size:.72rem;color:var(--soft);font-weight:600}
+.onglets button.on{background:#3A429A}
+.onglets button.on small{color:var(--ink)}
+#choix{flex:1;overflow:auto;padding:12px 14px 18px;background:#3A429A}
+#choix h3{margin:6px 0 8px;font-size:1rem;color:var(--soft);font-weight:600}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-bottom:12px}
+.grille button{background:#272C6B;border-radius:16px;padding:9px 4px;border:3px solid transparent;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:600;font-size:.82rem;line-height:1.1;text-align:center}
+.grille button .e{font-size:1.9rem;line-height:1}
+.grille button.on{border-color:var(--sun);background:#1D2357}
+.couleurs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.couleurs button{width:46px;height:46px;border-radius:50%;border:4px solid rgba(255,255,255,.25)}
+.couleurs button.on{border-color:#fff;transform:scale(1.12);box-shadow:0 0 0 3px var(--sun)}
+.actions{display:flex;gap:8px;padding:10px 14px;background:#1D2357;flex-wrap:wrap}
+.actions button,.actions a{flex:1;min-width:120px;text-align:center;padding:12px;border-radius:16px;font-weight:700;font-size:1.05rem;background:#3A429A;color:var(--ink);text-decoration:none}
+.actions .prim{background:linear-gradient(100deg,var(--sun),var(--tang));color:var(--night)}
+#bulle{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:#fff;color:#1D2357;font-weight:700;border-radius:18px;padding:8px 16px;font-size:1.1rem;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;transition:opacity .25s;white-space:nowrap}
+#bulle.on{opacity:1}
+#outils{position:absolute;left:12px;bottom:12px;display:flex;gap:8px}
+#outils button{background:rgba(29,35,87,.8);border-radius:999px;padding:10px 14px;font-weight:700;font-size:1rem}
+#accueil{position:absolute;top:12px;left:12px;background:rgba(29,35,87,.8);border-radius:999px;padding:8px 14px;font-weight:600;text-decoration:none;color:var(--ink)}
+@media (max-width:760px){
+  #app{flex-direction:column}
+  #scene{flex:0 0 42%}
+  #panneau{flex:1 1 auto}
+  .grille{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="scene">
+    <a id="accueil" href="../">🏠 Les jeux</a>
+    <div id="bulle"></div>
+    <div id="outils"><button id="danse">💃 Danse</button><button id="tourne">🔄 Tourner</button></div>
+  </div>
+  <div id="panneau">
+    <header>
+      <h1>Mon personnage</h1>
+      <div class="profils" id="profils"></div>
+    </header>
+    <div class="onglets" id="onglets"></div>
+    <div id="choix"></div>
+    <div class="actions">
+      <button id="hasard">🎲 Au hasard</button>
+      <button class="prim" id="fini">✅ C'est moi !</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="atelier.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@
    Tout est dessiné en code : stade, joueurs, ballon. */
 import * as THREE from "../course3d/lib/three.module.min.js";
 import { lireManette, vraiesManettes } from "../commun/manette.js";
+import { profils, avatarDe, creerAvatar } from "../commun/avatar.js";
 
 const $ = (id) => document.getElementById(id);
 const PARAMS = new URLSearchParams(location.search);
@@ -15,11 +16,20 @@ function angle(a){ while(a > Math.PI) a -= 2 * Math.PI; while(a < -Math.PI) a +=
 function hasard(seed){ let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 
 /* ======================= réglages ======================= */
-const JOUEURS = [
-  { id:"mikael", nom:"Mikael", e:"⚽", niveau:"facile", numero:5, peau:"#C98E62", cheveux:"#22150F" },
-  { id:"aleyah", nom:"Aleyah", e:"⭐", niveau:"normal", numero:10, peau:"#C98E62", cheveux:"#22150F", longs:true },
-  { id:"invite", nom:"Invité", e:"🙂", niveau:"normal", numero:7, peau:"#E8B98E", cheveux:"#6B3E23" }
-];
+// les joueurs et leur personnage viennent de l'atelier « Mon personnage » (commun/avatar.js)
+const JOUEURS = profils().map(p => { const a = avatarDe(p.id); return Object.assign({}, p, { niveau: p.id === "mikael" ? "facile" : "normal", peau: a.peau, cheveux: a.couleurCheveux }); });
+/* le joueur dirigé par l'enfant : son personnage, avec le maillot de l'équipe */
+function joueurAvatar(J, maillot, short){
+  const cfg = Object.assign({}, avatarDe(J.id), { haut: "maillot", couleurHaut: maillot, motif: "uni", bas: "short", couleurBas: short, dos: "aucun" });
+  const g = creerAvatar(cfg, { numero: J.numero }), u = g.userData;
+  const ombre = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.4), ombreMat); ombre.rotation.x = -Math.PI / 2; ombre.position.y = .02; g.add(ombre);
+  const anneau = new THREE.Mesh(new THREE.RingGeometry(.62, .82, 28), new THREE.MeshBasicMaterial({ color: "#FFD23F", transparent: true, opacity: .9 }));
+  anneau.rotation.x = -Math.PI / 2; anneau.position.y = .04; anneau.visible = false; g.add(anneau);
+  const fleche = new THREE.Mesh(new THREE.ConeGeometry(.28, .5, 4), new THREE.MeshBasicMaterial({ color: "#FFD23F" }));
+  fleche.rotation.x = Math.PI; fleche.position.y = 3.1; fleche.visible = false; g.add(fleche);
+  g.userData = { corps: u.corps, jambes: u.jambes, bras: u.bras, anneau, fleche };
+  return g;
+}
 const NIVEAUX = {
   facile:   { nom:"Facile", e:"🐣", desc:"2 minutes", duree:120, vAdv:.76, volAdv:.35, gardienAdv:.3, monVol:3, visee:.35, tirAdv:.35, aide:true },
   normal:   { nom:"Normal", e:"⚽", desc:"2 min 30", duree:150, vAdv:.9, volAdv:.85, gardienAdv:.5, monVol:1.7, visee:.8, tirAdv:.6, aide:false },
@@ -229,12 +239,12 @@ function creerEquipes(){
   joueurs.forEach(p => scene.remove(p.mesh)); joueurs = [];
   const J = JOUEURS.find(j => j.id === choix.joueur) || JOUEURS[2], mai = MAILLOTS.find(m => m.id === choix.maillot) || MAILLOTS[0], adv = ADVERSAIRES.find(a => a.id === choix.adv) || ADVERSAIRES[0];
   const copains = [{ peau:"#F2C9A0", cheveux:"#E0A43A" }, { peau:"#8D5B3C", cheveux:"#1E1410" }, { peau:"#E8B98E", cheveux:"#6B3E23" }, { peau:"#C98E62", cheveux:"#22150F" }];
-  const ajoute = (equipe, role, numero, look, nom) => {
+  const ajoute = (equipe, role, numero, look, nom, avatar) => {
     const o = Object.assign({ equipe, gardien: role === "gardien", numero, maillot: equipe === 0 ? mai.c : adv.c, short: equipe === 0 ? mai.s : adv.s }, look);
-    const p = { equipe, role, numero, nom, mesh: creerJoueur(o), x: 0, z: 0, vx: 0, vz: 0, h: 0, phase: Math.random() * 6, attente: 0, tPossession: 0, cool: 0, saut: 0 };
+    const p = { equipe, role, numero, nom, mesh: avatar ? joueurAvatar(J, mai.c, mai.s) : creerJoueur(o), x: 0, z: 0, vx: 0, vz: 0, h: 0, phase: Math.random() * 6, attente: 0, tPossession: 0, cool: 0, saut: 0 };
     scene.add(p.mesh); joueurs.push(p); return p;
   };
-  humain = ajoute(0, "champ", J.numero, { peau: J.peau, cheveux: J.cheveux, longs: J.longs }, J.nom);
+  humain = ajoute(0, "champ", J.numero, { peau: J.peau, cheveux: J.cheveux }, J.nom, true);
   ajoute(0, "champ", 9, copains[0], "Léo");
   ajoute(0, "gardien", 1, copains[1], "Sam");
   ajoute(1, "champ", 10, copains[2], adv.nom);
@@ -257,6 +267,7 @@ function engagement(equipeQuiEngage){
 function donner(p){ B.owner = p; B.dernier = p; p.tPossession = 0; B.tenteArret = false; B.tirEquipe = -1; }
 function demarrerMatch(){
   const niv = NIVEAUX[choix.niveau];
+  if(vitrine){ scene.remove(vitrine); vitrine = null; }
   creerEquipes();
   match = { niv, temps: niv.duree, score: [0, 0], gel: 0, fete: 0, fini: false, auto: AUTO };
   etat = "match";
@@ -695,7 +706,7 @@ let vitrine = null;
 function majVitrine(){
   if(vitrine) scene.remove(vitrine);
   const J = JOUEURS.find(j => j.id === choix.joueur) || JOUEURS[2], mai = MAILLOTS.find(m => m.id === choix.maillot) || MAILLOTS[0];
-  vitrine = creerJoueur({ equipe: 0, maillot: mai.c, short: mai.s, peau: J.peau, cheveux: J.cheveux, numero: J.numero, longs: J.longs });
+  vitrine = joueurAvatar(J, mai.c, mai.s);
   scene.add(vitrine);
 }
 function allerMenu(){
@@ -716,6 +727,9 @@ function boutons(id, liste, cle, rendu, apres){
 function remplirMenu(){
   boutons("cJoueur", JOUEURS.map(j => [j.id, j]), "joueur", (j) => '<span class="e">' + j.e + "</span>" + j.nom + " <small>n° " + j.numero + "</small>",
     () => { choix.niveau = lire("foot-niveau-" + choix.joueur, (JOUEURS.find(j => j.id === choix.joueur) || JOUEURS[0]).niveau); majVitrine(); });
+  const perso = document.createElement("button"); perso.innerHTML = '<span class="e">✏️</span>Mon personnage';
+  perso.onclick = () => { location.href = "../avatar/?profil=" + encodeURIComponent(choix.joueur) + "&retour=../foot3d/"; };
+  $("cJoueur").appendChild(perso);
   boutons("cNiveau", Object.entries(NIVEAUX), "niveau", (n) => '<span class="e">' + n.e + "</span><span>" + n.nom + "<small>" + n.desc + "</small></span>");
   boutons("cMaillot", MAILLOTS.map(m => [m.id, m]), "maillot", (m) => '<span class="pastille" style="background:' + m.c + '"></span>' + m.nom, majVitrine);
   boutons("cAdv", ADVERSAIRES.map(a => [a.id, a]), "adv", (a) => '<span class="e">' + a.e + "</span>" + a.nom);
@@ -740,6 +754,7 @@ function boucle(now){
     if(m && m.nA){ if(etat === "menu") $("go").click(); else if(etat === "fin") $("rejouer").click(); }
     if(m && m.nSTART && etat === "pause") basculerPause();
   }
+  if(etat === "menu" && !vitrine) majVitrine();
   if(etat === "menu"){
     const el = $("etatManette"); el.textContent = vraiesManettes().length ? "🎮 Manette connectée ! Appuie sur ✕ pour jouer." : "🎮 Manette branchée ? Appuie sur un de ses boutons pour la réveiller.";
     // le joueur jongle au milieu du terrain, la caméra tourne doucement
