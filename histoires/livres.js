@@ -8,7 +8,7 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
-  id:"zouli", cache:true, titre:"Les extraterrestres de Vevey", auteur:"Une histoire imaginée par Aleyah", couverture:{ f:"vevey", p:[["@soucoupe",64,26,13,"vole","x,rayon"],["@zouli",48,80,19,"saut","x,joie,rire,0"],["@aleyah",24,80,23,"","heros,joie,rire"],["@copine1",10,82,20,"","heros2,debout,sourire"]] }, age:"4-10 ans",
+  id:"zouli", titre:"Les extraterrestres de Vevey", auteur:"Une histoire imaginée par Aleyah", couverture:{ f:"vevey", p:[["@soucoupe",64,26,13,"vole","x,rayon"],["@zouli",48,80,19,"saut","x,joie,rire,0"],["@aleyah",24,80,23,"","heros,joie,rire"],["@copine1",10,82,20,"","heros2,debout,sourire"]] }, age:"4-10 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, zouli:{ nom:"Zouli", h:1.6, v:1.05, c:"#7BE495", vx:"jessica+6" }, aleyah:{ nom:"Super Aleyah", h:1.2, v:.95, c:"#FF8FD0", vx:"siwis" },
            lune:{ nom:"Super Lune", h:1.2, v:.95, c:"#7FD3FF", vx:"siwis+2" }, arc:{ nom:"Super Arc-en-ciel", h:1.2, v:.95, c:"#9BE07A", vx:"jessica+2" },
            bipbop:{ nom:"MC Bip-Bop", h:.9, v:1.05, c:"#FFD23F", vx:"pierre+3" }, gens:{ nom:"Les gens de Vevey", h:.9, v:1.1, c:"#FFD23F", vx:"miro" } },
