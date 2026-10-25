@@ -47,7 +47,9 @@
     kimono:  { haut:"#FAFAF5", bas:"#FAFAF5", jambe:"pant", chaussure:"pieds", manche:"longue", ceinture:"#FFD23F" },
     pyjama:  { haut:"#8EC5FF", bas:"#8EC5FF", jambe:"pant", chaussure:"chaussons", manche:"longue", etoiles:true },
     ecole:   { haut:"#FF9F1C", bas:"#3D4A8F", jambe:"pant", chaussure:"#2B2140", manche:"courte", sac:true },
-    heros:   { haut:"#8E5BC4", bas:"#5A3A9A", jambe:"pant", chaussure:"#FFD23F", manche:"longue", cape:"#FF4FB0", logo:true }
+    heros:   { haut:"#8E5BC4", bas:"#5A3A9A", jambe:"pant", chaussure:"#FFD23F", manche:"longue", cape:"#FF4FB0", logo:true },
+    heros2:  { haut:"#3D7BD9", bas:"#1D2357", jambe:"pant", chaussure:"#FFFFFF", manche:"longue", cape:"#4CC9F0", logo:true },
+    heros3:  { haut:"#3FA34D", bas:"#2F7D4A", jambe:"pant", chaussure:"#FF8FB8", manche:"longue", cape:"#FFD23F", logo:true }
   };
 
   function visage(cx, cy, expr, peau){
@@ -219,6 +221,12 @@
     if(expr === "rire") s += '<path d="M-12 -96 Q0 -80 12 -96Z" fill="#8A2C4A"/>';
     else if(expr === "surpris") s += ovale(0, -92, 5, 6, "#8A2C4A");
     else s += chemin("M-10 -96 q10 8 20 0", TRAIT, 2.6);
+    if(o[4] === "rap"){
+      s += '<path d="M-38 -128 Q-30 -152 0 -152 Q30 -152 38 -128Z" fill="#E5484D" stroke="' + TRAIT + '" stroke-width="2"/><path d="M28 -134 L58 -128 L56 -122 L30 -126Z" fill="#E5484D" stroke="' + TRAIT + '" stroke-width="2"/>';
+      s += '<rect x="-30" y="-124" width="24" height="15" rx="6" fill="#1A1A24"/><rect x="6" y="-124" width="24" height="15" rx="6" fill="#1A1A24"/><rect x="-6" y="-120" width="12" height="3" fill="#1A1A24"/>';
+      s += '<path d="M-16 -82 Q0 -66 16 -82" fill="none" stroke="#FFD23F" stroke-width="4"/>' + rond(0, -70, 6, "#FFD23F", ' stroke="' + TRAIT + '" stroke-width="1.5"');
+      var m = bd[1]; s += '<rect x="' + (m[0] - 4) + '" y="' + (m[1] - 4) + '" width="8" height="22" rx="3" fill="#22232B"/>' + rond(m[0], m[1] - 8, 8, "#8A90A0", ' stroke="' + TRAIT + '" stroke-width="1.5"');
+    }
     void fonce;
     return s;
   }
@@ -250,7 +258,10 @@
     grognon: grognon,
     zouli: alien,
     soucoupe: soucoupe,
-    etoile: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#4A2C1A", longs:true }); }
+    etoile: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#4A2C1A", longs:true }); },
+    aleyah: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", longs:true }); },
+    copine1: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#E0A43A", longs:true }); },
+    copine2: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
   window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110 };
