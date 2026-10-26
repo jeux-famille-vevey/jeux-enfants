@@ -18,3 +18,4 @@ Petits jeux éducatifs en français, sans publicité ni compte.
 - `toboggan/` : Le Toboggan des Nuages, glissade en 3D à travers 5 mondes (déblocage, trophées, musique). Voix : `outils/enregistrer-toboggan.py`.
 - `avatar/` : l'atelier « Mon personnage » (style Roblox). Le moteur des personnages est dans `commun/avatar.js` (utilisé par le toboggan et le foot).
 - `parler/` : « Je répète ! », jeu de parole pour les tout-petits (mots dans `parler/mots.js`, voix : `outils/enregistrer-parler.py`). Le micro sert seulement à savoir que l'enfant a parlé.
+- `lire/` : « J'apprends à lire », 6 étapes des voyelles aux petites phrases (contenu dans `lire/donnees.js`, voix : `outils/enregistrer-lire.py`, les sons qu'on fait durer sont fabriqués à partir des phonèmes).
