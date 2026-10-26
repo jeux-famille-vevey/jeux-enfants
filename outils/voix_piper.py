@@ -31,7 +31,7 @@ def voix(nom):
 
 
 # mots que la voix prononce mal : on lui donne une écriture « phonétique » (le texte affiché ne change pas)
-PRONONCIATION = {"taekwondo": "tékwondo", "Taekwondo": "Tékwondo"}
+PRONONCIATION = {"taekwondo": "tékwondo", "Taekwondo": "Tékwondo", "ananas": "ananasse"}
 
 
 def enregistrer(texte, vx, vitesse, sortie):
@@ -50,8 +50,10 @@ def enregistrer(texte, vx, vitesse, sortie):
         if demi:
             filtres.append("rubberband=pitch=%.5f" % (2 ** (demi / 12)))
         # enlever le silence au début et à la fin, puis un petit souffle avant
-        filtres += ["silenceremove=start_periods=1:start_threshold=-50dB", "areverse",
-                    "silenceremove=start_periods=1:start_threshold=-50dB", "areverse", "adelay=60"]
+        # (seuil bas pour ne pas couper les sons doux comme « f », « s » ; un peu d'air avant et après,
+        #  car certains navigateurs mangent le tout début ou la toute fin d'un MP3 très court)
+        filtres += ["silenceremove=start_periods=1:start_threshold=-60dB", "areverse",
+                    "silenceremove=start_periods=1:start_threshold=-60dB", "areverse", "adelay=150", "apad=pad_dur=0.25"]
         os.makedirs(os.path.dirname(sortie), exist_ok=True)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", brut, "-af", ",".join(filtres),
                         "-ac", "1", "-ar", "22050", "-c:a", "libmp3lame", "-q:a", "6", sortie], check=True)

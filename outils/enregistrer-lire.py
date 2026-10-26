@@ -9,19 +9,19 @@ from voix_piper import RACINE, slug, enregistrer, voix  # noqa: E402
 from piper import SynthesisConfig  # noqa: E402
 
 SONS = os.path.join(RACINE, "lire", "sons")
-VOIX = "jessica+2"
+VOIX = "siwis"  # la voix la plus claire (jessica mangeait le début des mots)
 
 def depuis_phonemes(ph, sortie, lent=1.6):
-    v = voix("jessica")
+    v = voix(VOIX)
     ids = v.phonemes_to_ids(list(ph))
-    a = np.asarray(v.phoneme_ids_to_audio(ids, SynthesisConfig(speaker_id=0, length_scale=lent))).flatten()
+    a = np.asarray(v.phoneme_ids_to_audio(ids, SynthesisConfig(speaker_id=None, length_scale=lent))).flatten()
     if a.dtype != np.int16: a = (np.clip(a, -1, 1) * 32767).astype(np.int16)
     with tempfile.TemporaryDirectory() as tmp:
         brut = os.path.join(tmp, "b.wav")
         with wave.open(brut, "wb") as w:
             w.setnchannels(1); w.setsampwidth(2); w.setframerate(v.config.sample_rate); w.writeframes(a.tobytes())
-        # même hauteur de voix que le reste (+2 demi-tons) et un peu plus fort
-        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", brut, "-af", "rubberband=pitch=%.5f,volume=1.6,adelay=60" % (2 ** (2 / 12)),
+        # un peu plus fort, avec un peu d'air avant et après
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", brut, "-af", "volume=1.6,adelay=150,apad=pad_dur=0.25",
                         "-ac", "1", "-ar", "22050", "-c:a", "libmp3lame", "-q:a", "6", sortie], check=True)
 
 def main():
@@ -30,24 +30,24 @@ def main():
     textes, phon = {}, {}
     def t(nom, texte, vit=.8): textes[nom] = (texte, vit)
     for k, v in D["voix"].items():
-        for x in (v if isinstance(v, list) else [v]): t("v-" + slug(x), x, .85)
+        for x in (v if isinstance(v, list) else [v]): t("v-" + slug(x), x, .9)
     for x in D["voyelles"]:
-        t("l-" + slug(x["l"]) + ("-e" if x["l"] == "é" else ""), x["dit"] + ".", .7)
-        t("c-" + slug(x["mot"]), "comme " + x["mot"] + " !", .8)
+        t("l-" + slug(x["l"]) + ("-e" if x["l"] == "é" else ""), x["dit"] + ".", .75)
+        t("c-" + slug(x["mot"]), "comme " + x["mot"] + " !", .85)
     for x in D["chantantes"]:
         phon["l-" + slug(x["l"])] = x["ph"]
-        t("c-" + slug(x["mot"]), "comme " + x["mot"] + " !", .8)
+        t("c-" + slug(x["mot"]), "comme " + x["mot"] + " !", .85)
     for x in D["fusions"]:
         phon["f-" + slug(x["s"])] = x["ph"]
-        t("s-" + slug(x["s"]), x["s"] + ".", .7)
+        t("s-" + slug(x["s"]), x["s"] + ".", .75)
     for g in D["syllabes"]:
-        for s in g: t("s-" + slug(s), s + ".", .7)
+        for s in g: t("s-" + slug(s), s + ".", .75)
     for w in D["mots"]:
-        t("m-" + slug(w["m"]), w["m"] + ".", .7)
-        for (e, d) in w["s"]: t("s-" + slug(d), d + ".", .7)
+        t("m-" + slug(w["m"]), w["m"] + ".", .8)
+        for (e, d) in w["s"]: t("s-" + slug(d), d + ".", .75)
     for p in D["phrases"]:
-        t("p-" + slug(p["p"]), p["p"], .78)
-        for mot in re.findall(r"[\wÀ-ÿ']+", p["p"]): t("w-" + slug(mot), mot + ".", .75)
+        t("p-" + slug(p["p"]), p["p"], .85)
+        for mot in re.findall(r"[\wÀ-ÿ']+", p["p"]): t("w-" + slug(mot), mot + ".", .8)
     n = 0
     for nom, (texte, vit) in sorted(textes.items()):
         s = os.path.join(SONS, nom + ".mp3")

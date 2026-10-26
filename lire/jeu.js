@@ -31,7 +31,7 @@
       return new Promise(function(fin){
         var fait = false, finir = function(){ if(!fait){ fait = true; fin(); } };
         lecteur.onended = finir; lecteur.onerror = function(){ setTimeout(finir, 300); };
-        lecteur.src = "sons/" + nom + ".mp3";
+        lecteur.muted = false; lecteur.src = "sons/" + nom + ".mp3?v=2";   // ?v=2 : nouvelles voix (sinon le navigateur garde les anciennes)
         var pr = lecteur.play(); if(pr && pr.catch) pr.catch(function(){ setTimeout(finir, 300); });
         setTimeout(finir, 8000);
       });

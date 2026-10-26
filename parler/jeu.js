@@ -26,13 +26,14 @@
 
   /* ---------- voix enregistrées ---------- */
   var lecteur = new Audio(), tour = 0;
+  var VERSION_SONS = "?v=2";   // à changer quand on réenregistre les voix (sinon le navigateur garde les anciennes)
   function dire(nom){
     var monTour = tour;
     return new Promise(function(fin){
       if(monTour !== tour) return fin();
       var fait = false, finir = function(){ if(!fait){ fait = true; fin(); } };
       lecteur.onended = finir; lecteur.onerror = function(){ setTimeout(finir, 600); };
-      lecteur.src = "sons/" + nom + ".mp3";
+      lecteur.muted = false; lecteur.src = "sons/" + nom + ".mp3" + VERSION_SONS;
       var p = lecteur.play(); if(p && p.catch) p.catch(function(){ setTimeout(finir, 600); });
       setTimeout(finir, 9000); // filet de sécurité
     });
@@ -48,7 +49,7 @@
   var micro = null, analyseur = null, donnees = null, niveauSon = 0;
   function ouvrirMicro(){
     if(micro || !reglages.micro || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.resolve(!!micro);
-    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function(flux){
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }).then(function(flux){
       var c = audio(); micro = c.createMediaStreamSource(flux); analyseur = c.createAnalyser(); analyseur.fftSize = 1024;
       donnees = new Float32Array(analyseur.fftSize); micro.connect(analyseur); return true;
     }).catch(function(){ micro = null; return false; });
@@ -192,10 +193,10 @@
     var al = $("album"); al.innerHTML = "";
     Array.from(album).filter(function(c){ return c.trim(); }).slice(-30).forEach(function(c){ if(/\p{Extended_Pictographic}/u.test(c)){ var s = document.createElement("span"); s.textContent = c; al.appendChild(s); } });
   }
-  $("jouer").onclick = function(){ audio(); lecteur.muted = true; lecteur.src = "sons/p-bravo.mp3"; var p = lecteur.play(); if(p && p.then) p.then(function(){ lecteur.pause(); lecteur.muted = false; }).catch(function(){ lecteur.muted = false; }); else lecteur.muted = false; jouerPartie(); };
+  $("jouer").onclick = function(){ audio(); lecteur.muted = true; lecteur.src = "sons/p-bravo.mp3" + VERSION_SONS; var p = lecteur.play(); if(p && p.then) p.then(function(){ if(lecteur.src.indexOf("p-bravo") >= 0) lecteur.pause(); lecteur.muted = false; }).catch(function(){ lecteur.muted = false; }); else lecteur.muted = false; jouerPartie(); };
   $("encore").onclick = function(){ jouerPartie(); };
   $("retour").onclick = arreter; $("retourFin").onclick = arreter;
-  $("carte").onclick = function(){ if(partie && partie.mot){ hop(); var l = new Audio("sons/m-" + slug(partie.mot.m) + ".mp3"); l.play().catch(function(){}); } };
+  $("carte").onclick = function(){ if(partie && partie.mot){ hop(); var l = new Audio("sons/m-" + slug(partie.mot.m) + ".mp3" + VERSION_SONS); l.play().catch(function(){}); } };
   $("redire").onclick = $("carte").onclick;
   function remplirReglages(){
     $("optMicro").checked = reglages.micro; $("optVerif").checked = reglages.verif;
