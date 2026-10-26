@@ -233,12 +233,14 @@ function construireMonde(idx){
     niveau3D.add(ile(W, r, c, 4 + r() * 5));
   }
   // île de départ et île d'arrivée avec le portail
-  const depart = ile(W, r, new THREE.Vector3(P[0].x, P[0].y - 1.2, P[0].z - 8), 10, true); niveau3D.add(depart);
-  const fin = P[NS], arr = ile(W, r, new THREE.Vector3(fin.x, fin.y - 1.4, fin.z + 9), 12, true); niveau3D.add(arr);
+  const dirDebut = new THREE.Vector3(T[0].x, 0, T[0].z).normalize(), dirFin = new THREE.Vector3(T[NS].x, 0, T[NS].z).normalize();
+  const depart = ile(W, r, new THREE.Vector3(P[0].x, P[0].y - 1.2, P[0].z).addScaledVector(dirDebut, -8), 10, true, true); niveau3D.add(depart);
+  const fin = P[NS], arr = ile(W, r, new THREE.Vector3(fin.x, fin.y - 1.4, fin.z).addScaledVector(dirFin, 11), 12, true, true); niveau3D.add(arr);
+  piste.directionFin = dirFin;
   const portail = new THREE.Mesh(new THREE.TorusGeometry(5, .6, 12, 40), mat("#FFD23F", { emissive: "#FFB000", emissiveIntensity: .8 }));
-  portail.position.set(fin.x, fin.y + 5, fin.z + 12); niveau3D.add(portail);
+  portail.position.copy(fin).addScaledVector(dirFin, 5); portail.position.y += 3.6; portail.lookAt(portail.position.clone().add(dirFin)); niveau3D.add(portail);
   const voile = new THREE.Mesh(new THREE.CircleGeometry(4.6, 40), new THREE.MeshBasicMaterial({ color: MONDES[(idx + 1) % 5].carte, transparent: true, opacity: .55, side: THREE.DoubleSide }));
-  voile.position.copy(portail.position); niveau3D.add(voile);
+  voile.position.copy(portail.position); voile.quaternion.copy(portail.quaternion); voile.material.opacity = .35; niveau3D.add(voile);
   piste.portail = portail; piste.voile = voile; portail.userData.dynamique = voile.userData.dynamique = true;
   const nuages = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshLambertMaterial({ color: idx >= 3 ? (idx === 3 ? "#7A4A4A" : "#4A4A8A") : "#FFFFFF", transparent: true, opacity: .9 }), 160);
   const dm = new THREE.Object3D();
@@ -325,13 +327,13 @@ function obstacle3D(id, r){
   }
   return g;
 }
-function ile(W, r, c, taille, grande){
+function ile(W, r, c, taille, grande, passage){
   const g = new THREE.Group();
   const dessus = maille(new THREE.CylinderGeometry(taille, taille * .92, 1.4, 12), W.ile); g.add(dessus);
   const dessous = maille(new THREE.ConeGeometry(taille * .9, taille * 1.6, 10), W.roche); dessous.rotation.x = Math.PI; dessous.position.y = -taille * .8 - .7; g.add(dessous);
   const nb = grande ? 6 : 1 + Math.floor(r() * 3);
   for(let k = 0; k < nb; k++){
-    const a = r() * Math.PI * 2, d = r() * taille * .6, o = objetDecor(W.id, r);
+    const a = r() * Math.PI * 2, d = passage ? taille * (.62 + r() * .25) : r() * taille * .6, o = objetDecor(W.id, r);
     o.position.set(Math.cos(a) * d, .7, Math.sin(a) * d); o.rotation.y = r() * 6; g.add(o);
   }
   g.position.copy(c); return g;
@@ -368,20 +370,23 @@ function objetDecor(id, r){
 }
 function decorLointain(W, r){
   const c = piste.P[Math.floor(piste.NS / 2)];
+  // le décor lointain est placé bien au-delà du toboggan entier (sinon une montagne peut barrer la fin)
+  let loin = 0; piste.P.forEach(p => { loin = Math.max(loin, Math.hypot(p.x - c.x, p.z - c.z)); });
+  const R0 = loin + 420;
   if(W.id === "espace"){
-    [["#FF9F6B", 60, [-260, 60, 300]], ["#7BC8FF", 35, [280, 120, 500]], ["#C9A8FF", 90, [120, -40, 900]]].forEach(([col, rr, p]) => {
-      const pl = maille(new THREE.SphereGeometry(rr, 24, 16), col, { flatShading: false, fog: false }); pl.position.set(c.x + p[0], c.y + p[1], p[2]); niveau3D.add(pl);
+    [["#FF9F6B", 60, -.9, 60], ["#7BC8FF", 35, 1.1, 120], ["#C9A8FF", 90, 2.6, -40]].forEach(([col, rr, a, h], k) => {
+      const pl = maille(new THREE.SphereGeometry(rr, 24, 16), col, { flatShading: false, fog: false }); pl.position.set(c.x + Math.cos(a) * (R0 + 200), c.y + h, c.z + Math.sin(a) * (R0 + 200)); niveau3D.add(pl);
+      if(k === 2){ const anneau = maille(new THREE.TorusGeometry(130, 8, 4, 60), "#E8D8FF", { fog: false }); anneau.position.copy(pl.position); anneau.rotation.x = 1.2; niveau3D.add(anneau); }
     });
-    const anneau = maille(new THREE.TorusGeometry(130, 8, 4, 60), "#E8D8FF", { fog: false }); anneau.position.set(c.x + 120, c.y - 40, 900); anneau.rotation.x = 1.2; niveau3D.add(anneau);
     const etoilesG = new THREE.BufferGeometry(), ep = [];
-    for(let k = 0; k < 1500; k++){ const a = r() * Math.PI * 2, b = r() * Math.PI - Math.PI / 2, d = 900; ep.push(c.x + Math.cos(a) * Math.cos(b) * d, c.y + Math.sin(b) * d, c.z + Math.sin(a) * Math.cos(b) * d); }
+    for(let k = 0; k < 1500; k++){ const a = r() * Math.PI * 2, b = r() * Math.PI - Math.PI / 2, d = R0 + 400; ep.push(c.x + Math.cos(a) * Math.cos(b) * d, c.y + Math.sin(b) * d, c.z + Math.sin(a) * Math.cos(b) * d); }
     etoilesG.setAttribute("position", new THREE.Float32BufferAttribute(ep, 3));
     niveau3D.add(new THREE.Points(etoilesG, new THREE.PointsMaterial({ color: "#FFFFFF", size: 2.2, sizeAttenuation: false, fog: false })));
     return;
   }
   // montagnes / volcans au loin
   for(let k = 0; k < 18; k++){
-    const a = k / 18 * Math.PI * 2, d = 700;
+    const a = k / 18 * Math.PI * 2, d = R0 + 120;
     const h = 220 + r() * 180, m = maille(new THREE.ConeGeometry(160 + r() * 80, h, 7), W.id === "volcan" ? "#3A2424" : W.id === "bonbons" ? "#FFC4E1" : "#8C9BB5", { fog: false });
     m.position.set(c.x + Math.cos(a) * d, c.y - 150 + h / 2, c.z + Math.sin(a) * d); niveau3D.add(m);
     if(W.id !== "volcan"){ const cap = maille(new THREE.ConeGeometry(60, 80, 7), W.id === "bonbons" ? "#FFFFFF" : "#FFFFFF", { fog: false }); cap.position.set(m.position.x, c.y - 150 + h - 40, m.position.z); niveau3D.add(cap); }
@@ -556,14 +561,17 @@ function placer(dt){
     premiereImage = false;
   }else{
     // arrivée : on glisse sur l'île et la caméra tourne autour
-    const fin = piste.P[piste.NS], t = piste.T[piste.NS];
+    const fin = piste.P[piste.NS], t = piste.directionFin || piste.T[piste.NS];
     const p = new THREE.Vector3().copy(fin).addScaledVector(t, Math.min(8, J.finT * J.v * .6 + J.finT * 3));
     glisseur.position.lerp(new THREE.Vector3(p.x, fin.y - .7, p.z), .1);
-    glisseur.quaternion.slerp(new THREE.Quaternion(), .1);
+    const versCam = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(camPos.x - glisseur.position.x, camPos.z - glisseur.position.z));
+    glisseur.quaternion.slerp(versCam, .08);
     glisseur.userData.bras.forEach((b, k) => { b.rotation.z = (k ? 1 : -1) * 2.7 + Math.sin(J.finT * 8) * .2; });
     glisseur.userData.corps.position.y = Math.abs(Math.sin(J.finT * 6)) * .3;
-    const a = J.finT * .4;
-    camPos.lerp(new THREE.Vector3(glisseur.position.x + Math.sin(a) * 9, glisseur.position.y + 4, glisseur.position.z - Math.cos(a) * 9), .05);
+    // la caméra reste devant, au-dessus de l'île (jamais dans le toboggan), et balance doucement
+    const a = Math.sin(J.finT * .5) * .9, df = piste.directionFin || t;
+    const dirCam = new THREE.Vector3(df.x * Math.cos(a) - df.z * Math.sin(a), 0, df.x * Math.sin(a) + df.z * Math.cos(a));
+    camPos.lerp(new THREE.Vector3(glisseur.position.x, glisseur.position.y + 3.2, glisseur.position.z).addScaledVector(dirCam, 8), .06);
     camVise.lerp(glisseur.position.clone().add(new THREE.Vector3(0, 1.2, 0)), .1); camHaut.lerp(new THREE.Vector3(0, 1, 0), .1);
   }
   camera.position.copy(camPos); camera.up.copy(camHaut); camera.lookAt(camVise);
@@ -571,7 +579,7 @@ function placer(dt){
   // étoiles qui tournent, portail qui brille
   const t = performance.now() / 1000;
   piste.etoiles.forEach(e => { if(!e.pris && Math.abs(e.s - jeu.s) < 110) majEtoile(e, t); });
-  if(piste.portail){ piste.portail.rotation.z = t; piste.voile.material.opacity = .4 + Math.sin(t * 3) * .15; }
+  if(piste.portail){ piste.portail.rotateZ(.01); piste.voile.material.opacity = .3 + Math.sin(t * 3) * .1; }
 }
 
 /* ======================= arrivée et résultats ======================= */
