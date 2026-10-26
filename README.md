@@ -17,3 +17,4 @@ Petits jeux éducatifs en français, sans publicité ni compte.
 - `foot3d/` : Super Foot 3D, match à 3 contre 3 en 3D (même Three.js, manettes via `commun/manette.js`). Voix : `outils/enregistrer-foot.py`.
 - `toboggan/` : Le Toboggan des Nuages, glissade en 3D à travers 5 mondes (déblocage, trophées, musique). Voix : `outils/enregistrer-toboggan.py`.
 - `avatar/` : l'atelier « Mon personnage » (style Roblox). Le moteur des personnages est dans `commun/avatar.js` (utilisé par le toboggan et le foot).
+- `parler/` : « Je répète ! », jeu de parole pour les tout-petits (mots dans `parler/mots.js`, voix : `outils/enregistrer-parler.py`). Le micro sert seulement à savoir que l'enfant a parlé.

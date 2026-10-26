@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Je répète !</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --sun:#FFD23F; --tang:#FF9F1C; --ink:#FFF8E7; --soft:#C9CCF2; --night:#1D2357; --pink:#FF6F9F; --lilac:#B9B3F5; --mint:#7BE495;
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;color:var(--ink);font-family:var(--font);user-select:none;-webkit-user-select:none}
+html{background:#3B3F8F}
+body{background:linear-gradient(#FF9FD0,#B9B3F5 55%,#7FD3FF)}
+[hidden]{display:none !important}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+.vue{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:14px}
+h1{margin:0;font-size:clamp(2.6rem,9vw,4.6rem);color:#fff;text-shadow:0 5px 0 #FF4FB0,0 10px 24px rgba(0,0,0,.2);text-align:center;line-height:1}
+.sous{margin:0;color:#1D2357;font-weight:600;font-size:1.2rem;text-align:center}
+.niveaux{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.niveaux button{width:clamp(130px,26vw,190px);aspect-ratio:1;border-radius:32px;background:#fff;color:#1D2357;font-weight:700;font-size:1.15rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 8px 0 rgba(29,35,87,.25);border:5px solid transparent}
+.niveaux button .e{font-size:clamp(3rem,9vw,4.6rem);line-height:1}
+.niveaux button small{font-weight:500;font-size:.85rem;color:#5A5F8F}
+.niveaux button.on{border-color:var(--sun)}
+.gros{padding:16px 40px;border-radius:999px;font-size:1.7rem;font-weight:700;color:var(--night);background:linear-gradient(100deg,var(--sun),var(--tang));box-shadow:0 7px 0 #c9771a}
+.gros:active{transform:translateY(4px);box-shadow:0 3px 0 #c9771a}
+.coin{position:fixed;top:12px;padding:9px 15px;border-radius:999px;background:rgba(29,35,87,.75);font-weight:600;text-decoration:none;color:var(--ink);font-size:1rem}
+#album{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:620px;font-size:2rem;min-height:2.4rem}
+#album span{background:rgba(255,255,255,.6);border-radius:14px;padding:2px 6px}
+
+/* le jeu */
+#carte{position:relative;width:min(78vw,52vh,420px);aspect-ratio:1;border-radius:44px;background:#fff;box-shadow:0 14px 0 rgba(29,35,87,.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#image{font-size:min(50vw,32vh,270px);line-height:1;animation:respire 2.4s ease-in-out infinite}
+@keyframes respire{50%{transform:scale(1.06) rotate(-3deg)}}
+#image.hop{animation:hop .6s ease}
+@keyframes hop{30%{transform:scale(1.25) rotate(6deg)}60%{transform:scale(.95)}}
+#mot{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:4rem}
+#mot span{background:#fff;color:#1D2357;border-radius:18px;padding:6px 14px;font-weight:700;font-size:clamp(1.8rem,7vw,3rem);line-height:1.1;transition:transform .2s, background .2s;box-shadow:0 5px 0 rgba(29,35,87,.18)}
+#mot span.on{background:var(--sun);transform:scale(1.15)}
+#mot.entier span{background:#fff}
+#oreille{position:relative;width:96px;height:96px;display:flex;align-items:center;justify-content:center}
+#oreille i{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(.6);transition:transform .08s}
+#oreille b{position:relative;font-size:3rem}
+#oreille.ecoute b{animation:battre 1s ease-in-out infinite}
+@keyframes battre{50%{transform:scale(1.15)}}
+#oreille.ecoute i{background:rgba(123,228,149,.85)}
+#consigne{font-weight:700;font-size:1.4rem;color:#1D2357;min-height:1.8rem;text-align:center}
+#etoiles{position:fixed;top:12px;left:50%;transform:translateX(-50%);font-size:2rem;letter-spacing:4px;white-space:nowrap}
+.barre{display:flex;gap:12px}
+.rond{width:72px;height:72px;border-radius:50%;background:rgba(29,35,87,.75);font-size:2rem;display:flex;align-items:center;justify-content:center}
+#dit{background:var(--mint);color:#1D2357}
+#fete{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#fete span{position:absolute;top:-10%;font-size:2.2rem;animation:tombe linear forwards}
+@keyframes tombe{to{transform:translateY(120vh) rotate(540deg)}}
+
+/* réglages des parents */
+#reglages{position:fixed;inset:0;background:rgba(18,22,60,.65);display:flex;align-items:center;justify-content:center;padding:16px}
+#reglages .carte2{background:#272C6B;border-radius:24px;padding:20px 22px;width:min(480px,100%);line-height:1.45}
+#reglages h2{margin:0 0 10px;color:var(--sun)}
+#reglages label{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-weight:600}
+#reglages label small{display:block;font-weight:500;color:var(--soft)}
+#reglages input[type=checkbox]{width:24px;height:24px;flex:0 0 auto;margin-top:2px}
+#reglages .rep{display:flex;gap:8px;margin-top:6px}
+#reglages .rep button{background:#3A429A;border-radius:12px;padding:8px 14px;font-weight:700;border:3px solid transparent}
+#reglages .rep button.on{border-color:var(--sun)}
+</style>
+</head>
+<body>
+<!-- accueil -->
+<div class="vue" id="vAccueil">
+  <h1>Je répète ! 🗣️</h1>
+  <p class="sous">Regarde l'image, écoute, et répète le mot !</p>
+  <div class="niveaux" id="niveaux"></div>
+  <button class="gros" id="jouer">▶ On joue !</button>
+  <div id="album"></div>
+  <a class="coin" style="left:12px" href="../petits/">🏠 Les jeux</a>
+  <button class="coin" style="right:12px" id="ouvrirReglages">⚙️ Parents</button>
+</div>
+
+<!-- jeu -->
+<div class="vue" id="vJeu" hidden>
+  <div id="etoiles"></div>
+  <div id="carte"><div id="image">🐱</div></div>
+  <div id="mot"></div>
+  <div id="consigne"></div>
+  <div class="barre">
+    <button class="rond" id="redire" aria-label="Réécouter">🔊</button>
+    <div id="oreille"><i></i><b>👂</b></div>
+    <button class="rond" id="dit" aria-label="Elle l'a dit" title="Elle l'a dit">✅</button>
+  </div>
+  <button class="coin" style="left:12px" id="retour">🏠</button>
+</div>
+
+<!-- fin d'une partie -->
+<div class="vue" id="vFin" hidden>
+  <h1 id="finTitre">Bravo !</h1>
+  <div id="autocollant" style="font-size:9rem;line-height:1;animation:hop 1s ease infinite">🦄</div>
+  <p class="sous">Tu as gagné un autocollant !</p>
+  <div class="barre"><button class="gros" id="encore">🔁 Encore</button></div>
+  <button class="coin" style="left:12px" id="retourFin">🏠</button>
+</div>
+<div id="fete"></div>
+
+<div id="reglages" hidden>
+  <div class="carte2">
+    <h2>⚙️ Pour les parents</h2>
+    <label><input type="checkbox" id="optMicro"><span>Écouter avec le micro<small>Le jeu entend seulement <b>qu'elle parle</b> (rien n'est envoyé sur Internet), puis il la félicite. Sans micro, un adulte appuie sur ✅, ou le jeu continue tout seul.</small></span></label>
+    <label id="ligneVerif"><input type="checkbox" id="optVerif"><span>Vérifier le mot (facultatif)<small>Seulement sur Chrome ou Safari. La voix est alors envoyée à Google ou Apple pour être reconnue. À 3 ans la reconnaissance se trompe souvent : le jeu ne dit jamais « faux », il ajoute juste un « Parfait ! » quand le mot est reconnu.</small></span></label>
+    <div style="font-weight:600;margin-top:10px">Combien de fois répéter chaque mot ?</div>
+    <div class="rep" id="optRep"></div>
+    <div style="margin-top:16px;text-align:right"><button class="gros" style="font-size:1.2rem;padding:10px 24px" id="fermerReglages">OK</button></div>
+  </div>
+</div>
+
+<script src="mots.js"></script>
+<script src="jeu.js"></script>
+</body>
+</html>
