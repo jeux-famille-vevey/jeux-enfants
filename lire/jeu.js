@@ -31,13 +31,35 @@
       return new Promise(function(fin){
         var fait = false, finir = function(){ if(!fait){ fait = true; fin(); } };
         lecteur.onended = finir; lecteur.onerror = function(){ setTimeout(finir, 300); };
-        lecteur.muted = false; lecteur.src = "sons/" + nom + ".mp3?v=2";   // ?v=2 : nouvelles voix (sinon le navigateur garde les anciennes)
+        // la voix d'un parent (enregistrée sur cet appareil) passe avant la voix du jeu
+        lecteur.muted = false; lecteur.src = MAVOIX[nom] || ("sons/" + nom + ".mp3?v=3");   // ?v=3 : nouvelles voix (sinon le navigateur garde les anciennes)
         var pr = lecteur.play(); if(pr && pr.catch) pr.catch(function(){ setTimeout(finir, 300); });
         setTimeout(finir, 8000);
       });
     }); }, Promise.resolve());
   }
   var v = function(t){ return "v-" + slug(t); };
+
+  /* ---------- « Ma voix » : un parent peut enregistrer les sons lui-même (gardés sur cet appareil) ---------- */
+  var MAVOIX = {};   // nom du son -> adresse du son enregistré
+  var base = null;
+  function ouvrirBase(){
+    if(base) return base;
+    base = new Promise(function(ok, ko){
+      try{ var r = indexedDB.open("lire-ma-voix", 1);
+        r.onupgradeneeded = function(){ r.result.createObjectStore("sons"); };
+        r.onsuccess = function(){ ok(r.result); }; r.onerror = function(){ ko(r.error); };
+      }catch(e){ ko(e); }
+    });
+    return base;
+  }
+  function baseFaire(mode, f){ return ouvrirBase().then(function(db){ return new Promise(function(ok, ko){ var t = db.transaction("sons", mode), st = t.objectStore("sons"), r = f(st); t.oncomplete = function(){ ok(r && r.result); }; t.onerror = function(){ ko(t.error); }; }); }); }
+  function chargerMaVoix(){
+    return baseFaire("readonly", function(st){ var res = {}; var c = st.openCursor(); c.onsuccess = function(){ var k = c.result; if(k){ res[k.key] = k.value; k.continue(); } }; return { get result(){ return res; } }; })
+      .then(function(res){ Object.keys(MAVOIX).forEach(function(k){ URL.revokeObjectURL(MAVOIX[k]); }); MAVOIX = {}; Object.keys(res || {}).forEach(function(k){ MAVOIX[k] = URL.createObjectURL(res[k]); }); })
+      .catch(function(){});
+  }
+  chargerMaVoix();
   var fLettre = function(l){ return "l-" + slug(l) + (l === "é" ? "-e" : ""); };
 
   /* ---------- sons et fête ---------- */
@@ -58,7 +80,7 @@
     { n:6, e:"📜", nom:"Petites phrases", age:"dès 6 ans", intro:V.intro6 }
   ];
   var cleEtoiles = function(n){ return "lire-" + profil + "-" + n; };
-  function afficher(vue){ ["vCarte", "vDecouverte", "vQuestion", "vFin"].forEach(function(x){ $(x).hidden = x !== vue; }); }
+  function afficher(vue){ ["vCarte", "vDecouverte", "vQuestion", "vFin", "vStudio"].forEach(function(x){ $(x).hidden = x !== vue; }); }
   function carte(){
     tour++; session++; afficher("vCarte");
     var pb = $("profils"); pb.innerHTML = "";
@@ -93,7 +115,7 @@
         else c.innerHTML = '<span class="lettre">' + it.l + '</span><span class="img">' + it.e + "</span><small>" + it.mot + "</small>";
         c.onclick = async function(){
           tour++; document.querySelectorAll(".carteL.on").forEach(function(x){ x.classList.remove("on"); }); c.classList.add("on", "vu");
-          if(et.n === 3){ c.classList.remove("colle"); setTimeout(function(){ c.classList.add("colle"); }, 900); await jouer("f-" + slug(it.s)); }
+          if(et.n === 3){ c.classList.remove("colle"); setTimeout(function(){ c.classList.add("colle"); }, 1400); await jouer("f-" + slug(it.s)); }
           else await jouer([fLettre(it.l), "c-" + slug(it.mot)]);
           c.classList.remove("on");
         };
@@ -195,7 +217,58 @@
       jouer(q.voix);
     });
   }
-  $("retour1").onclick = $("retour2").onclick = $("retour3").onclick = carte;
+  $("retour1").onclick = $("retour2").onclick = $("retour3").onclick = $("retour4").onclick = carte;
+
+  /* ---------- le studio des parents ---------- */
+  var CONSEIL = { m:"mmmmmm", l:"llllll", s:"ssssss", r:"rrrrrr", f:"ffffff", n:"nnnnnn", ch:"chchchch (comme « chut » sans le « ut »)", v:"vvvvvv" };
+  function lignesStudio(){
+    var L = [{ titre:"🅰️ Les voyelles" }];
+    D.voyelles.forEach(function(x){ L.push({ nom: fLettre(x.l), gros: x.l, dire: "Dites « " + x.l + " » (le son, pas le nom de la lettre)." }); });
+    L.push({ titre:"🎵 Les sons qui chantent" });
+    D.chantantes.forEach(function(x){ L.push({ nom: "l-" + slug(x.l), gros: x.l, dire: "Faites durer le son : « " + CONSEIL[x.l] + " », environ 2 secondes, sans « e » ni « a » derrière." }); });
+    L.push({ titre:"🧲 Je colle les sons" });
+    D.fusions.forEach(function(x){ L.push({ nom: "f-" + slug(x.s), gros: x.s, dire: "Dites « " + (CONSEIL[x.c] || x.c).split(" ")[0].slice(0, 4) + "… " + x.v + x.v + x.v + " » en glissant, puis « " + x.s + " »." }); });
+    return L;
+  }
+  var enreg = null;   // enregistrement en cours
+  function arreterEnreg(){ if(enreg){ try{ enreg.rec.stop(); }catch(e){} } }
+  function studio(){
+    tour++; session++; afficher("vStudio");
+    var box = $("listeStudio"); box.innerHTML = "";
+    if(!window.MediaRecorder || !navigator.mediaDevices){ box.innerHTML = '<p class="aide">Cet appareil ne permet pas d\'enregistrer. Essayez avec Firefox ou Chrome sur l\'ordinateur.</p>'; return; }
+    lignesStudio().forEach(function(l){
+      if(l.titre){ var h = document.createElement("h2"); h.textContent = l.titre; box.appendChild(h); return; }
+      var r = document.createElement("div"); r.className = "ligneS";
+      r.innerHTML = '<b class="lettreS">' + l.gros + '</b><span class="dire">' + l.dire + '</span><span class="btns">' +
+        '<button data-a="jeu" title="Voix du jeu">🤖</button><button data-a="rec" class="rec">🎙️ Enregistrer</button>' +
+        '<button data-a="moi" title="Écouter ma voix">▶️</button><button data-a="suppr" title="Effacer ma voix">🗑️</button></span>';
+      var maj = function(){ var a = !!MAVOIX[l.nom]; r.classList.toggle("fait", a); r.querySelector('[data-a=moi]').disabled = !a; r.querySelector('[data-a=suppr]').disabled = !a; };
+      maj();
+      r.querySelector('[data-a=jeu]').onclick = function(){ tour++; lecteur.src = "sons/" + l.nom + ".mp3?v=3"; lecteur.play().catch(function(){}); };
+      r.querySelector('[data-a=moi]').onclick = function(){ tour++; jouer(l.nom); };
+      r.querySelector('[data-a=suppr]').onclick = function(){ baseFaire("readwrite", function(st){ return st.delete(l.nom); }).then(chargerMaVoix).then(maj); };
+      var bRec = r.querySelector('[data-a=rec]');
+      bRec.onclick = function(){
+        if(enreg && enreg.nom === l.nom){ arreterEnreg(); return; }
+        arreterEnreg(); tour++;
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function(flux){
+          var morceaux = [], rec = new MediaRecorder(flux);
+          enreg = { nom: l.nom, rec: rec }; bRec.textContent = "⏹️ Stop"; bRec.classList.add("enCours");
+          rec.ondataavailable = function(e){ if(e.data && e.data.size) morceaux.push(e.data); };
+          rec.onstop = function(){
+            flux.getTracks().forEach(function(t){ t.stop(); });
+            enreg = null; bRec.textContent = "🎙️ Enregistrer"; bRec.classList.remove("enCours");
+            if(!morceaux.length) return;
+            var blob = new Blob(morceaux, { type: rec.mimeType || "audio/webm" });
+            baseFaire("readwrite", function(st){ return st.put(blob, l.nom); }).then(chargerMaVoix).then(function(){ maj(); jouer(l.nom); });
+          };
+          rec.start(); setTimeout(function(){ if(rec.state === "recording") rec.stop(); }, 6000);   // 6 secondes au plus
+        }).catch(function(){ alert("Le micro n'est pas disponible. Autorisez le micro pour ce site, puis réessayez."); });
+      };
+      box.appendChild(r);
+    });
+  }
+  $("ouvrirStudio").onclick = studio;
   $("refaire").onclick = function(){ commencer(etape); };
   $("suivante").onclick = function(){ commencer(ETAPES[Math.min(ETAPES.length - 1, etape.n)]); };
   carte();

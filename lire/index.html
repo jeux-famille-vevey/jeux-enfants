@@ -19,7 +19,7 @@ body{background:linear-gradient(#FFE8A3,#FFD0E6 50%,#BFE6FF)}
 [hidden]{display:none !important}
 button{font:inherit;cursor:pointer;border:0;color:inherit}
 .vue{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;padding:14px 14px 18px;gap:12px;overflow:auto}
-h1{margin:6px 0 0;font-size:clamp(2.2rem,7vw,3.6rem);color:#fff;text-shadow:0 4px 0 #FF8A3C,0 8px 20px rgba(0,0,0,.15);text-align:center;line-height:1}
+h1{margin:46px 0 0;font-size:clamp(2.2rem,7vw,3.6rem);color:#fff;text-shadow:0 4px 0 #FF8A3C,0 8px 20px rgba(0,0,0,.15);text-align:center;line-height:1}
 .coin{position:fixed;top:10px;padding:9px 15px;border-radius:999px;background:rgba(29,35,87,.8);font-weight:600;text-decoration:none;color:var(--ink);font-size:1rem;z-index:5}
 #profils{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 #profils button{background:#fff;border-radius:999px;padding:8px 16px;font-weight:700;border:4px solid transparent;box-shadow:0 4px 0 rgba(29,35,87,.15)}
@@ -34,7 +34,7 @@ h1{margin:6px 0 0;font-size:clamp(2.2rem,7vw,3.6rem);color:#fff;text-shadow:0 4p
 @media (max-width:620px){ #chemin{grid-template-columns:repeat(2,minmax(0,1fr))} }
 
 /* découverte : les cartes à toucher */
-#titreEtape{margin:44px 0 0;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;text-align:center}
+#titreEtape,.titreStudio{margin:44px 0 0;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;text-align:center}
 #cartes{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:900px}
 .carteL{background:#fff;border-radius:26px;min-width:130px;padding:12px 16px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 7px 0 rgba(29,35,87,.18);border:4px solid transparent}
 .carteL .lettre{font-family:var(--lettre);font-size:4.4rem;line-height:1;font-weight:700;color:#3D7BD9}
@@ -65,6 +65,20 @@ h1{margin:6px 0 0;font-size:clamp(2.2rem,7vw,3.6rem);color:#fff;text-shadow:0 4p
 .gros{padding:14px 34px;border-radius:999px;font-size:1.5rem;font-weight:700;color:var(--night);background:linear-gradient(100deg,var(--sun),var(--tang));box-shadow:0 7px 0 #c9771a}
 .gros:active{transform:translateY(4px);box-shadow:0 3px 0 #c9771a}
 #fete{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+/* le studio des parents */
+.aide{max-width:760px;margin:0;background:rgba(255,255,255,.75);border-radius:18px;padding:12px 16px;line-height:1.45;font-weight:500}
+#listeStudio{width:min(760px,100%);display:flex;flex-direction:column;gap:8px;padding-bottom:30px}
+#listeStudio h2{margin:12px 0 2px;font-size:1.3rem}
+.ligneS{background:#fff;border-radius:18px;padding:10px 12px;display:grid;grid-template-columns:70px 1fr;gap:4px 12px;align-items:center;box-shadow:0 4px 0 rgba(29,35,87,.12);border:3px solid transparent}
+.ligneS.fait{border-color:#3FA34D}
+.ligneS .lettreS{font-family:var(--lettre);font-size:2.4rem;text-align:center;grid-row:span 2;color:#3D7BD9}
+.ligneS .dire{font-size:.95rem}
+.ligneS .btns{display:flex;gap:6px;flex-wrap:wrap}
+.ligneS .btns button{background:#EEF0FF;border-radius:999px;padding:6px 12px;font-weight:600}
+.ligneS .btns button:disabled{opacity:.35;cursor:default}
+.ligneS .btns .rec{background:#FFE1E1}
+.ligneS .btns .enCours{background:#E5484D;color:#fff;animation:battre 1s infinite}
+@keyframes battre{50%{transform:scale(1.07)}}
 #fete span{position:absolute;top:-10%;font-size:2.2rem;animation:tombe linear forwards}
 @keyframes tombe{to{transform:translateY(120vh) rotate(540deg)}}
 </style>
@@ -75,6 +89,14 @@ h1{margin:6px 0 0;font-size:clamp(2.2rem,7vw,3.6rem);color:#fff;text-shadow:0 4p
   <div id="profils"></div>
   <div id="chemin"></div>
   <a class="coin" style="left:10px" href="../">🏠 Les jeux</a>
+  <button class="coin" style="right:10px" id="ouvrirStudio">🎙️ Ma voix (parents)</button>
+</div>
+
+<div class="vue" id="vStudio" hidden>
+  <div class="titreStudio">🎙️ Ma voix</div>
+  <p class="aide">Si un son du jeu ne vous plaît pas, enregistrez-le avec votre voix : appuyez sur <b>🎙️ Enregistrer</b>, dites le son, puis appuyez sur <b>⏹️ Stop</b>. Le jeu utilisera alors <b>votre voix</b> à la place (seulement sur cet appareil, rien n'est envoyé sur Internet). 🗑️ remet la voix du jeu.</p>
+  <div id="listeStudio"></div>
+  <button class="coin" style="left:10px" id="retour4">🗺️</button>
 </div>
 
 <div class="vue" id="vDecouverte" hidden>
