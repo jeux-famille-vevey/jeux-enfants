@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>L'Île des Pirates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --sun:#FFD23F; --tang:#FF9F1C; --ink:#FFF8E7; --soft:#C9CCF2; --night:#1D2357; --panel:rgba(29,35,87,.84);
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#8ED6FF;color:var(--ink);font-family:var(--font);user-select:none;-webkit-user-select:none}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+[hidden]{display:none !important}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+.rond{background:var(--panel);border-radius:999px;padding:8px 14px;font-weight:600;text-decoration:none;color:var(--ink)}
+
+/* ---------- menu ---------- */
+#menu{position:fixed;inset:0;display:flex;pointer-events:none}
+#menu .panneau{pointer-events:auto;width:min(540px,100%);height:100%;overflow:auto;padding:16px 20px 24px;
+  background:linear-gradient(90deg,rgba(29,35,87,.96),rgba(29,35,87,.88) 82%,rgba(29,35,87,0))}
+#menu h1{margin:40px 0 2px;font-size:clamp(2rem,5.5vw,2.8rem);line-height:1.02;color:var(--sun);text-shadow:0 4px 0 var(--tang)}
+#menu .sous{margin:4px 0 8px;color:var(--soft)}
+#menu h2{font-size:1.05rem;margin:16px 0 8px;color:var(--soft);font-weight:600}
+.puces{display:flex;flex-wrap:wrap;gap:8px}
+.puces button{background:#2E3580;border-radius:16px;padding:9px 13px;font-weight:600;font-size:1.02rem;border:3px solid transparent}
+.puces button.on{border-color:var(--sun);background:#3A429A}
+.gros{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border-radius:20px;padding:12px 16px;margin-bottom:8px;font-weight:700;font-size:1.2rem;color:var(--night);background:linear-gradient(100deg,var(--sun),var(--tang));box-shadow:0 5px 0 #c9771a}
+.gros .e{font-size:2.1rem}
+.gros small{display:block;font-weight:500;font-size:.88rem;opacity:.85}
+.gros.bleu{background:linear-gradient(100deg,#7FD3FF,#4CC9F0);box-shadow:0 5px 0 #2B8FB5}
+.gros.vert{background:linear-gradient(100deg,#9EE6A8,#3FCF6A);box-shadow:0 5px 0 #2E9A4F}
+.gros:active{transform:translateY(3px)}
+#listeMondes{display:flex;flex-direction:column;gap:8px}
+.monde{display:flex;align-items:center;gap:8px;background:#2E3580;border-radius:16px;padding:8px 10px}
+.monde b{flex:1;font-size:1.05rem}
+.monde b small{display:block;font-weight:500;color:var(--soft);font-size:.8rem}
+.monde button{background:#3A429A;border-radius:12px;padding:8px 10px;font-weight:600}
+.aide{margin-top:14px;color:var(--soft);font-size:.92rem;line-height:1.5}
+.aide b{color:var(--ink)}
+#etatManette{margin-top:6px;font-weight:600;color:#9EE6A8}
+#accueil{position:fixed;top:12px;left:14px;pointer-events:auto}
+#sonBtn{position:fixed;top:12px;right:14px;pointer-events:auto}
+
+/* ---------- pendant le jeu ---------- */
+#hud{position:fixed;inset:0;pointer-events:none}
+.boite{position:absolute;background:var(--panel);border-radius:18px;padding:8px 14px;font-weight:700}
+#compte{top:12px;left:12px;font-size:1.4rem;display:flex;gap:14px}
+#boussole{top:12px;left:50%;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;font-size:2.2rem}
+#boussole i{display:block;font-style:normal;transition:transform .1s linear}
+#hautDroite{position:absolute;top:12px;right:12px;display:flex;gap:8px;pointer-events:auto}
+#hautDroite button{background:var(--panel);border-radius:999px;padding:9px 14px;font-weight:700}
+#message{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);max-width:90vw;text-align:center;font-size:1.25rem;opacity:0;transition:opacity .25s}
+#message.on{opacity:1}
+#annonce{position:absolute;top:24%;left:0;right:0;text-align:center;font-size:clamp(2.4rem,9vw,5.4rem);font-weight:700;color:var(--sun);
+  text-shadow:0 6px 0 var(--tang),0 10px 30px rgba(0,0,0,.4);opacity:0;transition:opacity .25s;padding:0 12px}
+#annonce.on{opacity:1}
+#annonce small{display:block;font-size:.36em;color:#fff;text-shadow:0 3px 8px rgba(0,0,0,.6)}
+#bouton{bottom:18px;left:50%;transform:translateX(-50%);pointer-events:auto;font-size:1.15rem;padding:12px 20px;background:linear-gradient(100deg,var(--sun),var(--tang));color:var(--night);border-radius:999px;box-shadow:0 5px 0 #c9771a}
+/* commandes tactiles */
+#tactile{position:absolute;inset:0;pointer-events:none}
+#joy{position:absolute;left:24px;bottom:24px;width:150px;height:150px;border-radius:50%;background:rgba(29,35,87,.35);border:3px solid rgba(255,255,255,.35);pointer-events:auto;touch-action:none}
+#joy i{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.75)}
+#btnsT{position:absolute;right:20px;bottom:24px;display:flex;flex-direction:column;gap:12px;pointer-events:auto}
+#btnsT button{width:84px;height:84px;border-radius:50%;background:rgba(29,35,87,.6);border:3px solid rgba(255,255,255,.45);font-size:2.2rem;touch-action:none}
+
+/* ---------- construction ---------- */
+#outils{position:fixed;left:0;right:0;bottom:0;background:var(--panel);padding:8px 10px 10px;pointer-events:auto}
+#categories{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:6px}
+#categories button{flex:0 0 auto;background:#272C6B;border-radius:12px;padding:6px 12px;font-weight:600;font-size:.95rem;border:3px solid transparent}
+#categories button.on{border-color:var(--sun);background:#3A429A}
+#palette{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding-bottom:2px}
+#palette button{flex:0 0 auto;min-width:74px;background:#3A429A;border-radius:14px;padding:6px 8px;font-size:1.8rem;line-height:1.1;border:3px solid transparent;display:flex;flex-direction:column;align-items:center}
+#palette button small{font-size:.7rem;font-weight:600;color:var(--soft);margin-top:2px;white-space:nowrap}
+#palette button.on{border-color:var(--sun);background:#4A52B5}
+#palette .coul{width:46px;min-width:46px;height:46px;border-radius:50%;border:3px solid rgba(255,255,255,.4)}
+#palette .coul.on{border-color:var(--sun);transform:scale(1.1)}
+#barreC{position:fixed;top:10px;left:10px;right:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;pointer-events:auto}
+#barreC button,#barreC .titre{background:var(--panel);border-radius:999px;padding:9px 14px;font-weight:700}
+#barreC .titre{flex:1;min-width:120px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#barreC .vert{background:linear-gradient(100deg,#9EE6A8,#3FCF6A);color:var(--night)}
+#cam{position:fixed;right:10px;top:64px;display:grid;grid-template-columns:repeat(3,48px);gap:6px;pointer-events:auto}
+#cam button{height:48px;border-radius:14px;background:var(--panel);font-size:1.3rem;font-weight:700}
+#info{position:fixed;left:50%;transform:translateX(-50%);bottom:132px;background:var(--panel);border-radius:14px;padding:6px 12px;font-weight:600;font-size:.95rem;pointer-events:none;white-space:nowrap}
+@media (max-width:640px){ #boussole{top:64px;left:12px;transform:none;width:56px;height:56px;font-size:1.8rem} #cam{grid-template-columns:repeat(3,42px)} #cam button{height:42px} #info{bottom:140px;font-size:.85rem} }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="menu">
+  <div class="panneau">
+    <h1>🏴‍☠️ L'Île des Pirates</h1>
+    <p class="sous">Crée ton pirate, cherche les trésors… et construis ton propre monde !</p>
+    <h2>Qui joue ?</h2>
+    <div class="puces" id="profils"></div>
+    <button class="gros bleu" id="monPirate" style="margin-top:10px"><span class="e">🦜</span><span>Mon pirate<small>Chapeau, perroquet, sabre, couleurs…</small></span></button>
+    <h2>Jouer</h2>
+    <button class="gros" id="aventure"><span class="e">🗺️</span><span>L'île au trésor<small>Trouve les 6 coffres cachés, en marchant, en nageant ou en bateau</small></span></button>
+    <h2>Crée ton monde</h2>
+    <button class="gros vert" id="nouvelIle"><span class="e">🏝️</span><span>Nouveau monde : une île<small>Une île de départ, à toi de la transformer</small></span></button>
+    <button class="gros vert" id="nouvelOcean"><span class="e">🌊</span><span>Nouveau monde : l'océan<small>Presque rien : tout est à construire</small></span></button>
+    <div id="listeMondes"></div>
+    <div class="aide" id="aideMenu"></div>
+    <div id="etatManette"></div>
+  </div>
+  <a class="rond" id="accueil" href="../">🏠 Les jeux</a>
+  <button class="rond" id="sonBtn">🔊</button>
+</div>
+
+<div id="hud" hidden>
+  <div class="boite" id="compte"></div>
+  <div class="boite" id="boussole" title="La boussole montre le trésor le plus proche"><i>⬆️</i></div>
+  <div id="hautDroite"><button id="aideBtn">❓</button><button id="quitter">🏠 Menu</button></div>
+  <div class="boite" id="message"></div>
+  <div id="annonce"></div>
+  <button class="boite" id="bouton" hidden></button>
+  <div id="tactile" hidden>
+    <div id="joy"><i></i></div>
+    <div id="btnsT"><button id="tSaut" aria-label="Sauter">🦘</button><button id="tAction" aria-label="Bateau">⚓</button></div>
+  </div>
+</div>
+
+<div id="constr" hidden>
+  <div id="barreC">
+    <button id="cMenu">🏠</button>
+    <div class="titre" id="cNom"></div>
+    <button id="cAnnuler">↩️ Annuler</button>
+    <button id="cJouer" class="vert">▶ Jouer</button>
+  </div>
+  <div id="cam">
+    <button data-c="rg">⟲</button><button data-c="av">⬆️</button><button data-c="rd">⟳</button>
+    <button data-c="ga">⬅️</button><button data-c="re">⬇️</button><button data-c="dr">➡️</button>
+    <button data-c="zp">➕</button><button data-c="haut">🔭</button><button data-c="zm">➖</button>
+  </div>
+  <div id="info"></div>
+  <div id="outils"><div id="categories"></div><div id="palette"></div></div>
+</div>
+
+<script type="module" src="jeu.js"></script>
+</body>
+</html>

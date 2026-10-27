@@ -62,7 +62,8 @@ const ONGLETS = [
   { id:"haut", e:"👕", nom:"Haut", parts:[["haut", "Le haut", "liste"], ["couleurHaut", "La couleur", "couleursHabits"], ["motif", "Le dessin", "liste"]] },
   { id:"bas", e:"👖", nom:"Bas", parts:[["bas", "Le bas", "liste"], ["couleurBas", "La couleur", "couleursHabits"]] },
   { id:"pieds", e:"👟", nom:"Chaussures", parts:[["chaussures", "Les chaussures", "couleurs"]] },
-  { id:"dos", e:"🦸", nom:"Dans le dos", parts:[["dos", "Dans le dos", "liste"]] }
+  { id:"dos", e:"🦸", nom:"Dans le dos", parts:[["dos", "Dans le dos", "liste"]] },
+  { id:"accessoire", e:"🦜", nom:"Accessoires", parts:[["accessoire", "Dans la main ou sur l'épaule", "liste"]] }
 ];
 function remplirOnglets(){
   const box = $("onglets"); box.innerHTML = "";

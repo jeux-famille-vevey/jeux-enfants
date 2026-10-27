@@ -29,16 +29,19 @@ export const CATALOGUE = {
     { id:"chat", nom:"Oreilles de chat", e:"🐱" }, { id:"lapin", nom:"Oreilles de lapin", e:"🐰" }, { id:"noeud", nom:"Nœud", e:"🎀" },
     { id:"pirate", nom:"Chapeau de pirate", e:"🏴‍☠️" }, { id:"cowboy", nom:"Chapeau de cowboy", e:"🤠" }, { id:"magicien", nom:"Chapeau de magicien", e:"🧙" },
     { id:"ninja", nom:"Bandeau ninja", e:"🥷" }, { id:"viking", nom:"Casque viking", e:"🪖" }, { id:"antennes", nom:"Antennes", e:"👽" },
-    { id:"fleurs", nom:"Couronne de fleurs", e:"🌸" }, { id:"licorne", nom:"Corne de licorne", e:"🦄" }, { id:"chef", nom:"Toque de chef", e:"👨‍🍳" }
+    { id:"fleurs", nom:"Couronne de fleurs", e:"🌸" }, { id:"licorne", nom:"Corne de licorne", e:"🦄" }, { id:"chef", nom:"Toque de chef", e:"👨‍🍳" },
+    { id:"bandana", nom:"Bandana de pirate", e:"🧣" }, { id:"capitaine", nom:"Chapeau de capitaine", e:"🎩" }
   ],
   lunettes: [
     { id:"aucune", nom:"Rien", e:"🚫" }, { id:"rondes", nom:"Lunettes rondes", e:"👓" }, { id:"soleil", nom:"Lunettes de soleil", e:"🕶️" },
-    { id:"masque", nom:"Masque de héros", e:"🦸" }, { id:"etoiles", nom:"Lunettes étoiles", e:"⭐" }, { id:"plongee", nom:"Masque de plongée", e:"🤿" }
+    { id:"masque", nom:"Masque de héros", e:"🦸" }, { id:"etoiles", nom:"Lunettes étoiles", e:"⭐" }, { id:"plongee", nom:"Masque de plongée", e:"🤿" },
+    { id:"cacheOeil", nom:"Cache-œil de pirate", e:"🏴‍☠️" }
   ],
   haut: [
     { id:"tshirt", nom:"T-shirt", e:"👕" }, { id:"maillot", nom:"Maillot de foot", e:"⚽" }, { id:"capuche", nom:"Sweat à capuche", e:"🧥" },
     { id:"pull", nom:"Pull", e:"🧶" }, { id:"chemise", nom:"Chemise", e:"👔" }, { id:"robe", nom:"Robe", e:"👗" },
-    { id:"heros", nom:"Super-héros", e:"🦸" }, { id:"salopette", nom:"Salopette", e:"👖" }, { id:"veste", nom:"Veste", e:"🧑‍🚀" }, { id:"princesse", nom:"Robe de princesse", e:"👸" }
+    { id:"heros", nom:"Super-héros", e:"🦸" }, { id:"salopette", nom:"Salopette", e:"👖" }, { id:"veste", nom:"Veste", e:"🧑‍🚀" }, { id:"princesse", nom:"Robe de princesse", e:"👸" },
+    { id:"pirate", nom:"Marinière de pirate", e:"🏴‍☠️" }, { id:"capitaine", nom:"Manteau de capitaine", e:"🧥" }
   ],
   couleurs: ["#E5484D", "#FF8FB8", "#FF9F1C", "#FFD23F", "#3FA34D", "#7BE495", "#2BB3C0", "#4CC9F0", "#3D7BD9", "#1D2357", "#8E5BC4", "#B9B3F5", "#FFFFFF", "#9AA0AE", "#22232B", "#8A5A3B"],
   motif: [
@@ -49,7 +52,10 @@ export const CATALOGUE = {
   bas: [ { id:"short", nom:"Short", e:"🩳" }, { id:"pantalon", nom:"Pantalon", e:"👖" }, { id:"jupe", nom:"Jupe", e:"🩰" }, { id:"jogging", nom:"Jogging", e:"🏃" } ],
   chaussures: ["#E5484D", "#FFFFFF", "#22232B", "#3D7BD9", "#FFD23F", "#FF8FB8", "#3FA34D", "#FF9F1C"],
   dos: [ { id:"aucun", nom:"Rien", e:"🚫" }, { id:"cape", nom:"Cape", e:"🦸" }, { id:"ailes", nom:"Ailes de fée", e:"🧚" }, { id:"sac", nom:"Sac à dos", e:"🎒" },
-         { id:"dragon", nom:"Ailes de dragon", e:"🐉" }, { id:"fusee", nom:"Réacteur", e:"🚀" }, { id:"carapace", nom:"Carapace de tortue", e:"🐢" } ]
+         { id:"dragon", nom:"Ailes de dragon", e:"🐉" }, { id:"fusee", nom:"Réacteur", e:"🚀" }, { id:"carapace", nom:"Carapace de tortue", e:"🐢" } ],
+  accessoire: [ { id:"aucun", nom:"Rien", e:"🚫" }, { id:"perroquet", nom:"Perroquet sur l'épaule", e:"🦜" }, { id:"sabre", nom:"Sabre", e:"🗡️" },
+         { id:"longueVue", nom:"Longue-vue", e:"🔭" }, { id:"crochet", nom:"Crochet", e:"🪝" }, { id:"lanterne", nom:"Lanterne", e:"🏮" },
+         { id:"carte", nom:"Carte au trésor", e:"🗺️" }, { id:"pelle", nom:"Pelle", e:"⛏️" }, { id:"epee", nom:"Épée de chevalier", e:"⚔️" }, { id:"baguette", nom:"Baguette magique", e:"🪄" } ]
 };
 
 /* ======================= les profils des enfants ======================= */
@@ -59,9 +65,9 @@ const PROFILS_BASE = [
   { id:"invite", nom:"Invité", e:"🙂", numero:7 }
 ];
 const DEFAUTS = {
-  mikael: { peau:"#C98E62", visage:"rire", yeux:"#5A3A22", cheveux:"boucle", couleurCheveux:"#22150F", chapeau:"aucun", lunettes:"aucune", haut:"maillot", couleurHaut:"#3D7BD9", motif:"uni", bas:"short", couleurBas:"#FFFFFF", chaussures:"#E5484D", dos:"aucun" },
-  aleyah: { peau:"#C98E62", visage:"sourire", yeux:"#5A3A22", cheveux:"long", couleurCheveux:"#22150F", chapeau:"noeud", lunettes:"aucune", haut:"tshirt", couleurHaut:"#FF8FB8", motif:"coeur", bas:"jupe", couleurBas:"#8E5BC4", chaussures:"#FFFFFF", dos:"aucun" },
-  invite: { peau:"#E8B98E", visage:"sourire", yeux:"#3D7BD9", cheveux:"court", couleurCheveux:"#7A4B2E", chapeau:"casquette", lunettes:"aucune", haut:"tshirt", couleurHaut:"#3FA34D", motif:"etoile", bas:"pantalon", couleurBas:"#1D2357", chaussures:"#22232B", dos:"aucun" }
+  mikael: { peau:"#C98E62", visage:"rire", yeux:"#5A3A22", cheveux:"boucle", couleurCheveux:"#22150F", chapeau:"aucun", lunettes:"aucune", haut:"maillot", couleurHaut:"#3D7BD9", motif:"uni", bas:"short", couleurBas:"#FFFFFF", chaussures:"#E5484D", dos:"aucun", accessoire:"aucun" },
+  aleyah: { peau:"#C98E62", visage:"sourire", yeux:"#5A3A22", cheveux:"long", couleurCheveux:"#22150F", chapeau:"noeud", lunettes:"aucune", haut:"tshirt", couleurHaut:"#FF8FB8", motif:"coeur", bas:"jupe", couleurBas:"#8E5BC4", chaussures:"#FFFFFF", dos:"aucun", accessoire:"aucun" },
+  invite: { peau:"#E8B98E", visage:"sourire", yeux:"#3D7BD9", cheveux:"court", couleurCheveux:"#7A4B2E", chapeau:"casquette", lunettes:"aucune", haut:"tshirt", couleurHaut:"#3FA34D", motif:"etoile", bas:"pantalon", couleurBas:"#1D2357", chaussures:"#22232B", dos:"aucun", accessoire:"aucun" }
 };
 function lire(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } }
 function ecrire(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
@@ -90,7 +96,7 @@ export function auHasard(){
   return { peau: Math.random() < .9 ? p(humain) : p(CATALOGUE.peau), visage: id(CATALOGUE.visage), yeux: p(CATALOGUE.yeux), cheveux: id(CATALOGUE.cheveux),
     couleurCheveux: p(CATALOGUE.couleurCheveux), chapeau: Math.random() < .5 ? "aucun" : id(CATALOGUE.chapeau), lunettes: Math.random() < .7 ? "aucune" : id(CATALOGUE.lunettes),
     haut: id(CATALOGUE.haut), couleurHaut: p(CATALOGUE.couleurs), motif: id(CATALOGUE.motif), bas: id(CATALOGUE.bas), couleurBas: p(CATALOGUE.couleurs),
-    chaussures: p(CATALOGUE.chaussures), dos: Math.random() < .6 ? "aucun" : id(CATALOGUE.dos) };
+    chaussures: p(CATALOGUE.chaussures), dos: Math.random() < .6 ? "aucun" : id(CATALOGUE.dos), accessoire: Math.random() < .5 ? "aucun" : id(CATALOGUE.accessoire) };
 }
 
 /* ======================= dessins (textures) ======================= */
@@ -168,10 +174,12 @@ function dessinMotif(g, w, h, motif, couleur, x, y, t){
   else if(motif === "arc"){ ["#E5484D", "#FF9F1C", "#FFD23F", "#3FA34D", "#3D7BD9", "#8E5BC4"].forEach((c, k) => { g.strokeStyle = c; g.lineWidth = t * .14; g.beginPath(); g.arc(x, y + t * .45, t * (.95 - k * .14), Math.PI, 0); g.stroke(); }); }
 }
 function texHaut(cfg, numero, face){
-  const style = cfg.haut, couleur = cfg.couleurHaut, motif = style === "heros" && cfg.motif === "uni" ? "etoile" : cfg.motif;
+  const style = cfg.haut, couleur = cfg.couleurHaut, motif = style === "heros" && cfg.motif === "uni" ? "etoile" : style === "pirate" ? "mariniere" : cfg.motif;
   return tex("h" + style + couleur + motif + (numero || "") + face, 128, 128, (g, w, h) => {
     g.fillStyle = couleur; g.fillRect(0, 0, w, h);
     const encre = clair(couleur) ? "#1D2357" : "#FFFFFF";
+    if(motif === "mariniere"){ g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, w, h); g.fillStyle = couleur; for(let y = 6; y < h; y += 22) g.fillRect(0, y, w, 11); }
+    if(face === "devant" && style === "capitaine"){ g.fillStyle = "#FFFFFF"; g.beginPath(); g.moveTo(40, 0); g.lineTo(64, 40); g.lineTo(88, 0); g.fill(); g.fillStyle = "#FFD23F"; [[46, 54], [82, 54], [46, 80], [82, 80], [46, 106], [82, 106]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); }); }
     if(motif === "rayures"){ g.fillStyle = clair(couleur) ? "rgba(29,35,87,.35)" : "rgba(255,255,255,.55)"; for(let y = 0; y < h; y += 28) g.fillRect(0, y, w, 13); }
     if(motif === "pois"){ g.fillStyle = clair(couleur) ? "rgba(29,35,87,.45)" : "rgba(255,255,255,.75)"; for(let y = 10; y < h; y += 30) for(let x = (y / 30) % 2 ? 24 : 9; x < w; x += 30){ g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); } }
     if(face === "devant"){
@@ -181,7 +189,7 @@ function texHaut(cfg, numero, face){
       if(style === "capuche"){ g.fillStyle = "rgba(0,0,0,.18)"; g.fillRect(30, 84, 68, 30); g.strokeStyle = "#FFFFFF"; g.lineWidth = 4; g.beginPath(); g.moveTo(52, 0); g.lineTo(50, 34); g.moveTo(76, 0); g.lineTo(78, 34); g.stroke(); }
       if(style === "princesse"){ g.fillStyle = "#FFD23F"; for(let x = 10; x < w; x += 20){ g.beginPath(); g.arc(x, 112, 5, 0, 7); g.fill(); } }
       if(style === "maillot" && numero){ g.fillStyle = encre; g.font = "bold 34px Fredoka, Arial, sans-serif"; g.textAlign = "center"; g.fillText(String(numero), 92, 44); }
-      if(!["rayures", "pois", "uni"].includes(motif) && style !== "salopette") dessinMotif(g, w, h, motif, couleur, style === "maillot" ? 52 : 64, style === "maillot" ? 66 : 62, 34);
+      if(!["rayures", "pois", "uni", "mariniere"].includes(motif) && style !== "salopette" && style !== "capitaine") dessinMotif(g, w, h, motif, couleur, style === "maillot" ? 52 : 64, style === "maillot" ? 66 : 62, 34);
       if(style === "maillot"){ g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, w, 8); }
     }
     if(face === "dos" && style === "maillot" && numero){ g.fillStyle = encre; g.font = "bold 80px Fredoka, Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(numero), 64, 70); }
@@ -240,6 +248,14 @@ function chapeau3D(cfg){
   if(st === "fleurs") for(let k = 0; k < 8; k++){ const a = k / 8 * Math.PI * 2; g.add(boule(.07, ["#FF8FB8", "#FFD23F", "#FFFFFF", "#B9B3F5"][k % 4], Math.cos(a) * .33, .26 + bouffant, Math.sin(a) * .33, 6)); }
   if(st === "licorne"){ const c = cone(.07, .4, "#FFD23F", 0, .48 + bouffant, .18, 8); c.rotation.x = .45; g.add(c); }
   if(st === "chef"){ g.add(cyl(.3, .3, .26, "#FFFFFF", 0, .38 + bouffant, 0, 14)); g.add(boule(.34, "#FFFFFF", 0, .6 + bouffant, 0, 12)); }
+  if(st === "bandana"){ const r = "#E5484D"; const c = new THREE.Mesh(new THREE.SphereGeometry(TETE_R + .035, 16, 8, 0, Math.PI * 2, 0, Math.PI * .46), mat(r)); c.rotation.x = -.25; c.position.y = .02 + bouffant; c.castShadow = true; g.add(c);
+    g.add(boule(.07, r, 0, .08 + bouffant, -.4, 6)); [-1, 1].forEach(s => { const q = boite(.07, .22, .04, r, s * .07, -.05 + bouffant, -.42); q.rotation.z = s * .4; g.add(q); });
+    for(let k = 0; k < 6; k++){ const a = k / 6 * Math.PI * 2; g.add(boule(.03, "#FFFFFF", Math.cos(a) * .22, .3 + bouffant, Math.sin(a) * .22 + .05, 5)); } }
+  if(st === "capitaine"){ const n = "#1D2357", or = mat("#FFD23F", { metalness: .5, roughness: .3 });
+    const b = new THREE.Mesh(new THREE.SphereGeometry(.5, 18, 8, 0, Math.PI * 2, 0, Math.PI / 2), mat(n)); b.scale.set(1.15, .55, .62); b.position.y = .26 + bouffant; b.castShadow = true; g.add(b);
+    const bord = new THREE.Mesh(new THREE.SphereGeometry(.505, 18, 2, 0, Math.PI * 2, Math.PI * .47, Math.PI * .03), or); bord.scale.set(1.15, .55, .62); bord.position.y = .26 + bouffant; g.add(bord);
+    g.add(boule(.06, "#FFFFFF", 0, .38 + bouffant, .32, 6));
+    const plume = boule(.11, "#FFFFFF", -.28, .5 + bouffant, -.05, 8); plume.scale.set(.6, 2.2, .5); plume.rotation.z = .5; g.add(plume); }
   return g;
 }
 function lunettes3D(cfg){
@@ -256,8 +272,43 @@ function lunettes3D(cfg){
   if(st === "masque"){ const m = new THREE.Mesh(new THREE.SphereGeometry(TETE_R + .015, 20, 6, -Math.PI * .3, Math.PI * .6, Math.PI * .4, Math.PI * .16), mat(cfg.couleurHaut)); m.rotation.y = 0; g.add(m); m.position.y = .05; }
   if(st === "plongee"){ const m = new THREE.Mesh(new THREE.BoxGeometry(.42, .2, .1), mat("#4CC9F0", { transparent: true, opacity: .75, roughness: .1 })); m.position.set(0, .02, z + .02); g.add(m);
     g.add(new THREE.Mesh(new THREE.TorusGeometry(TETE_R + .01, .025, 6, 24), mat("#22232B")).rotateX(Math.PI / 2)); }
+  if(st === "cacheOeil"){
+    // le cache est posé exactement sur l'œil gauche du dessin du visage (u = 0,25 + 0,053 ; un peu au-dessus de l'équateur)
+    const phi = Math.PI / 2 + .33, theta = Math.PI / 2 - .05, R = TETE_R + .02;
+    const pos = new THREE.Vector3(-Math.cos(phi) * Math.sin(theta) * R, Math.cos(theta) * R, Math.sin(phi) * Math.sin(theta) * R);
+    const cache = new THREE.Mesh(new THREE.CylinderGeometry(.095, .095, .03, 16), mat("#16161C")); cache.position.copy(pos);
+    cache.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize()); g.add(cache);
+    const sangle = new THREE.Mesh(new THREE.TorusGeometry(TETE_R + .012, .014, 4, 30), mat("#16161C")); sangle.rotation.set(Math.PI / 2 - .3, 0, .35); sangle.position.y = .04; g.add(sangle); }
   g.position.y = .03;
   return g;
+}
+/* ce que le personnage tient (main droite) ou porte sur l'épaule */
+function accessoire3D(cfg, brasD, corps){
+  const st = cfg.accessoire || "aucun";
+  if(st === "aucun") return;
+  const main = new THREE.Group(); main.position.set(0, -.86, .06); brasD.add(main);
+  const bois = "#8A5A3B", metal = mat("#C9CED8", { metalness: .7, roughness: .25 }), or = mat("#FFD23F", { metalness: .5, roughness: .3 });
+  if(st === "perroquet"){
+    const p = new THREE.Group(); p.position.set(-.5, 1.92, -.02); corps.add(p);
+    const c = boule(.16, "#E5484D", 0, .12, 0, 10); c.scale.set(.85, 1.25, .85); p.add(c);
+    p.add(boule(.12, "#E5484D", 0, .34, .04, 10));
+    const bec = cone(.05, .12, "#FFD23F", 0, .32, .17, 6); bec.rotation.x = Math.PI / 2 + .5; p.add(bec);
+    [-1, 1].forEach(s => { p.add(boule(.025, "#FFFFFF", s * .07, .38, .12, 5)); p.add(boule(.014, "#16161C", s * .075, .38, .14, 4));
+      const aile = boule(.1, "#3D7BD9", s * .12, .1, -.02, 8); aile.scale.set(.4, 1.3, .9); p.add(aile); });
+    const queue = boite(.1, .32, .04, "#3FA34D", 0, -.12, -.12); queue.rotation.x = .5; p.add(queue);
+    p.userData.perroquet = true; corps.userData.perroquet = p; return;
+  }
+  if(st === "sabre"){ main.add(boite(.06, .16, .06, bois, 0, -.02, 0)); const garde = new THREE.Mesh(new THREE.TorusGeometry(.09, .018, 5, 12, Math.PI), or); garde.position.set(0, -.06, .02); garde.rotation.y = Math.PI / 2; main.add(garde);
+    const lame = new THREE.Group(); lame.position.set(0, -.1, 0); main.add(lame); lame.rotation.x = 1.2;
+    for(let k = 0; k < 5; k++){ const m = boite(.025, .17, .07, metal, 0, -.08 - k * .16, k * k * .008); m.rotation.x = -k * .06; lame.add(m); } }
+  if(st === "epee"){ main.add(boite(.06, .18, .06, bois, 0, 0, 0)); main.add(boite(.06, .05, .3, or, 0, -.1, 0)); const l = boite(.03, .8, .09, metal, 0, -.52, 0); main.add(l); main.rotation.x = 1.2; }
+  if(st === "longueVue"){ const lv = new THREE.Group(); lv.rotation.x = Math.PI / 2; main.add(lv); lv.add(cyl(.05, .05, .3, or, 0, 0, 0, 10)); lv.add(cyl(.065, .065, .2, mat(bois), 0, .22, 0, 10)); lv.add(cyl(.075, .075, .05, or, 0, .33, 0, 10)); }
+  if(st === "crochet"){ main.add(cyl(.09, .07, .1, mat(bois), 0, .02, 0, 10)); main.add(cyl(.02, .02, .14, metal, 0, -.08, 0, 6)); const h = new THREE.Mesh(new THREE.TorusGeometry(.08, .022, 6, 12, Math.PI * 1.3), metal); h.position.set(0, -.2, .05); h.rotation.y = Math.PI / 2; main.add(h); }
+  if(st === "lanterne"){ main.add(cyl(.01, .01, .14, metal, 0, -.05, 0, 4)); main.add(boite(.18, .04, .18, "#22232B", 0, -.13, 0));
+    main.add(boite(.15, .2, .15, mat("#FFD23F", { emissive: "#FFB000", emissiveIntensity: 1.2, transparent: true, opacity: .9 }), 0, -.26, 0)); main.add(boite(.19, .04, .19, "#22232B", 0, -.38, 0)); }
+  if(st === "carte"){ const r = cyl(.06, .06, .36, mat("#F4E2A0"), 0, -.05, .05, 10); r.rotation.z = Math.PI / 2; main.add(r); main.add(boite(.02, .14, .14, "#E5484D", 0, -.05, .05)); }
+  if(st === "pelle"){ const m = new THREE.Group(); m.rotation.x = .3; main.add(m); m.add(cyl(.025, .025, 1.1, mat(bois), 0, -.2, 0, 6)); m.add(boite(.2, .24, .03, metal, 0, -.82, 0)); }
+  if(st === "baguette"){ const b = cyl(.02, .02, .45, "#22232B", 0, -.12, .12, 6); b.rotation.x = 1.1; main.add(b); main.add(boule(.05, "#FFD23F", 0, -.2, .32, 6)); }
 }
 function dos3D(cfg){
   const g = new THREE.Group(), st = cfg.haut === "heros" && cfg.dos === "aucun" ? "cape" : cfg.dos;
@@ -276,7 +327,7 @@ export function creerAvatar(cfg, options){
   const racine = new THREE.Group(), base = new THREE.Group(), corps = new THREE.Group(); racine.add(base); base.add(corps);
   const peau = mat(cfg.peau), robe = cfg.haut === "robe" || cfg.haut === "princesse";
   const bas = mat(cfg.couleurBas), chaus = mat(cfg.chaussures);
-  const longues = ["capuche", "pull", "chemise", "veste", "heros", "princesse"].includes(cfg.haut);
+  const longues = ["capuche", "pull", "chemise", "veste", "heros", "princesse", "capitaine"].includes(cfg.haut);
   const haut = mat(cfg.couleurHaut);
   // jambes
   const jambes = [];
@@ -298,6 +349,8 @@ export function creerAvatar(cfg, options){
     if(cfg.haut === "princesse") corps.add(cyl(.86, .86, .06, "#FFD23F", 0, .21, 0, 16)); }
   if(cfg.haut === "capuche"){ const c = new THREE.Mesh(new THREE.SphereGeometry(.34, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), haut); c.rotation.x = -1.9; c.position.set(0, 1.74, -.2); c.scale.set(1, 1, .7); corps.add(c); }
   if(cfg.haut === "chemise" || cfg.haut === "veste") corps.add(boite(.5, .1, .46, cfg.haut === "chemise" ? "#FFFFFF" : haut, 0, 1.78, 0));
+  if(cfg.haut === "pirate" || cfg.haut === "capitaine"){ corps.add(boite(.84, .12, .48, "#5A3A22", 0, 1.03, 0)); corps.add(boite(.16, .14, .05, mat("#FFD23F", { metalness: .5, roughness: .3 }), 0, 1.03, .25)); }
+  if(cfg.haut === "capitaine"){ [-1, 1].forEach(s => { corps.add(boite(.3, .55, .06, haut, s * .26, .7, .2)); corps.add(boite(.36, .55, .06, haut, s * .2, .7, -.22)); corps.add(boite(.06, .55, .44, haut, s * .41, .7, 0)); }); }
   // bras
   const bras = [];
   [-1, 1].forEach(s => {
@@ -305,6 +358,7 @@ export function creerAvatar(cfg, options){
     b.add(boite(.24, .32, .26, haut, 0, -.13, 0));
     b.add(boite(.2, .42, .22, longues ? haut : peau, 0, -.47, 0));
     b.add(boite(.21, .2, .23, cfg.haut === "heros" ? mat("#FFD23F") : peau, 0, -.76, 0));
+    if(cfg.haut === "capitaine") b.add(boite(.23, .08, .25, "#FFD23F", 0, -.64, 0));
     corps.add(b); bras.push(b);
   });
   // cou, tête, cheveux, chapeau, lunettes
@@ -314,6 +368,7 @@ export function creerAvatar(cfg, options){
   [-1, 1].forEach(s => tete.add(boule(.075, peau, s * .35, -.02, 0, 8)));
   tete.add(cheveux3D(cfg)); tete.add(chapeau3D(cfg)); tete.add(lunettes3D(cfg));
   const dos = dos3D(cfg); corps.add(dos);
+  accessoire3D(cfg, bras[1], corps);
   if(options.pose === "assis"){
     jambes.forEach(j => { j.rotation.x = -1.45; }); base.position.y = -.5;
   }
@@ -337,5 +392,6 @@ export function animerAvatar(av, t, mode, v){
     u.bras[0].rotation.z = -.08 - Math.sin(t * 2) * .04; u.bras[1].rotation.z = .08 + Math.sin(t * 2) * .04; u.corps.rotation.y = 0; u.corps.position.y = Math.sin(t * 2) * .02;
     u.jambes.forEach(j => j.rotation.x = 0); u.tete.rotation.z = Math.sin(t * 1.3) * .05;
   }
+  if(u.corps.userData.perroquet){ const p = u.corps.userData.perroquet; p.rotation.y = Math.sin(t * 1.7) * .5; p.position.y = 1.92 + Math.abs(Math.sin(t * 3)) * .02; }
   if(u.cape) u.cape.rotation.x = .18 + Math.sin(t * 3) * .05 + (mode === "course" ? Math.min(1, (v || 0) / 8) * .7 : 0);
 }
