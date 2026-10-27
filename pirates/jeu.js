@@ -3,7 +3,7 @@
 import * as THREE from "../course3d/lib/three.module.min.js";
 import { profils, avatarDe, creerAvatar, animerAvatar } from "../commun/avatar.js";
 import { lireManette, vraiesManettes } from "../commun/manette.js";
-import { Partie } from "./reseau.js";
+import { Partie } from "./reseau.js?v=3";
 import { N, T, HMAX, NIVEAU_EAU, TERRAINS, COULEURS, OBJETS, PAR_ID, Rendu, sol, idx, dedans, caseX, centre, hauteurCase,
   mondeVide, nouvelleIle, oceanVide, ileAventure, versTexte, depuisTexte, ajouterObjet, objetSur } from "./monde.js";
 
@@ -285,7 +285,7 @@ function majJeu(dt, t){
     if(o.k === "crabe" && d < 1.3 && !g.userData.pris){ g.userData.pris = true; message("🦀 Pince pince !"); bip(700, .08, "square", .04); setTimeout(() => { g.userData.pris = false; }, 2500); }
   }
   // ----- les autres pirates (jouer ensemble) -----
-  if(partie){ envoiT -= dt; if(envoiT <= 0){ envoiT = .08; envoyer(etatJoueur()); } }
+  if(partie){ envoiT -= dt; if(envoiT <= 0){ envoiT = .12; envoyer(etatJoueur()); } }
   majAutres(dt, t);
   // ----- la boussole : vers le trésor le plus proche -----
   if(jeu.coffres){
@@ -379,7 +379,7 @@ function fenetre(titre, code, texte, saisie){
   $("ensemble").hidden = false; $("ensTitre").textContent = titre; $("ensCode").textContent = code || ""; $("ensCode").hidden = !code; $("ensTexte").textContent = texte || "";
   $("ensSaisie").hidden = !saisie; $("ensOk").hidden = !saisie; if(saisie){ $("ensSaisie").value = ""; setTimeout(() => $("ensSaisie").focus(), 50); }
 }
-$("ensAnnuler").onclick = () => { $("ensemble").hidden = true; quitterPartie(); };
+$("ensAnnuler").onclick = () => { $("ensemble").hidden = true; if(etat !== "jeu") quitterPartie(); };
 function heberger(m, mode){
   const propre = depuisTexte(versTexte(m)); propre.cle = m.cle; propre.nom = m.nom;   // mêmes numéros d'objets chez tout le monde
   const texte = versTexte(propre);
@@ -393,10 +393,11 @@ function heberger(m, mode){
   }).then(code => {
     demarrerJeu(propre, mode, true);
     fenetre("Ta partie est prête !", code, "Sur l'autre appareil : ouvre « L'Île des Pirates », appuie sur « Rejoindre une partie » et tape ce code. Le code reste affiché en haut à gauche.");
+    setTimeout(() => { if(partie && !$("ensemble").hidden) $("ensTexte").textContent += " (connexion : " + partie.servicesOk() + " service" + (partie.servicesOk() > 1 ? "s" : "") + " sur 3 répondent ✅)"; }, 4000);
     $("ensAnnuler").textContent = "▶ C'est parti !";
-    $("ensAnnuler").onclick = () => { $("ensemble").hidden = true; $("ensAnnuler").textContent = "Retour"; $("ensAnnuler").onclick = () => { $("ensemble").hidden = true; quitterPartie(); }; };
+    $("ensAnnuler").onclick = () => { $("ensemble").hidden = true; $("ensAnnuler").textContent = "Retour"; $("ensAnnuler").onclick = () => { $("ensemble").hidden = true; if(etat !== "jeu") quitterPartie(); }; };
     majEquipage();
-  }).catch(e => { quitterPartie(); fenetre("Impossible de créer la partie", "", "Le service de connexion ne répond pas (" + (e && (e.type || e.message) || "?") + "). Vérifie qu'Internet marche, puis réessaie dans un moment."); });
+  }).catch(e => { quitterPartie(); fenetre("Impossible de créer la partie", "", "Aucun des 3 services de connexion ne répond. Vérifie qu'Internet marche (une page web s'ouvre-t-elle ?), puis réessaie dans un moment."); });
 }
 $("creerPartie").onclick = () => heberger(ileAventure(), "aventure");
 $("rejoindre").onclick = () => { fenetre("Rejoindre une partie", "", "Tape le code à 4 chiffres affiché sur l'appareil du capitaine.", true); };
