@@ -3,6 +3,7 @@
 import * as THREE from "../course3d/lib/three.module.min.js";
 import { profils, avatarDe, creerAvatar, animerAvatar } from "../commun/avatar.js";
 import { lireManette, vraiesManettes } from "../commun/manette.js";
+import { Partie } from "./reseau.js";
 import { N, T, HMAX, NIVEAU_EAU, TERRAINS, COULEURS, OBJETS, PAR_ID, Rendu, sol, idx, dedans, caseX, centre, hauteurCase,
   mondeVide, nouvelleIle, oceanVide, ileAventure, versTexte, depuisTexte, ajouterObjet, objetSur } from "./monde.js";
 
@@ -95,9 +96,10 @@ function remplirMondes(){
   l.slice().sort((a, b) => (b.date || 0) - (a.date || 0)).forEach(w => {
     const d = document.createElement("div"); d.className = "monde";
     const qui = profils().find(p => p.id === w.auteur);
-    d.innerHTML = "<b></b><button data-a='jouer'>▶ Jouer</button><button data-a='modif'>🛠️</button><button data-a='suppr'>🗑️</button>";
+    d.innerHTML = "<b></b><button data-a='jouer'>▶ Jouer</button><button data-a='ens' title='Jouer à plusieurs'>👫</button><button data-a='modif'>🛠️</button><button data-a='suppr'>🗑️</button>";
     d.querySelector("b").textContent = w.nom; const sm = document.createElement("small"); sm.textContent = (qui ? "par " + qui.nom + " · " : "") + new Date(w.date || Date.now()).toLocaleDateString("fr-CH"); d.querySelector("b").appendChild(sm);
     d.querySelector("[data-a=jouer]").onclick = () => { const m = depuisTexte(w.data); m.cle = w.id; demarrerJeu(m, "libre"); };
+    d.querySelector("[data-a=ens]").onclick = () => { const m = depuisTexte(w.data); m.cle = w.id; heberger(m, "libre"); };
     d.querySelector("[data-a=modif]").onclick = () => { const m = depuisTexte(w.data); m.cle = w.id; demarrerConstr(m); };
     d.querySelector("[data-a=suppr]").onclick = () => { if(confirm("Effacer le monde « " + w.nom + " » ?")){ garderMondes(mesMondes().filter(x => x.id !== w.id)); remplirMondes(); } };
     box.appendChild(d);
@@ -137,7 +139,8 @@ $("nouvelOcean").onclick = () => { const n = prompt("Comment s'appelle ton monde
 /* ======================= le jeu (marcher, nager, bateau, trésors) ======================= */
 const R = .42, PAS = .55, GRAV = -30, SAUT = 11.8, VMARCHE = 7.5, VNAGE = 4, VBATEAU = 11;
 let joueur = null, perso = null, camJ = { yaw: 0, pitch: .5, dist: 10 }, jeu = null;
-function demarrerJeu(m, mode){
+function demarrerJeu(m, mode, ensemble){
+  if(!ensemble) quitterPartie();
   etat = "jeu"; monde = m; $("menu").hidden = true; $("constr").hidden = true; $("hud").hidden = false; $("tactile").hidden = !tactile;
   if(persoVitrine){ scene.remove(persoVitrine); persoVitrine = null; }
   rendu.tout(monde);
@@ -160,7 +163,7 @@ function majCompte(){
 let msgT = 0, annT = 0;
 function message(t, d){ $("message").textContent = t; $("message").classList.add("on"); msgT = d || 2.5; }
 function annonce(t, s, d){ $("annonce").innerHTML = ""; $("annonce").append(t); if(s){ const sm = document.createElement("small"); sm.textContent = s; $("annonce").appendChild(sm); } $("annonce").classList.add("on"); annT = d || 2.6; }
-$("quitter").onclick = () => { if(monde.retourConstr){ demarrerConstr(monde.retourConstr); return; } montrerMenu(); };
+$("quitter").onclick = () => { quitterPartie(); if(monde.retourConstr){ demarrerConstr(monde.retourConstr); return; } montrerMenu(); };
 $("aideBtn").onclick = () => message(tactile ? "Rond à gauche : marcher · 🦘 sauter · ⚓ bateau · glisse pour tourner la caméra" : "Flèches / W A S D : marcher · Espace : sauter · E : bateau · souris : caméra", 5);
 
 /* le sol le plus haut sous les pieds (on regarde le centre et 4 coins) */
@@ -194,7 +197,8 @@ function bateauProche(){
 function actionBateau(){
   if(!joueur.bateau){
     const b = bateauProche(); if(!b){ message("Il n'y a pas de bateau ici."); return; }
-    joueur.bateau = b; b.userData.pilote = true; joueur.dir = b.rotation.y; message("⛵ Tu es le capitaine ! Avance et tourne avec les flèches.", 3.5); dire("capitaine"); bip(523, .2); setTimeout(() => bip(784, .25), 120);
+    if(b.userData.piloteDistant){ const a = autres.get(b.userData.piloteDistant); message("⛵ " + (a ? a.nom : "Un autre pirate") + " conduit déjà ce bateau !"); return; }
+    joueur.bateau = b; b.userData.pilote = true; envoyer({ t: "bateau", o: b.userData.objet.id, pilote: true }); joueur.dir = b.rotation.y; message("⛵ Tu es le capitaine ! Avance et tourne avec les flèches.", 3.5); dire("capitaine"); bip(523, .2); setTimeout(() => bip(784, .25), 120);
     return;
   }
   // descendre : chercher une case de terre basse juste à côté
@@ -204,7 +208,7 @@ function actionBateau(){
     const d = Math.hypot(centre(i) - b.position.x, centre(j) - b.position.z); if(d < md){ md = d; mieux = [i, j, h]; }
   }
   if(!mieux){ message("Approche-toi d'une plage pour descendre !"); dire("approche"); return; }
-  b.userData.pilote = false; joueur.bateau = null;
+  b.userData.pilote = false; joueur.bateau = null; envoyer({ t: "bateau", o: b.userData.objet.id, pilote: false, x: b.position.x, z: b.position.z, r: b.rotation.y });
   joueur.x = centre(mieux[0]); joueur.z = centre(mieux[1]); joueur.y = mieux[2] + .05; joueur.vy = 0; bip(392, .15);
 }
 function majJeu(dt, t){
@@ -275,12 +279,14 @@ function majJeu(dt, t){
   for(const [, g] of rendu.speciaux){
     const o = g.userData.objet, d = Math.hypot(g.position.x - j.x, g.position.z - j.z);
     if(o.k === "coffre" && g.userData.ouverture === undefined && d < 2 && Math.abs(g.position.y - j.y) < 2.2){
-      g.userData.ouverture = 0; jeu.trouves++; majCompte(); sonTresor();
-      if(jeu.trouves >= jeu.coffres) victoire(); else { annonce("Un trésor !", "Encore " + (jeu.coffres - jeu.trouves)); dire("tresor"); }
+      ouvrirCoffre(g, null); envoyer({ t: "coffre", o: o.id });
     }
-    if(o.k === "piece" && g.visible && d < 1.4 && Math.abs(g.position.y + 1 - j.y - 1) < 2){ g.visible = false; jeu.pieces++; majCompte(); sonPiece(); }
+    if(o.k === "piece" && g.visible && d < 1.4 && Math.abs(g.position.y + 1 - j.y - 1) < 2){ g.visible = false; jeu.pieces++; majCompte(); sonPiece(); envoyer({ t: "piece", o: o.id }); }
     if(o.k === "crabe" && d < 1.3 && !g.userData.pris){ g.userData.pris = true; message("🦀 Pince pince !"); bip(700, .08, "square", .04); setTimeout(() => { g.userData.pris = false; }, 2500); }
   }
+  // ----- les autres pirates (jouer ensemble) -----
+  if(partie){ envoiT -= dt; if(envoiT <= 0){ envoiT = .08; envoyer(etatJoueur()); } }
+  majAutres(dt, t);
   // ----- la boussole : vers le trésor le plus proche -----
   if(jeu.coffres){
     let cible = null, md = 1e9;
@@ -296,18 +302,134 @@ function majJeu(dt, t){
   camera.position.lerp(new THREE.Vector3(cx, cy, cz), Math.min(1, dt * 10)); camera.lookAt(j.x, j.y + 1.6, j.z);
   suivreSoleil(j.x, j.z);
 }
+function ouvrirCoffre(g, qui){
+  if(g.userData.ouverture !== undefined) return;
+  g.userData.ouverture = 0; jeu.trouves++; majCompte(); sonTresor();
+  if(jeu.trouves >= jeu.coffres){ if(!jeu.fini) victoire(); }
+  else if(qui) annonce(qui + " a trouvé un trésor !", "Encore " + (jeu.coffres - jeu.trouves));
+  else { annonce("Un trésor !", "Encore " + (jeu.coffres - jeu.trouves)); dire("tresor"); }
+}
+
+/* ======================= jouer ensemble ======================= */
+let partie = null, autres = new Map(), envoiT = 0;
+function monNom(){ const P = profils().find(p => p.id === profil); return P ? P.nom : "Pirate"; }
+function monNumero(){ const P = profils().find(p => p.id === profil); return P && P.numero; }
+function envoyer(m){ if(partie) partie.envoyer(m); }
+function etatJoueur(){
+  const j = joueur, b = j.bateau;
+  return { t: "pos", x: +j.x.toFixed(2), y: +j.y.toFixed(2), z: +j.z.toFixed(2), d: +j.dir.toFixed(2), v: +j.v.toFixed(1), n: j.nage ? 1 : 0, s: j.auSol ? 1 : 0,
+    b: b ? [b.userData.objet.id, +b.position.x.toFixed(2), +b.position.z.toFixed(2), +b.rotation.y.toFixed(2)] : null };
+}
+function etiquette(nom){
+  const c = document.createElement("canvas"); c.width = 256; c.height = 64; const x = c.getContext("2d");
+  x.font = "bold 34px Fredoka, Arial, sans-serif"; const w = Math.min(244, x.measureText(nom).width + 28);
+  x.fillStyle = "rgba(29,35,87,.8)"; x.beginPath(); x.roundRect ? x.roundRect(128 - w / 2, 8, w, 48, 24) : x.rect(128 - w / 2, 8, w, 48); x.fill();
+  x.fillStyle = "#FFF8E7"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(nom, 128, 33);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true })); sp.scale.set(2.6, .65, 1); sp.position.y = 3.3; sp.renderOrder = 10;
+  return sp;
+}
+function ajouterAutre(id, nom, avatar, numero){
+  if(!id || id === (partie && partie.moi) || autres.has(id)) return;
+  const g = creerAvatar(avatar || {}, { numero }); g.traverse(o => { if(o.isMesh) o.castShadow = true; }); g.add(etiquette(nom || "Pirate"));
+  g.visible = false; scene.add(g);
+  autres.set(id, { g, nom: nom || "Pirate", avatar, numero, c: null, t: 0 });
+  majEquipage();
+}
+function enleverAutre(id){
+  const a = autres.get(id); if(!a) return;
+  scene.remove(a.g); autres.delete(id);
+  for(const [, g] of rendu.speciaux) if(g.userData.piloteDistant === id) g.userData.piloteDistant = null;
+  majEquipage();
+}
+function majEquipage(){
+  const e = $("equipage"); if(!partie){ e.hidden = true; return; }
+  e.hidden = false; e.textContent = "👫 " + [monNom() + " (toi)"].concat([...autres.values()].map(a => a.nom)).join(", ") + (partie.role === "capitaine" ? " · code " + partie.code : "");
+}
+function majAutres(dt, t){
+  for(const [, a] of autres){
+    if(!a.c) continue;
+    const g = a.g, k = Math.min(1, dt * 12);
+    g.visible = true;
+    g.position.x += (a.c.x - g.position.x) * k; g.position.y += (a.c.y - g.position.y) * k; g.position.z += (a.c.z - g.position.z) * k;
+    let d = a.c.d - g.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); g.rotation.y += d * k;
+    a.t += dt;
+    if(a.c.n){ animerAvatar(g, a.t * 6, "course", 4); g.userData.corps.rotation.x = .5; }
+    else { g.userData.corps.rotation.x = 0; if(a.c.b) animerAvatar(g, t, "repos"); else if(!a.c.s) animerAvatar(g, 0, "course", 0); else if(a.c.v > .5) animerAvatar(g, a.t * 11, "course", a.c.v); else animerAvatar(g, t, "repos"); }
+    if(a.c.b){ const b = rendu.speciaux.get(a.c.b[0]); if(b){ b.position.x += (a.c.b[1] - b.position.x) * k; b.position.z += (a.c.b[2] - b.position.z) * k; b.rotation.y = a.c.b[3]; } }
+  }
+}
+function recevoir(m){
+  if(etat !== "jeu" || !jeu) return;
+  if(m.t === "bonjour"){ ajouterAutre(m.de, m.nom, m.avatar, m.numero); message("🏴‍☠️ " + (m.nom || "Un pirate") + " arrive sur l'île !", 3); bip(660, .15); setTimeout(() => bip(880, .2), 120); }
+  else if(m.t === "pos"){ const a = autres.get(m.de); if(a) a.c = m; }
+  else if(m.t === "coffre"){ const g = rendu.speciaux.get(m.o); const a = autres.get(m.de); if(g) ouvrirCoffre(g, a ? a.nom : "Un pirate"); }
+  else if(m.t === "piece"){ const g = rendu.speciaux.get(m.o); if(g && g.visible){ g.visible = false; jeu.pieces++; majCompte(); } }
+  else if(m.t === "bateau"){ const g = rendu.speciaux.get(m.o); if(g){ g.userData.piloteDistant = m.pilote ? m.de : null; g.userData.pilote = !!m.pilote; if(!m.pilote && m.x !== undefined){ g.position.x = m.x; g.position.z = m.z; g.rotation.y = m.r; } } }
+  else if(m.t === "parti"){ const a = autres.get(m.de); if(a){ message("👋 " + a.nom + " a quitté la partie", 3); enleverAutre(m.de); } }
+  else if(m.t === "fin"){ annonce("La partie est finie", "Le capitaine a quitté la partie", 4); quitterPartie(); setTimeout(() => { if(etat === "jeu") montrerMenu(); }, 3500); }
+}
+function quitterPartie(){
+  if(!partie) return;
+  partie.fermer(); partie = null;
+  for(const id of [...autres.keys()]) enleverAutre(id);
+  $("equipage").hidden = true;
+}
+function fenetre(titre, code, texte, saisie){
+  $("ensemble").hidden = false; $("ensTitre").textContent = titre; $("ensCode").textContent = code || ""; $("ensCode").hidden = !code; $("ensTexte").textContent = texte || "";
+  $("ensSaisie").hidden = !saisie; $("ensOk").hidden = !saisie; if(saisie){ $("ensSaisie").value = ""; setTimeout(() => $("ensSaisie").focus(), 50); }
+}
+$("ensAnnuler").onclick = () => { $("ensemble").hidden = true; quitterPartie(); };
+function heberger(m, mode){
+  const propre = depuisTexte(versTexte(m)); propre.cle = m.cle; propre.nom = m.nom;   // mêmes numéros d'objets chez tout le monde
+  const texte = versTexte(propre);
+  fenetre("Création de la partie…", "", "Un instant, on prépare le bateau ⛵");
+  partie = new Partie(recevoir);
+  partie.creer({
+    monde: () => texte,
+    etat: () => ({ mode, ouverts: [...rendu.speciaux.values()].filter(g => g.userData.ouverture !== undefined).map(g => g.userData.objet.id),
+      prises: [...rendu.speciaux.values()].filter(g => g.userData.objet.k === "piece" && !g.visible).map(g => g.userData.objet.id), pieces: jeu ? jeu.pieces : 0 }),
+    joueurs: () => [{ id: partie.moi, nom: monNom(), avatar: avatarDe(profil), numero: monNumero() }].concat([...autres.entries()].map(([id, a]) => ({ id, nom: a.nom, avatar: a.avatar, numero: a.numero })))
+  }).then(code => {
+    demarrerJeu(propre, mode, true);
+    fenetre("Ta partie est prête !", code, "Sur l'autre appareil : ouvre « L'Île des Pirates », appuie sur « Rejoindre une partie » et tape ce code. Le code reste affiché en haut à gauche.");
+    $("ensAnnuler").textContent = "▶ C'est parti !";
+    $("ensAnnuler").onclick = () => { $("ensemble").hidden = true; $("ensAnnuler").textContent = "Retour"; $("ensAnnuler").onclick = () => { $("ensemble").hidden = true; quitterPartie(); }; };
+    majEquipage();
+  }).catch(e => { quitterPartie(); fenetre("Impossible de créer la partie", "", "Le service de connexion ne répond pas (" + (e && (e.type || e.message) || "?") + "). Vérifie qu'Internet marche, puis réessaie dans un moment."); });
+}
+$("creerPartie").onclick = () => heberger(ileAventure(), "aventure");
+$("rejoindre").onclick = () => { fenetre("Rejoindre une partie", "", "Tape le code à 4 chiffres affiché sur l'appareil du capitaine.", true); };
+$("ensSaisie").addEventListener("keydown", (e) => { if(e.key === "Enter") $("ensOk").onclick(); });
+$("ensOk").onclick = () => {
+  const code = $("ensSaisie").value.replace(/\D/g, "");
+  if(code.length !== 4){ $("ensTexte").textContent = "Le code a 4 chiffres, par exemple 4821."; return; }
+  fenetre("Connexion…", code, "On cherche le bateau du capitaine ⛵");
+  partie = new Partie(recevoir);
+  partie.rejoindre(code, { nom: monNom(), avatar: avatarDe(profil), numero: monNumero() }).then(b => {
+    $("ensemble").hidden = true;
+    const m = depuisTexte(b.monde);
+    demarrerJeu(m, b.etat.mode || "libre", true);
+    (b.joueurs || []).forEach(p => ajouterAutre(p.id, p.nom, p.avatar, p.numero));
+    for(const id of b.etat.ouverts || []){ const g = rendu.speciaux.get(id); if(g){ g.userData.ouverture = 1; g.userData.couvercle.rotation.x = -1.9; g.userData.tresor.visible = true; jeu.trouves++; } }
+    for(const id of b.etat.prises || []){ const g = rendu.speciaux.get(id); if(g) g.visible = false; }
+    jeu.pieces = b.etat.pieces || 0; majCompte(); majEquipage();
+    message("🏴‍☠️ Tu as rejoint la partie !", 3);
+  }).catch(e => { quitterPartie(); fenetre("Impossible de rejoindre", "", (e && e.type === "peer-unavailable") ? "Aucune partie avec ce code. Vérifie le code sur l'appareil du capitaine." : "Aucune partie trouvée. Vérifie le code sur l'appareil du capitaine (la partie doit être ouverte), et qu'Internet marche. Puis réessaie."); });
+};
+
 function victoire(){
   jeu.fini = true; const s = Math.round((performance.now() - jeu.debut) / 1000);
   annonce("Bravo capitaine !", "Tous les trésors en " + Math.floor(s / 60) + " min " + (s % 60) + " s · 🪙 " + jeu.pieces, 6); dire("bravo");
   if(jeu.mode === "aventure"){ const k = "pirates-record-" + profil, r = parseInt(lire(k, "0"), 10); if(!r || s < r){ ecrire(k, String(s)); setTimeout(() => message("🏆 Nouveau record !", 4), 2500); } }
   for(let k = 0; k < 6; k++) setTimeout(sonTresor, k * 400);
-  $("bouton").hidden = false; $("bouton").textContent = "🏠 Retour au menu"; $("bouton").onclick = () => { if(monde.retourConstr) demarrerConstr(monde.retourConstr); else montrerMenu(); };
+  $("bouton").hidden = false; $("bouton").textContent = "🏠 Retour au menu"; $("bouton").onclick = () => { quitterPartie(); if(monde.retourConstr) demarrerConstr(monde.retourConstr); else montrerMenu(); };
 }
 let appuiE = false;
 function quandTouche(e){
   if(etat === "jeu" && (e.code === "KeyE" || e.code === "Enter") && !e.repeat) appuiE = true;
   if(etat === "jeu" && e.code === "Space" && !e.repeat) sautT = true;   // même un appui très court compte (ordinateurs lents)
-  if(etat === "jeu" && e.code === "Escape"){ if(monde.retourConstr) demarrerConstr(monde.retourConstr); else montrerMenu(); }
+  if(etat === "jeu" && e.code === "Escape"){ quitterPartie(); if(monde.retourConstr) demarrerConstr(monde.retourConstr); else montrerMenu(); }
   if(etat === "constr") toucheConstr(e);
 }
 
