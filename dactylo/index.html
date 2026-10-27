@@ -122,6 +122,8 @@ label.f{display:flex;flex-direction:column;gap:4px;font-weight:500;font-size:.95
 label.f input{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
 label.f input:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
 .err{color:var(--err);font-weight:500;margin:0}
+.maj{color:#B26B00;font-weight:600;margin:0}
+.voirmdp{font:inherit;font-size:.9rem;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;align-self:flex-start;text-decoration:underline}
 .link{font:inherit;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline;align-self:flex-start}
 .link.danger{color:var(--err)}
 @media (prefers-reduced-motion:reduce){.target.focus span.c::before{animation:none}.bar i{transition:none}}
@@ -225,21 +227,37 @@ label.f input:focus{outline:3px solid var(--accent-soft);border-color:var(--acce
   </div>
   <form class="card" id="vPass" hidden>
     <h2 id="passName"></h2>
-    <label class="f">Mot de passe<input type="password" id="pPass" autocomplete="current-password"></label>
+    <label class="f">Mot de passe<input type="password" id="pPass" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true"></label>
+    <button class="voirmdp" type="button" data-voir="pPass">👁️ Voir ce que je tape</button>
+    <p class="maj" id="majP" hidden>⚠️ La touche des majuscules est bloquée (Verr. Maj, à gauche du clavier, au-dessus de la touche Maj ⇧).</p>
     <p class="err" id="passErr" hidden></p>
     <div class="row"><button class="btn" type="submit">Se connecter</button><button class="btn ghost" type="button" id="passBack">Retour</button></div>
+    <button class="link" type="button" id="oubli">Mot de passe oublié ?</button>
     <button class="link danger" type="button" id="delAsk">Supprimer ce profil</button>
     <p id="delInfo" hidden>Pour supprimer ce profil et tous ses résultats, tape son mot de passe ci-dessus puis clique sur « Confirmer la suppression ». C'est définitif.</p>
     <button class="btn" type="button" id="delGo" hidden style="background:var(--err);border-color:var(--err)">Confirmer la suppression</button>
+  </form>
+  <form class="card" id="vOubli" hidden>
+    <h2>Nouveau mot de passe</h2>
+    <p>Pour <b id="oubliNom"></b>. Les résultats sont gardés. Écris le <b>prénom</b> et le <b>nom</b> du profil pour confirmer, puis choisis un nouveau mot de passe.</p>
+    <label class="f">Prénom<input id="oPrenom" autocomplete="off"></label>
+    <label class="f">Nom<input id="oNom" autocomplete="off"></label>
+    <label class="f">Nouveau mot de passe (4 caractères au moins)<input type="password" id="oPass" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <label class="f">Nouveau mot de passe, encore une fois<input type="password" id="oPass2" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <button class="voirmdp" type="button" data-voir="oPass,oPass2">👁️ Voir ce que je tape</button>
+    <p class="err" id="oubliErr" hidden></p>
+    <div class="row"><button class="btn" type="submit">Changer le mot de passe</button><button class="btn ghost" type="button" id="oubliBack">Retour</button></div>
   </form>
   <form class="card" id="vCreate" hidden>
     <h2>Nouveau profil</h2>
     <label class="f">Prénom<input id="cPrenom" autocomplete="given-name" maxlength="40"></label>
     <label class="f">Nom<input id="cNom" autocomplete="family-name" maxlength="40"></label>
-    <label class="f">Mot de passe (4 caractères au moins)<input type="password" id="cPass" autocomplete="new-password"></label>
-    <label class="f">Mot de passe, encore une fois<input type="password" id="cPass2" autocomplete="new-password"></label>
+    <label class="f">Mot de passe (4 caractères au moins)<input type="password" id="cPass" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <label class="f">Mot de passe, encore une fois<input type="password" id="cPass2" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <button class="voirmdp" type="button" data-voir="cPass,cPass2">👁️ Voir ce que je tape</button>
+    <p class="maj" id="majC" hidden>⚠️ La touche des majuscules est bloquée (Verr. Maj, à gauche du clavier, au-dessus de la touche Maj ⇧).</p>
     <p class="err" id="createErr" hidden></p>
-    <p>Note bien ton mot de passe : s'il est oublié, on ne peut pas le retrouver.</p>
+    <p>Note bien ton mot de passe. S'il est oublié, « Mot de passe oublié ? » permet d'en choisir un nouveau (avec ton prénom et ton nom) sans perdre tes résultats.</p>
     <div class="row"><button class="btn" type="submit">Créer et commencer</button><button class="btn ghost" type="button" id="createBack">Retour</button></div>
   </form>
 </div>
@@ -519,7 +537,7 @@ label.f input:focus{outline:3px solid var(--accent-soft);border-color:var(--acce
       .then(function(k){ return crypto.subtle.deriveBits({ name:"PBKDF2", hash:"SHA-256", salt:sel, iterations:150000 }, k, 256); })
       .then(b64);
   }
-  function vue(id){ ["vList","vPass","vCreate"].forEach(function(v){ $(v).hidden = v !== id; }); }
+  function vue(id){ ["vList","vPass","vCreate","vOubli"].forEach(function(v){ $(v).hidden = v !== id; }); }
   function msg(id, t){ $(id).textContent = t; $(id).hidden = !t; }
   function listeProfils(){
     var l = profils(), box = $("plist"); box.innerHTML = "";
@@ -529,7 +547,7 @@ label.f input:focus{outline:3px solid var(--accent-soft);border-color:var(--acce
       b.innerHTML = '<span class="ini"></span><span></span>';
       b.children[0].textContent = (P.prenom[0] || "?").toUpperCase(); b.children[1].textContent = P.prenom + " " + P.nom;
       b.onclick = function(){ pending = P; $("passName").textContent = P.prenom + " " + P.nom; $("pPass").value = ""; msg("passErr", "");
-        $("delInfo").hidden = true; $("delGo").hidden = true; vue("vPass"); $("pPass").focus(); };
+        $("delInfo").hidden = true; $("delGo").hidden = true; $("pPass").type = "password"; vue("vPass"); $("pPass").focus(); };
       box.appendChild(b);
     });
   }
@@ -563,7 +581,40 @@ label.f input:focus{outline:3px solid var(--accent-soft);border-color:var(--acce
       l.push(P); saveProfils(l); entrer(P);
     }).catch(function(){ msg("createErr", "Ce navigateur ne permet pas de protéger le mot de passe. Ouvre la page avec Firefox ou Chrome à jour."); });
   });
-  function verifier(){ return hacher($("pPass").value, unb64(pending.sel)).then(function(h){ return h === pending.h; }); }
+  /* On essaie aussi les petites différences qui font rater un mot de passe sans le vouloir :
+     espaces au début ou à la fin, majuscules bloquées (Verr. Maj), accents tapés autrement (é en un ou deux caractères). */
+  function variantes(m){
+    var inv = m.split("").map(function(c){ var u = c.toUpperCase(), l = c.toLowerCase(); return c === u ? l : u; }).join("");
+    var l = [m, m.trim(), inv, inv.trim()], out = [];
+    l.forEach(function(x){ [x, x.normalize ? x.normalize("NFC") : x, x.normalize ? x.normalize("NFD") : x].forEach(function(y){ if(out.indexOf(y) < 0) out.push(y); }); });
+    return out;
+  }
+  function verifier(){
+    var l = variantes($("pPass").value), sel = unb64(pending.sel), i = 0;
+    function suivant(){ if(i >= l.length) return Promise.resolve(false); var m = l[i++]; return hacher(m, sel).then(function(h){ return h === pending.h ? true : suivant(); }); }
+    return suivant();
+  }
+  function majBloquee(e, id){ if(e.getModifierState) $(id).hidden = !e.getModifierState("CapsLock"); }
+  ["pPass"].forEach(function(i){ $(i).addEventListener("keyup", function(e){ majBloquee(e, "majP"); }); $(i).addEventListener("keydown", function(e){ majBloquee(e, "majP"); }); });
+  ["cPass","cPass2"].forEach(function(i){ $(i).addEventListener("keyup", function(e){ majBloquee(e, "majC"); }); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-voir]"), function(b){
+    b.onclick = function(){ var ids = b.getAttribute("data-voir").split(","), voir = $(ids[0]).type === "password";
+      ids.forEach(function(i){ $(i).type = voir ? "text" : "password"; }); b.textContent = voir ? "🙈 Cacher" : "👁️ Voir ce que je tape"; $(ids[0]).focus(); };
+  });
+  $("oubli").onclick = function(){ ["oPrenom","oNom","oPass","oPass2"].forEach(function(i){ $(i).value = ""; }); msg("oubliErr", ""); $("oubliNom").textContent = pending.prenom + " " + pending.nom; vue("vOubli"); $("oPrenom").focus(); };
+  $("oubliBack").onclick = function(){ vue("vPass"); $("pPass").focus(); };
+  $("vOubli").addEventListener("submit", function(e){
+    e.preventDefault();
+    var pr = $("oPrenom").value.trim().toLowerCase(), no = $("oNom").value.trim().toLowerCase(), m1 = $("oPass").value, m2 = $("oPass2").value;
+    if(pr !== pending.prenom.toLowerCase() || no !== pending.nom.toLowerCase()) return msg("oubliErr", "Le prénom ou le nom ne correspond pas à ce profil.");
+    if(m1.length < 4) return msg("oubliErr", "Le mot de passe doit avoir au moins 4 caractères.");
+    if(m1 !== m2) return msg("oubliErr", "Les deux mots de passe ne sont pas identiques.");
+    var sel = crypto.getRandomValues(new Uint8Array(16));
+    hacher(m1, sel).then(function(h){
+      var l = profils(); l.forEach(function(P){ if(P.id === pending.id){ P.sel = b64(sel); P.h = h; } }); saveProfils(l);
+      pending.sel = b64(sel); pending.h = h; entrer(pending);
+    }).catch(function(){ msg("oubliErr", "Ce navigateur ne permet pas de protéger le mot de passe."); });
+  });
   $("vPass").addEventListener("submit", function(e){
     e.preventDefault();
     verifier().then(function(ok){ if(ok) entrer(pending); else { msg("passErr", "Mot de passe incorrect."); $("pPass").select(); } })
