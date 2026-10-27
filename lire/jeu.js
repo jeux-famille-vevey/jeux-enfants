@@ -28,11 +28,12 @@
     var monTour = tour; noms = [].concat(noms);
     return noms.reduce(function(p, nom){ return p.then(function(){
       if(monTour !== tour) return;
+      if(nom === "~") return attendre(350);   // petite pause
       return new Promise(function(fin){
         var fait = false, finir = function(){ if(!fait){ fait = true; fin(); } };
         lecteur.onended = finir; lecteur.onerror = function(){ setTimeout(finir, 300); };
         // la voix d'un parent (enregistrée sur cet appareil) passe avant la voix du jeu
-        lecteur.muted = false; lecteur.src = MAVOIX[nom] || ("sons/" + nom + ".mp3?v=3");   // ?v=3 : nouvelles voix (sinon le navigateur garde les anciennes)
+        lecteur.muted = false; lecteur.src = MAVOIX[nom] || ("sons/" + nom + ".mp3?v=4");   // ?v=4 : nouvelles voix (sinon le navigateur garde les anciennes)
         var pr = lecteur.play(); if(pr && pr.catch) pr.catch(function(){ setTimeout(finir, 300); });
         setTimeout(finir, 8000);
       });
@@ -61,6 +62,9 @@
   }
   chargerMaVoix();
   var fLettre = function(l){ return "l-" + slug(l) + (l === "é" ? "-e" : ""); };
+  // « coller les sons » = le son tenu, la voyelle, puis la syllabe (rrrr… i… ri), avec de petites pauses.
+  // Chaque morceau est un son vérifié (ou la voix du parent s'il l'a enregistré).
+  var fusion = function(it){ return [fLettre(it.c), "~", fLettre(it.v), "~", "s-" + slug(it.s)]; };
 
   /* ---------- sons et fête ---------- */
   var actx = null;
@@ -115,7 +119,7 @@
         else c.innerHTML = '<span class="lettre">' + it.l + '</span><span class="img">' + it.e + "</span><small>" + it.mot + "</small>";
         c.onclick = async function(){
           tour++; document.querySelectorAll(".carteL.on").forEach(function(x){ x.classList.remove("on"); }); c.classList.add("on", "vu");
-          if(et.n === 3){ c.classList.remove("colle"); setTimeout(function(){ c.classList.add("colle"); }, 1400); await jouer("f-" + slug(it.s)); }
+          if(et.n === 3){ c.classList.remove("colle"); setTimeout(function(){ c.classList.add("colle"); }, 1400); await jouer(fusion(it)); }
           else await jouer([fLettre(it.l), "c-" + slug(it.mot)]);
           c.classList.remove("on");
         };
@@ -143,7 +147,7 @@
       melanger(D.fusions).slice(0, 8).forEach(function(it){
         var autres = melanger(D.fusions.filter(function(x){ return x !== it; })).slice(0, 2);
         Q.push({ consigne: "Trouve :", voix: [v(V.ouEst), "s-" + slug(it.s)], modeleSon: true,
-          choix: melanger([it].concat(autres)).map(function(x){ return { t: x.s, bon: x === it, son: ["s-" + slug(x.s)] }; }), apres: ["f-" + slug(it.s)] });
+          choix: melanger([it].concat(autres)).map(function(x){ return { t: x.s, bon: x === it, son: ["s-" + slug(x.s)] }; }), apres: fusion(it) });
       });
     }else if(et.n === 4){
       melanger(D.syllabes).slice(0, 8).forEach(function(g){
@@ -220,14 +224,23 @@
   $("retour1").onclick = $("retour2").onclick = $("retour3").onclick = $("retour4").onclick = carte;
 
   /* ---------- le studio des parents ---------- */
+  var COMME = { pa:"papa", ba:"banane", da:"dame", to:"tomate", "tô":"tomate", do:"domino", po:"pomme", mi:"ami", ni:"nid", li:"lit", "vé":"vélo", "fé":"fée", "bé":"bébé", lu:"lune", ru:"rue", nu:"nuage",
+    ja:"jaune", cha:"chat", sa:"salade", ko:"koala", go:"gorille", ti:"tigre", di:"dix", pi:"pirate", mo:"moto", no:"nounours", lo:"loto", bu:"bus", pu:"puce", du:"dur",
+    ra:"radio", la:"lama", na:"nager", fo:"forêt", vo:"vole", so:"sofa", ma:"maman", ri:"riz", vi:"vite", ki:"kiwi", oui:"oui", ju:"judo", ka:"café", te:"tomate", ne:"banane",
+    de:"salade", tu:"tulipe", pe:"tulipe", o:"radio", fa:"sofa", fu:"fusée", "zé":"fusée" };
   var CONSEIL = { m:"mmmmmm", l:"llllll", s:"ssssss", r:"rrrrrr", f:"ffffff", n:"nnnnnn", ch:"chchchch (comme « chut » sans le « ut »)", v:"vvvvvv" };
   function lignesStudio(){
     var L = [{ titre:"🅰️ Les voyelles" }];
     D.voyelles.forEach(function(x){ L.push({ nom: fLettre(x.l), gros: x.l, dire: "Dites « " + x.l + " » (le son, pas le nom de la lettre)." }); });
     L.push({ titre:"🎵 Les sons qui chantent" });
     D.chantantes.forEach(function(x){ L.push({ nom: "l-" + slug(x.l), gros: x.l, dire: "Faites durer le son : « " + CONSEIL[x.l] + " », environ 2 secondes, sans « e » ni « a » derrière." }); });
-    L.push({ titre:"🧲 Je colle les sons" });
-    D.fusions.forEach(function(x){ L.push({ nom: "f-" + slug(x.s), gros: x.s, dire: "Dites « " + (CONSEIL[x.c] || x.c).split(" ")[0].slice(0, 4) + "… " + x.v + x.v + x.v + " » en glissant, puis « " + x.s + " »." }); });
+    L.push({ titre:"🔊 Les syllabes (étapes 3, 4 et 5)" });
+    var vues = {};
+    var ajoute = function(dit, ecrit){ var n = "s-" + slug(dit); if(vues[n]) return; vues[n] = 1;
+      L.push({ nom: n, gros: ecrit || dit, dire: "Dites « " + dit + " »" + (COMME[dit] ? " (comme dans « " + COMME[dit] + " »)" : "") + ", une seule fois, bien clairement." }); };
+    D.fusions.forEach(function(x){ ajoute(x.s); });
+    D.syllabes.forEach(function(g){ g.forEach(function(x){ ajoute(x); }); });
+    D.mots.forEach(function(w){ w.s.forEach(function(p){ ajoute(p[1], p[0]); }); });
     return L;
   }
   var enreg = null;   // enregistrement en cours
@@ -244,7 +257,7 @@
         '<button data-a="moi" title="Écouter ma voix">▶️</button><button data-a="suppr" title="Effacer ma voix">🗑️</button></span>';
       var maj = function(){ var a = !!MAVOIX[l.nom]; r.classList.toggle("fait", a); r.querySelector('[data-a=moi]').disabled = !a; r.querySelector('[data-a=suppr]').disabled = !a; };
       maj();
-      r.querySelector('[data-a=jeu]').onclick = function(){ tour++; lecteur.src = "sons/" + l.nom + ".mp3?v=3"; lecteur.play().catch(function(){}); };
+      r.querySelector('[data-a=jeu]').onclick = function(){ tour++; lecteur.src = "sons/" + l.nom + ".mp3?v=4"; lecteur.play().catch(function(){}); };
       r.querySelector('[data-a=moi]').onclick = function(){ tour++; jouer(l.nom); };
       r.querySelector('[data-a=suppr]').onclick = function(){ baseFaire("readwrite", function(st){ return st.delete(l.nom); }).then(chargerMaVoix).then(maj); };
       var bRec = r.querySelector('[data-a=rec]');

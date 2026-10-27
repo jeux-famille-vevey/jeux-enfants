@@ -1,0 +1,237 @@
+{
+ "verifies": {
+  "s-ba": {
+   "voix": "tom",
+   "texte": "bas",
+   "entendu_par_whisper": "bah"
+  },
+  "s-be": {
+   "voix": "siwis",
+   "texte": "bé",
+   "entendu_par_whisper": "b"
+  },
+  "s-cha": {
+   "voix": "siwis",
+   "texte": "chat",
+   "entendu_par_whisper": "chat"
+  },
+  "s-da": {
+   "voix": "siwis",
+   "texte": "da",
+   "entendu_par_whisper": "da"
+  },
+  "s-de": {
+   "voix": "siwis",
+   "texte": "deu",
+   "entendu_par_whisper": "2"
+  },
+  "s-do": {
+   "voix": "siwis",
+   "texte": "dau",
+   "entendu_par_whisper": "d'eau"
+  },
+  "s-du": {
+   "voix": "siwis",
+   "texte": "dû",
+   "entendu_par_whisper": "du"
+  },
+  "s-fa": {
+   "voix": "siwis",
+   "texte": "fa",
+   "entendu_par_whisper": "fa"
+  },
+  "s-fe": {
+   "voix": "siwis",
+   "texte": "fée",
+   "entendu_par_whisper": "fait"
+  },
+  "s-fo": {
+   "voix": "siwis",
+   "texte": "faux",
+   "entendu_par_whisper": "faux"
+  },
+  "s-fu": {
+   "voix": "siwis",
+   "texte": "fut",
+   "entendu_par_whisper": "fus"
+  },
+  "s-ju": {
+   "voix": "siwis",
+   "texte": "ju",
+   "entendu_par_whisper": "ju"
+  },
+  "s-ka": {
+   "voix": "siwis",
+   "texte": "cas",
+   "entendu_par_whisper": "qu'à"
+  },
+  "s-ki": {
+   "voix": "siwis",
+   "texte": "qui",
+   "entendu_par_whisper": "qui"
+  },
+  "s-ko": {
+   "voix": "siwis",
+   "texte": "kô",
+   "entendu_par_whisper": "koe"
+  },
+  "s-la": {
+   "voix": "siwis",
+   "texte": "la",
+   "entendu_par_whisper": "la"
+  },
+  "s-li": {
+   "voix": "siwis",
+   "texte": "li",
+   "entendu_par_whisper": "lits"
+  },
+  "s-lo": {
+   "voix": "siwis",
+   "texte": "lot",
+   "entendu_par_whisper": "l'eau"
+  },
+  "s-lu": {
+   "voix": "siwis",
+   "texte": "lu",
+   "entendu_par_whisper": "lut"
+  },
+  "s-ma": {
+   "voix": "siwis",
+   "texte": "ma",
+   "entendu_par_whisper": "ma"
+  },
+  "s-mi": {
+   "voix": "siwis",
+   "texte": "mie",
+   "entendu_par_whisper": "mi"
+  },
+  "s-mo": {
+   "voix": "siwis",
+   "texte": "mot",
+   "entendu_par_whisper": "mot"
+  },
+  "s-na": {
+   "voix": "siwis",
+   "texte": "na",
+   "entendu_par_whisper": "na"
+  },
+  "s-ne": {
+   "voix": "siwis",
+   "texte": "neu",
+   "entendu_par_whisper": "ne"
+  },
+  "s-ni": {
+   "voix": "siwis",
+   "texte": "ni",
+   "entendu_par_whisper": "ni"
+  },
+  "s-no": {
+   "voix": "tom",
+   "texte": "no",
+   "entendu_par_whisper": "no"
+  },
+  "s-nu": {
+   "voix": "siwis",
+   "texte": "nu",
+   "entendu_par_whisper": "nu"
+  },
+  "s-o": {
+   "voix": "siwis",
+   "texte": "o",
+   "entendu_par_whisper": "oh"
+  },
+  "s-oui": {
+   "voix": "siwis",
+   "texte": "oui",
+   "entendu_par_whisper": "oui"
+  },
+  "s-pa": {
+   "voix": "siwis",
+   "texte": "pas",
+   "entendu_par_whisper": "pas"
+  },
+  "s-pe": {
+   "voix": "siwis",
+   "texte": "peu",
+   "entendu_par_whisper": "peu"
+  },
+  "s-pi": {
+   "voix": "siwis",
+   "texte": "pie",
+   "entendu_par_whisper": "pi"
+  },
+  "s-po": {
+   "voix": "siwis",
+   "texte": "pô",
+   "entendu_par_whisper": "pau"
+  },
+  "s-ra": {
+   "voix": "siwis",
+   "texte": "ras",
+   "entendu_par_whisper": "ra"
+  },
+  "s-ri": {
+   "voix": "siwis",
+   "texte": "rit",
+   "entendu_par_whisper": "riz"
+  },
+  "s-ru": {
+   "voix": "siwis",
+   "texte": "rue",
+   "entendu_par_whisper": "rue"
+  },
+  "s-sa": {
+   "voix": "siwis",
+   "texte": "ça",
+   "entendu_par_whisper": "ça"
+  },
+  "s-so": {
+   "voix": "jessica",
+   "texte": "sot",
+   "entendu_par_whisper": "so"
+  },
+  "s-te": {
+   "voix": "siwis",
+   "texte": "te",
+   "entendu_par_whisper": "te"
+  },
+  "s-ti": {
+   "voix": "siwis",
+   "texte": "tie",
+   "entendu_par_whisper": "ti"
+  },
+  "s-to": {
+   "voix": "siwis",
+   "texte": "tô",
+   "entendu_par_whisper": "tôt"
+  },
+  "s-tu": {
+   "voix": "siwis",
+   "texte": "tu",
+   "entendu_par_whisper": "tu"
+  },
+  "s-ve": {
+   "voix": "siwis",
+   "texte": "vé",
+   "entendu_par_whisper": "v"
+  },
+  "s-vi": {
+   "voix": "siwis",
+   "texte": "vis",
+   "entendu_par_whisper": "vie"
+  },
+  "s-ze": {
+   "voix": "siwis",
+   "texte": "zé",
+   "entendu_par_whisper": "zé"
+  }
+ },
+ "non_verifies": [
+  "s-bu",
+  "s-di",
+  "s-go",
+  "s-ja",
+  "s-pu",
+  "s-vo"
+ ]
+}

@@ -1,0 +1,1388 @@
+{
+ "lire/c-avion": {
+  "attendu": "comme avion",
+  "entendu": "comme avion",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-chat": {
+  "attendu": "comme chat",
+  "entendu": "comme chat",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-elephant": {
+  "attendu": "comme éléphant",
+  "entendu": "comme éléphant",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-fusee": {
+  "attendu": "comme fusée",
+  "entendu": "comme fusée",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-ile": {
+  "attendu": "comme île",
+  "entendu": "comme il",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-lune": {
+  "attendu": "comme lune",
+  "entendu": "comme lune",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-maison": {
+  "attendu": "comme maison",
+  "entendu": "comme maison",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-nuage": {
+  "attendu": "comme nuage",
+  "entendu": "comme nuages",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-orange": {
+  "attendu": "comme orange",
+  "entendu": "comme orange",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-renard": {
+  "attendu": "comme renard",
+  "entendu": "comme renard",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-serpent": {
+  "attendu": "comme serpent",
+  "entendu": "comme serpent",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/c-vache": {
+  "attendu": "comme vache",
+  "entendu": "comme vache",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-banane": {
+  "attendu": "banane",
+  "entendu": "banane",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-bebe": {
+  "attendu": "bébé",
+  "entendu": "bd",
+  "ok": false,
+  "ecart": 5
+ },
+ "lire/m-cafe": {
+  "attendu": "café",
+  "entendu": "café",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-fusee": {
+  "attendu": "fusée",
+  "entendu": "fusée",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-judo": {
+  "attendu": "judo",
+  "entendu": "judo",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-kiwi": {
+  "attendu": "kiwi",
+  "entendu": "kiwi",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-lama": {
+  "attendu": "lama",
+  "entendu": "lama",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-lune": {
+  "attendu": "lune",
+  "entendu": "lune",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-mamie": {
+  "attendu": "mamie",
+  "entendu": "mamie",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-moto": {
+  "attendu": "moto",
+  "entendu": "moto  jeudi  moto",
+  "ok": false,
+  "ecart": 8
+ },
+ "lire/m-papa": {
+  "attendu": "papa",
+  "entendu": "papa",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-pirate": {
+  "attendu": "pirate",
+  "entendu": "pirate",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-radio": {
+  "attendu": "radio",
+  "entendu": "radio",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-salade": {
+  "attendu": "salade",
+  "entendu": "salade",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-sofa": {
+  "attendu": "sofa",
+  "entendu": "sofa",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-tomate": {
+  "attendu": "tomate",
+  "entendu": "tomate",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-tulipe": {
+  "attendu": "tulipe",
+  "entendu": "tulipe",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/m-velo": {
+  "attendu": "vélo",
+  "entendu": "vélo",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-bebe-a-un-kiwi": {
+  "attendu": "Bébé a un kiwi.",
+  "entendu": "bébé un kiouille",
+  "ok": false,
+  "ecart": 3
+ },
+ "lire/p-la-fusee-va-sur-la-lune": {
+  "attendu": "La fusée va sur la lune.",
+  "entendu": "la fusée va sur la lune.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-la-vache-dort-sur-la-salade": {
+  "attendu": "La vache dort sur la salade.",
+  "entendu": "la vache dort sur la salade.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-le-lama-a-vu-la-lune": {
+  "attendu": "Le lama a vu la lune.",
+  "entendu": "le lama a vu la lune.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-le-pirate-a-une-banane": {
+  "attendu": "Le pirate a une banane.",
+  "entendu": "le pirate a une banane.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-le-renard-a-une-tomate": {
+  "attendu": "Le renard a une tomate.",
+  "entendu": "le renard a une tomate.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-leo-fait-du-velo": {
+  "attendu": "Léo fait du vélo.",
+  "entendu": "léo fait du vélo.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-mamie-lit-sur-le-sofa": {
+  "attendu": "Mamie lit sur le sofa.",
+  "entendu": "mamie lit sur le sofa.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-papa-a-une-moto": {
+  "attendu": "Papa a une moto.",
+  "entendu": "papa a une moto.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/p-tom-fait-du-judo": {
+  "attendu": "Tom fait du judo.",
+  "entendu": "tom fait du judo.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-bravo": {
+  "attendu": "Bravo !",
+  "entendu": "bravo",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-bravo-tu-as-gagne-deux-etoiles": {
+  "attendu": "Bravo ! Tu as gagné deux étoiles !",
+  "entendu": "bravo, tu as gagné deux étoiles.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-bravo-tu-as-gagne-trois-etoiles": {
+  "attendu": "Bravo ! Tu as gagné trois étoiles !",
+  "entendu": "bravo, tu l'as gagné 3 étoiles.",
+  "ok": true,
+  "ecart": 1
+ },
+ "lire/v-bravo-tu-as-gagne-une-etoile": {
+  "attendu": "Bravo ! Tu as gagné une étoile !",
+  "entendu": "bravo, tu as gagné une étoile.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-ces-lettres-chantent-on-peut-faire-durer-leur-son-touche-les": {
+  "attendu": "Ces lettres chantent : on peut faire durer leur son. Touche-les !",
+  "entendu": "ces lettres chantent. on peut faire durer leur son. touche-les.",
+  "ok": true,
+  "ecart": 1
+ },
+ "lire/v-comme": {
+  "attendu": "comme",
+  "entendu": "comme",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-ecoute-bien": {
+  "attendu": "Écoute bien :",
+  "entendu": "écoute bien.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-ecoute-bien-et-trouve-la-bonne-syllabe": {
+  "attendu": "Écoute bien, et trouve la bonne syllabe !",
+  "entendu": "écoute bien et trouve la bonne syllabe.",
+  "ok": true,
+  "ecart": 1
+ },
+ "lire/v-essaie-encore": {
+  "attendu": "Essaie encore !",
+  "entendu": "essay encore !",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-et-maintenant-de-petites-phrases": {
+  "attendu": "Et maintenant, de petites phrases !",
+  "entendu": "et maintenant, de petites phrases.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-genial": {
+  "attendu": "Génial !",
+  "entendu": "génial",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-lis-la-phrase-puis-touche-la-bonne-image": {
+  "attendu": "Lis la phrase, puis touche la bonne image !",
+  "entendu": "lise la phrase, puis touche la bonne image.",
+  "ok": true,
+  "ecart": 1
+ },
+ "lire/v-lis-le-mot-puis-touche-la-bonne-image": {
+  "attendu": "Lis le mot, puis touche la bonne image !",
+  "entendu": "lis le mot, puis touche la bonne image.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-maintenant-a-toi-de-jouer": {
+  "attendu": "Maintenant, à toi de jouer !",
+  "entendu": "maintenant, à toi de jouer.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-maintenant-on-lit-des-mots": {
+  "attendu": "Maintenant, on lit des mots !",
+  "entendu": "maintenant, on lit des mots.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-on-colle-deux-sons-ensemble-pour-faire-une-syllabe-touche-chaque-carte": {
+  "attendu": "On colle deux sons ensemble pour faire une syllabe. Touche chaque carte !",
+  "entendu": "on colle deux sons ensemble pour faire une syllabe. touche chaque carte.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-ou-est-ecrit": {
+  "attendu": "Où est écrit :",
+  "entendu": "où est écrit ?",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-oui-c-est-ca": {
+  "attendu": "Oui, c'est ça !",
+  "entendu": "oui, c'est ça.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-super": {
+  "attendu": "Super !",
+  "entendu": "super",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-touche-la-lettre-qui-fait": {
+  "attendu": "Touche la lettre qui fait :",
+  "entendu": "touche la lettre qui fait.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-touche-les-morceaux-pour-les-entendre": {
+  "attendu": "Touche les morceaux pour les entendre !",
+  "entendu": "touche les morceaux pour les entendre.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-tres-bien": {
+  "attendu": "Très bien !",
+  "entendu": "très bien.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-tu-lis-comme-un-grand": {
+  "attendu": "Tu lis comme un grand !",
+  "entendu": "tu lis comme un grand.",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/v-voici-les-voyelles-touche-chaque-lettre-pour-l-entendre": {
+  "attendu": "Voici les voyelles. Touche chaque lettre pour l'entendre !",
+  "entendu": "voici les voyelles, sous chaque lettre pour l'entendre.",
+  "ok": true,
+  "ecart": 2
+ },
+ "lire/w-a": {
+  "attendu": "a",
+  "entendu": "",
+  "ok": false,
+  "ecart": 1
+ },
+ "lire/w-banane": {
+  "attendu": "banane",
+  "entendu": "banane",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-bebe": {
+  "attendu": "Bébé",
+  "entendu": "bd",
+  "ok": false,
+  "ecart": 5
+ },
+ "lire/w-dort": {
+  "attendu": "dort",
+  "entendu": "dort",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-du": {
+  "attendu": "du",
+  "entendu": "du",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-fait": {
+  "attendu": "fait",
+  "entendu": "fait",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-fusee": {
+  "attendu": "fusée",
+  "entendu": "fusée",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-judo": {
+  "attendu": "judo",
+  "entendu": "judo",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-kiwi": {
+  "attendu": "kiwi",
+  "entendu": "oui",
+  "ok": false,
+  "ecart": 2
+ },
+ "lire/w-la": {
+  "attendu": "la",
+  "entendu": "là",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-lama": {
+  "attendu": "lama",
+  "entendu": "lama",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-le": {
+  "attendu": "Le",
+  "entendu": "le",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-leo": {
+  "attendu": "Léo",
+  "entendu": "léo",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-lit": {
+  "attendu": "lit",
+  "entendu": "l'état",
+  "ok": false,
+  "ecart": 3
+ },
+ "lire/w-lune": {
+  "attendu": "lune",
+  "entendu": "lune",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-mamie": {
+  "attendu": "Mamie",
+  "entendu": "mamie",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-moto": {
+  "attendu": "moto",
+  "entendu": "moto  jeudi  moto",
+  "ok": false,
+  "ecart": 8
+ },
+ "lire/w-papa": {
+  "attendu": "Papa",
+  "entendu": "papa",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-pirate": {
+  "attendu": "pirate",
+  "entendu": "pirate",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-renard": {
+  "attendu": "renard",
+  "entendu": "ranar",
+  "ok": false,
+  "ecart": 1
+ },
+ "lire/w-salade": {
+  "attendu": "salade",
+  "entendu": "salade",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-sofa": {
+  "attendu": "sofa",
+  "entendu": "sofa",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-sur": {
+  "attendu": "sur",
+  "entendu": "sur",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-tom": {
+  "attendu": "Tom",
+  "entendu": "somme",
+  "ok": false,
+  "ecart": 1
+ },
+ "lire/w-tomate": {
+  "attendu": "tomate",
+  "entendu": "tomate",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-un": {
+  "attendu": "un",
+  "entendu": "1",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-une": {
+  "attendu": "une",
+  "entendu": "une",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-va": {
+  "attendu": "va",
+  "entendu": "20",
+  "ok": false,
+  "ecart": 2
+ },
+ "lire/w-vache": {
+  "attendu": "vache",
+  "entendu": "vache",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-velo": {
+  "attendu": "vélo",
+  "entendu": "vélo",
+  "ok": true,
+  "ecart": 0
+ },
+ "lire/w-vu": {
+  "attendu": "vu",
+  "entendu": "vie",
+  "ok": false,
+  "ecart": 1
+ },
+ "parler/c-ananas": {
+  "attendu": "Regarde, c'est un ananas",
+  "entendu": "regarde, c'est un ananas.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-avion": {
+  "attendu": "Regarde, c'est un avion",
+  "entendu": "regarde, c'est un avion.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-ballon": {
+  "attendu": "Regarde, c'est un ballon",
+  "entendu": "regarde, c'est un ballon.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-banane": {
+  "attendu": "Regarde, c'est une banane",
+  "entendu": "regarde, c'est une banane.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-bateau": {
+  "attendu": "Regarde, c'est un bateau",
+  "entendu": "regarde, c'est un bateau.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-bebe": {
+  "attendu": "Regarde, c'est un bébé",
+  "entendu": "regarde, c'est un bébé.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-bus": {
+  "attendu": "Regarde, c'est un bus",
+  "entendu": "regarde, c'est un bus.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-c-ur": {
+  "attendu": "Regarde, c'est un cœur",
+  "entendu": "regarde, c'est un cœur.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-cacahouete": {
+  "attendu": "Regarde, c'est une cacahouète",
+  "entendu": "regarde, c'est une cacahuète.",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/c-canard": {
+  "attendu": "Regarde, c'est un canard",
+  "entendu": "regarde, c'est un canard.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-carotte": {
+  "attendu": "Regarde, c'est une carotte",
+  "entendu": "regarde, c'est une carotte.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-chapeau": {
+  "attendu": "Regarde, c'est un chapeau",
+  "entendu": "regarde, c'est ton chapeau.",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/c-chat": {
+  "attendu": "Regarde, c'est un chat",
+  "entendu": "regarde, c'est un chat.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-chien": {
+  "attendu": "Regarde, c'est un chien",
+  "entendu": "regarde, c'est ton chien.",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/c-chocolat": {
+  "attendu": "Regarde, c'est du chocolat",
+  "entendu": "regarde, c'est du chocolat.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-citron": {
+  "attendu": "Regarde, c'est un citron",
+  "entendu": "regarde, c'est un citron.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-cle": {
+  "attendu": "Regarde, c'est une clé",
+  "entendu": "regarde, c'est une clé.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-coccinelle": {
+  "attendu": "Regarde, c'est une coccinelle",
+  "entendu": "regarde, c'est une coccinelle.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-cochon": {
+  "attendu": "Regarde, c'est un cochon",
+  "entendu": "regarde, c'est un cochon.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-crocodile": {
+  "attendu": "Regarde, c'est un crocodile",
+  "entendu": "regarde, c'est un crocodile.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-dinosaure": {
+  "attendu": "Regarde, c'est un dinosaure",
+  "entendu": "regarde, c'est un dinosaure.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-elephant": {
+  "attendu": "Regarde, c'est un éléphant",
+  "entendu": "regarde, c'est un éléphant.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-escargot": {
+  "attendu": "Regarde, c'est un escargot",
+  "entendu": "regarde, c'est un escargot.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-etoile": {
+  "attendu": "Regarde, c'est une étoile",
+  "entendu": "regarde, c'est une étoile.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-fleur": {
+  "attendu": "Regarde, c'est une fleur",
+  "entendu": "regarde, c'est une fleur.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-fraise": {
+  "attendu": "Regarde, c'est une fraise",
+  "entendu": "regarde, c'est une fraise.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-gateau": {
+  "attendu": "Regarde, c'est un gâteau",
+  "entendu": "regarde, c'est un gâteau.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-girafe": {
+  "attendu": "Regarde, c'est une girafe",
+  "entendu": "regarde, c'est une girafe.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-helicoptere": {
+  "attendu": "Regarde, c'est un hélicoptère",
+  "entendu": "regarde, c'est un hélicoptère.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-hippopotame": {
+  "attendu": "Regarde, c'est un hippopotame",
+  "entendu": "regarde, c'est un hippopotame.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-kangourou": {
+  "attendu": "Regarde, c'est un kangourou",
+  "entendu": "regarde, c'est un kangourou.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-lait": {
+  "attendu": "Regarde, c'est du lait",
+  "entendu": "regarde, c'est du lait.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-lapin": {
+  "attendu": "Regarde, c'est un lapin",
+  "entendu": "regarde, c'est un lapin.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-lit": {
+  "attendu": "Regarde, c'est un lit",
+  "entendu": "regarde, c'est un lit.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-lune": {
+  "attendu": "Regarde, c'est la lune",
+  "entendu": "regarde, c'est la lune.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-main": {
+  "attendu": "Regarde, c'est une main",
+  "entendu": "regarde, c'est une main.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-maison": {
+  "attendu": "Regarde, c'est une maison",
+  "entendu": "regarde, c'est une maison.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-mouton": {
+  "attendu": "Regarde, c'est un mouton",
+  "entendu": "regarde, c'est un mouton.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-nez": {
+  "attendu": "Regarde, c'est un nez",
+  "entendu": "regarde, s'étonner.",
+  "ok": true,
+  "ecart": 2
+ },
+ "parler/c-nounours": {
+  "attendu": "Regarde, c'est un nounours",
+  "entendu": "regarde, c'est un nounour.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-ordinateur": {
+  "attendu": "Regarde, c'est un ordinateur",
+  "entendu": "regarde, c'est un ordinateur.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-ours": {
+  "attendu": "Regarde, c'est un ours",
+  "entendu": "regarde, c'est un ours.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-pain": {
+  "attendu": "Regarde, c'est du pain",
+  "entendu": "regarde, c'est du pain.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-pantalon": {
+  "attendu": "Regarde, c'est un pantalon",
+  "entendu": "regarde, c'est un pantalon.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-papillon": {
+  "attendu": "Regarde, c'est un papillon",
+  "entendu": "regarde, c'est un papillon.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-parapluie": {
+  "attendu": "Regarde, c'est un parapluie",
+  "entendu": "regarde, c'est un parapluie.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-pingouin": {
+  "attendu": "Regarde, c'est un pingouin",
+  "entendu": "regarde, c'est un pingouin.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-poisson": {
+  "attendu": "Regarde, c'est un poisson",
+  "entendu": "regarde, c'est un poisson.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-pomme": {
+  "attendu": "Regarde, c'est une pomme",
+  "entendu": "regarde, c'est une pomme.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-poule": {
+  "attendu": "Regarde, c'est une poule",
+  "entendu": "regarde, c'est une poule.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-sapin": {
+  "attendu": "Regarde, c'est un sapin",
+  "entendu": "regarde, c'est un sapin.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-soleil": {
+  "attendu": "Regarde, c'est le soleil",
+  "entendu": "regarde, c'est le soleil.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-spaghettis": {
+  "attendu": "Regarde, c'est des spaghettis",
+  "entendu": "regarde, c'est des spaghettis.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-telephone": {
+  "attendu": "Regarde, c'est un téléphone",
+  "entendu": "regarde, c'est un téléphone.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-tomate": {
+  "attendu": "Regarde, c'est une tomate",
+  "entendu": "regarde, c'est une tomate.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-tortue": {
+  "attendu": "Regarde, c'est une tortue",
+  "entendu": "regarde, c'est une tortue.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-train": {
+  "attendu": "Regarde, c'est un train",
+  "entendu": "regarde, c'est en train.",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/c-vache": {
+  "attendu": "Regarde, c'est une vache",
+  "entendu": "regarde. c'est une vache.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-velo": {
+  "attendu": "Regarde, c'est un vélo",
+  "entendu": "regarde, c'est un vélo.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/c-voiture": {
+  "attendu": "Regarde, c'est une voiture",
+  "entendu": "regarde, c'est une voiture.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-ananas": {
+  "attendu": "ananas",
+  "entendu": "à un as",
+  "ok": false,
+  "ecart": 3
+ },
+ "parler/m-avion": {
+  "attendu": "avion",
+  "entendu": "avion",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-ballon": {
+  "attendu": "ballon",
+  "entendu": "ballon",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-banane": {
+  "attendu": "banane",
+  "entendu": "panane",
+  "ok": false,
+  "ecart": 1
+ },
+ "parler/m-bateau": {
+  "attendu": "bateau",
+  "entendu": "bateau",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-bebe": {
+  "attendu": "bébé",
+  "entendu": "bd",
+  "ok": false,
+  "ecart": 5
+ },
+ "parler/m-bus": {
+  "attendu": "bus",
+  "entendu": "bus",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-c-ur": {
+  "attendu": "cœur",
+  "entendu": "coeur",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-cacahouete": {
+  "attendu": "cacahouète",
+  "entendu": "cacahuète",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/m-canard": {
+  "attendu": "canard",
+  "entendu": "canard",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-carotte": {
+  "attendu": "carotte",
+  "entendu": "carottes",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-chapeau": {
+  "attendu": "chapeau",
+  "entendu": "chapeau",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-chat": {
+  "attendu": "chat",
+  "entendu": "char",
+  "ok": false,
+  "ecart": 1
+ },
+ "parler/m-chien": {
+  "attendu": "chien",
+  "entendu": "chien",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-chocolat": {
+  "attendu": "chocolat",
+  "entendu": "chocolat",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-citron": {
+  "attendu": "citron",
+  "entendu": "citron",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-cle": {
+  "attendu": "clé",
+  "entendu": "clé  jeudi  clé  jeudi  clé  jeudi  cl",
+  "ok": false,
+  "ecart": 22
+ },
+ "parler/m-coccinelle": {
+  "attendu": "coccinelle",
+  "entendu": "coqsinelle",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-cochon": {
+  "attendu": "cochon",
+  "entendu": "cochon",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-crocodile": {
+  "attendu": "crocodile",
+  "entendu": "crocodile",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-dinosaure": {
+  "attendu": "dinosaure",
+  "entendu": "dinosaure",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-elephant": {
+  "attendu": "éléphant",
+  "entendu": "elephant",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-escargot": {
+  "attendu": "escargot",
+  "entendu": "escargot",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-etoile": {
+  "attendu": "étoile",
+  "entendu": "étoile",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-fleur": {
+  "attendu": "fleur",
+  "entendu": "fleurs",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-fraise": {
+  "attendu": "fraise",
+  "entendu": "fraise",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-gateau": {
+  "attendu": "gâteau",
+  "entendu": "gâteau",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-girafe": {
+  "attendu": "girafe",
+  "entendu": "girafe",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-helicoptere": {
+  "attendu": "hélicoptère",
+  "entendu": "hélicoptère",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-hippopotame": {
+  "attendu": "hippopotame",
+  "entendu": "hippopotame",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-kangourou": {
+  "attendu": "kangourou",
+  "entendu": "kangourou",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-lait": {
+  "attendu": "lait",
+  "entendu": "les",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-lapin": {
+  "attendu": "lapin",
+  "entendu": "lapin",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-lit": {
+  "attendu": "lit",
+  "entendu": "lille",
+  "ok": false,
+  "ecart": 1
+ },
+ "parler/m-lune": {
+  "attendu": "lune",
+  "entendu": "lune",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-main": {
+  "attendu": "main",
+  "entendu": "ma  jeudi  ma  jeudi  ma  jeudi  ma  jeudi",
+  "ok": false,
+  "ecart": 23
+ },
+ "parler/m-maison": {
+  "attendu": "maison",
+  "entendu": "maison",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-mouton": {
+  "attendu": "mouton",
+  "entendu": "mouton",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-nez": {
+  "attendu": "nez",
+  "entendu": "nais",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-nounours": {
+  "attendu": "nounours",
+  "entendu": "nonour",
+  "ok": false,
+  "ecart": 1
+ },
+ "parler/m-ordinateur": {
+  "attendu": "ordinateur",
+  "entendu": "ordinateur",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-ours": {
+  "attendu": "ours",
+  "entendu": "ours",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-pain": {
+  "attendu": "pain",
+  "entendu": "pain",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-pantalon": {
+  "attendu": "pantalon",
+  "entendu": "pantalon",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-papillon": {
+  "attendu": "papillon",
+  "entendu": "papillon",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-parapluie": {
+  "attendu": "parapluie",
+  "entendu": "parapluie",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-pingouin": {
+  "attendu": "pingouin",
+  "entendu": "pinguin",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/m-poisson": {
+  "attendu": "poisson",
+  "entendu": "poisson",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-pomme": {
+  "attendu": "pomme",
+  "entendu": "pomme",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-poule": {
+  "attendu": "poule",
+  "entendu": "poule",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-sapin": {
+  "attendu": "sapin",
+  "entendu": "sapin",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-soleil": {
+  "attendu": "soleil",
+  "entendu": "soleil",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-spaghettis": {
+  "attendu": "spaghettis",
+  "entendu": "spalletti",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/m-telephone": {
+  "attendu": "téléphone",
+  "entendu": "téléphone",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-tomate": {
+  "attendu": "tomate",
+  "entendu": "tomate",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-tortue": {
+  "attendu": "tortue",
+  "entendu": "ortu",
+  "ok": false,
+  "ecart": 1
+ },
+ "parler/m-train": {
+  "attendu": "train",
+  "entendu": "train",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-vache": {
+  "attendu": "vache",
+  "entendu": "vache",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-velo": {
+  "attendu": "vélo",
+  "entendu": "vélo",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/m-voiture": {
+  "attendu": "voiture",
+  "entendu": "voiture",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-a-toi-dis-le": {
+  "attendu": "À toi ! Dis-le !",
+  "entendu": "à toi, dis-le.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-bonjour-on-va-jouer-a-repeter-les-mots-ecoute-bien": {
+  "attendu": "Bonjour ! On va jouer à répéter les mots. Écoute bien !",
+  "entendu": "bonjour, on va jouer à répéter les mots. écoute bien.",
+  "ok": true,
+  "ecart": 1
+ },
+ "parler/p-bravo": {
+  "attendu": "Bravo !",
+  "entendu": "bravo",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-bravo-tu-as-gagne-un-autocollant": {
+  "attendu": "Bravo ! Tu as gagné un autocollant !",
+  "entendu": "bravo, tu as gagné un autocollant.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-ce-mot-est-un-peu-difficile-on-le-coupe-en-petits-morceaux": {
+  "attendu": "Ce mot est un peu difficile. On le coupe en petits morceaux !",
+  "entendu": "ce mot est un peu difficile. on le coupe en petits morceaux.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-encore-une-fois": {
+  "attendu": "Encore une fois !",
+  "entendu": "encore une fois.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-genial": {
+  "attendu": "Génial !",
+  "entendu": "génial",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-je-t-ecoute": {
+  "attendu": "Je t'écoute !",
+  "entendu": "je t'écoute.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-maintenant-tout-ensemble": {
+  "attendu": "Maintenant, tout ensemble !",
+  "entendu": "maintenant, tout ensemble.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-parfait": {
+  "attendu": "Parfait !",
+  "entendu": "parfait",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-repete-apres-moi": {
+  "attendu": "Répète après moi :",
+  "entendu": "répète après moi.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-super": {
+  "attendu": "Super !",
+  "entendu": "super",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-tres-bien": {
+  "attendu": "Très bien !",
+  "entendu": "très bien.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-tu-as-gagne-une-etoile": {
+  "attendu": "Tu as gagné une étoile !",
+  "entendu": "tu as gagné une étoile.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-tu-parles-tres-bien": {
+  "attendu": "Tu parles très bien !",
+  "entendu": "tu parles très bien.",
+  "ok": true,
+  "ecart": 0
+ },
+ "parler/p-waouh-bravo": {
+  "attendu": "Waouh, bravo !",
+  "entendu": "oh, bravo!",
+  "ok": false,
+  "ecart": 3
+ }
+}

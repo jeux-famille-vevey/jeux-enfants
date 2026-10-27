@@ -65,8 +65,7 @@ def main():
         t("c-" + slug(x["mot"]), "comme " + x["mot"] + " !", .85)
     for x in D["fusions"]:
         c, v = C_PH[x["c"]], V_PH[x["v"]]
-        # « ssssssaaaa » (on glisse d'un son à l'autre), un petit temps, puis « sa »
-        phon["f-" + slug(x["s"])] = [[(c, 16)] + voyelle(v, 7), .45, [(c, 1)] + voyelle(v, 1.6)]
+        # (le jeu colle lui-même : son tenu + voyelle + syllabe ; plus de fichier f-)
         phon["s-" + slug(x["s"])] = [syllabe_ecrite(x["s"])]
     for g in D["syllabes"]:
         for s in g: phon["s-" + slug(s)] = [syllabe_ecrite(s)]

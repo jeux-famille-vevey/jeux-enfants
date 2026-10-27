@@ -26,7 +26,7 @@
 
   /* ---------- voix enregistrées ---------- */
   var lecteur = new Audio(), tour = 0;
-  var VERSION_SONS = "?v=2";   // à changer quand on réenregistre les voix (sinon le navigateur garde les anciennes)
+  var VERSION_SONS = "?v=3";   // à changer quand on réenregistre les voix (sinon le navigateur garde les anciennes)
   function dire(nom){
     var monTour = tour;
     return new Promise(function(fin){
