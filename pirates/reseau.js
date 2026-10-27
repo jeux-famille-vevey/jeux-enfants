@@ -37,8 +37,11 @@ export class Partie {
   constructor(ecoute){
     this.ecoute = ecoute; this.clients = []; this.moi = "p" + Math.random().toString(36).slice(2, 10); this.seq = 0;
     this.vus = new Set(); this.vusFile = []; this.joueurs = new Map(); this.ferme = false; this.role = null; this.code = null;
-    this.etatServices = {};
+    this.etatServices = {}; this.journal = []; this.t0 = performance.now(); this.compteurs = { recus: 0, envoyes: 0, rejetes: 0 };
   }
+  /* le journal : chaque étape, pour comprendre où ça bloque (affiché à l'écran) */
+  note(t){ const s = ((performance.now() - this.t0) / 1000).toFixed(1); this.journal.push(s + " s · " + t); if(this.journal.length > 40) this.journal.shift(); if(this.surNote) this.surNote(); }
+  nomService(url){ return /hivemq/.test(url) ? "HiveMQ" : /emqx/.test(url) ? "EMQX" : /mosquitto/.test(url) ? "Mosquitto" : url; }
   /* se brancher aux 3 services ; on continue dès qu'au moins un répond */
   async brancher(code){
     this.code = code;
@@ -55,18 +58,20 @@ export class Partie {
         catch(e){ echecs++; return; }
         this.clients.push(c);
         c.on("connect", () => {
-          this.etatServices[url] = true;
-          c.subscribe(salon, { qos: 0 }, (err) => { if(!err && !premier){ premier = true; clearTimeout(minuterie); ok(); } });
+          this.etatServices[url] = true; this.note("✅ " + this.nomService(url) + " connecté");
+          c.subscribe(salon, { qos: 0 }, (err) => { if(err) this.note("❌ " + this.nomService(url) + " : abonnement refusé"); if(!err && !premier){ premier = true; clearTimeout(minuterie); ok(); } });
         });
-        c.on("close", () => { this.etatServices[url] = false; });
-        c.on("error", () => { this.etatServices[url] = false; });
+        c.on("offline", () => { if(!this["off" + url]){ this["off" + url] = 1; this.note("❌ " + this.nomService(url) + " ne répond pas"); } });
+        c.on("close", () => { if(this.etatServices[url]) this.note("⚠️ " + this.nomService(url) + " déconnecté"); this.etatServices[url] = false; });
+        c.on("error", (e) => { this.etatServices[url] = false; if(!this["err" + url]){ this["err" + url] = 1; this.note("❌ " + this.nomService(url) + " : " + ((e && e.message) || "erreur")); } });
         c.on("message", (topic, payload) => { this.recu(payload); });
       });
       if(echecs === liste.length){ clearTimeout(minuterie); ko(new Error("connexion impossible")); }
     });
   }
   async recu(payload){
-    let m; try{ m = await dechiffrer(this.cle, payload); }catch(e){ return; }
+    let m; try{ m = await dechiffrer(this.cle, payload); }catch(e){ this.compteurs.rejetes++; if(this.compteurs.rejetes < 4) this.note("⚠️ message illisible (" + (payload && payload.length) + " octets)"); return; }
+    if(m && m.de !== this.moi){ this.compteurs.recus++; if(m.t !== "pos" && (!m.id || !this.vus.has(m.id))) this.note("📩 reçu « " + m.t + " »" + (m.t === "bienvenue" ? " (" + Math.round(payload.length / 1024) + " Ko)" : "")); }
     if(!m || m.de === this.moi || this.ferme) return;
     if(m.id){ if(this.vus.has(m.id)) return; this.vus.add(m.id); this.vusFile.push(m.id); if(this.vusFile.length > 800) this.vus.delete(this.vusFile.shift()); }   // le même message arrive par chaque service
     if(m.a && m.a !== this.moi) return;            // message pour quelqu'un d'autre
@@ -83,7 +88,10 @@ export class Partie {
     if(this.ferme || !this.cle) return;
     m.de = this.moi; m.id = this.moi + ":" + (++this.seq);
     const p = await chiffrer(this.cle, m);
-    for(const c of this.clients) if(c.connected) try{ c.publish(this.salon, p, { qos: 0 }); }catch(e){}
+    let n = 0;
+    for(const c of this.clients) if(c.connected) try{ c.publish(this.salon, p, { qos: 0 }, (err) => { if(err) this.note("❌ envoi « " + m.t + " » refusé : " + err.message); }); n++; }catch(e){ this.note("❌ envoi impossible : " + e.message); }
+    this.compteurs.envoyes++;
+    if(m.t !== "pos") this.note("📤 envoyé « " + m.t + " »" + (m.t === "bienvenue" ? " (" + Math.round(p.length / 1024) + " Ko)" : "") + " par " + n + " service" + (n > 1 ? "s" : ""));
   }
   /* le capitaine : un code au hasard */
   async creer(infos){
@@ -101,7 +109,7 @@ export class Partie {
       this.attenteBienvenue = (m) => { clearInterval(rep); clearTimeout(fin); this.surveiller(); ok(m); };
       const dire = () => this.envoyer(Object.assign({ t: "bonjour" }, bonjour));
       dire(); const rep = setInterval(dire, 2500);       // on redit bonjour au cas où un message se perd
-      const fin = setTimeout(() => { clearInterval(rep); this.attenteBienvenue = null; const e = new Error("pas de capitaine"); e.type = "peer-unavailable"; ko(e); }, 12000);
+      const fin = setTimeout(() => { clearInterval(rep); this.attenteBienvenue = null; this.note("❌ pas de réponse du capitaine en 15 s"); const e = new Error("pas de capitaine"); e.type = "peer-unavailable"; ko(e); }, 15000);
     });
   }
   /* si quelqu'un ne donne plus de nouvelles (appareil éteint, onglet fermé), on le considère parti */

@@ -3,7 +3,7 @@
 import * as THREE from "../course3d/lib/three.module.min.js";
 import { profils, avatarDe, creerAvatar, animerAvatar } from "../commun/avatar.js";
 import { lireManette, vraiesManettes } from "../commun/manette.js";
-import { Partie } from "./reseau.js?v=3";
+import { Partie } from "./reseau.js?v=4";
 import { N, T, HMAX, NIVEAU_EAU, TERRAINS, COULEURS, OBJETS, PAR_ID, Rendu, sol, idx, dedans, caseX, centre, hauteurCase,
   mondeVide, nouvelleIle, oceanVide, ileAventure, versTexte, depuisTexte, ajouterObjet, objetSur } from "./monde.js";
 
@@ -375,6 +375,9 @@ function quitterPartie(){
   for(const id of [...autres.keys()]) enleverAutre(id);
   $("equipage").hidden = true;
 }
+function majJournal(){ const j = $("ensJournal"); if(!partie || !j) return; j.textContent = partie.journal.slice(-14).join("\n") + "\n— reçus " + partie.compteurs.recus + " · envoyés " + partie.compteurs.envoyes + (partie.compteurs.rejetes ? " · illisibles " + partie.compteurs.rejetes : ""); }
+setInterval(majJournal, 1000);
+$("equipage").addEventListener("click", () => { $("ensemble").hidden = false; $("ensTitre").textContent = "Journal de connexion"; $("ensCode").hidden = !(partie && partie.code); $("ensCode").textContent = partie ? partie.code : ""; $("ensTexte").textContent = "Prends une photo de cet écran si quelque chose ne marche pas."; $("ensSaisie").hidden = true; $("ensOk").hidden = true; majJournal(); });
 function fenetre(titre, code, texte, saisie){
   $("ensemble").hidden = false; $("ensTitre").textContent = titre; $("ensCode").textContent = code || ""; $("ensCode").hidden = !code; $("ensTexte").textContent = texte || "";
   $("ensSaisie").hidden = !saisie; $("ensOk").hidden = !saisie; if(saisie){ $("ensSaisie").value = ""; setTimeout(() => $("ensSaisie").focus(), 50); }
@@ -384,7 +387,7 @@ function heberger(m, mode){
   const propre = depuisTexte(versTexte(m)); propre.cle = m.cle; propre.nom = m.nom;   // mêmes numéros d'objets chez tout le monde
   const texte = versTexte(propre);
   fenetre("Création de la partie…", "", "Un instant, on prépare le bateau ⛵");
-  partie = new Partie(recevoir);
+  partie = new Partie(recevoir); partie.surNote = majJournal; partie.note("capitaine : création de la partie");
   partie.creer({
     monde: () => texte,
     etat: () => ({ mode, ouverts: [...rendu.speciaux.values()].filter(g => g.userData.ouverture !== undefined).map(g => g.userData.objet.id),
@@ -406,7 +409,7 @@ $("ensOk").onclick = () => {
   const code = $("ensSaisie").value.replace(/\D/g, "");
   if(code.length !== 4){ $("ensTexte").textContent = "Le code a 4 chiffres, par exemple 4821."; return; }
   fenetre("Connexion…", code, "On cherche le bateau du capitaine ⛵");
-  partie = new Partie(recevoir);
+  partie = new Partie(recevoir); partie.surNote = majJournal; partie.note("matelot : je rejoins la partie " + code);
   partie.rejoindre(code, { nom: monNom(), avatar: avatarDe(profil), numero: monNumero() }).then(b => {
     $("ensemble").hidden = true;
     const m = depuisTexte(b.monde);

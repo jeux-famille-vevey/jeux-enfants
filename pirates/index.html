@@ -72,6 +72,8 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 #ensTitre{font-size:1.5rem;font-weight:700;color:var(--sun)}
 #ensCode{font-size:4rem;font-weight:700;letter-spacing:12px;margin:8px 0;color:#fff}
 #ensTexte{color:var(--soft)}
+#ensJournal{text-align:left;font-size:.78rem;line-height:1.35;background:#1D2357;border-radius:12px;padding:8px 10px;margin:10px 0 0;max-height:34vh;overflow:auto;white-space:pre-wrap;color:#C9CCF2}
+#equipage{pointer-events:auto;cursor:pointer}
 #ensSaisie{font:inherit;font-size:3rem;width:220px;text-align:center;letter-spacing:10px;border-radius:16px;border:3px solid var(--sun);background:#1D2357;color:#fff;margin:12px 0;padding:6px}
 .ligneE{display:flex;gap:10px;justify-content:center;margin-top:14px}
 .ligneE button{border-radius:999px;padding:10px 20px;font-weight:700;background:#3A429A}
@@ -128,6 +130,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 </div>
 
 <div id="ensemble" hidden><div class="carteE"><div id="ensTitre"></div><div id="ensCode"></div><div id="ensTexte"></div>
+  <pre id="ensJournal"></pre>
   <input id="ensSaisie" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="1234" hidden>
   <div class="ligneE"><button id="ensOk" hidden>▶ Rejoindre</button><button id="ensAnnuler">Retour</button></div></div></div>
 <div id="hud" hidden>
@@ -160,6 +163,6 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
   <div id="outils"><div id="categories"></div><div id="palette"></div></div>
 </div>
 
-<script type="module" src="jeu.js?v=3"></script>
+<script type="module" src="jeu.js?v=4"></script>
 </body>
 </html>
