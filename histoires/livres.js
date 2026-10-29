@@ -8,6 +8,27 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"trampoline", titre:"Youssouf au trampoline park", auteur:"Une histoire écrite en famille",
+  couverture:{ f:"trampoline", p:[["@youssouf",34,60,21,"saut","tshirt,saut,rire"],["@copain3",64,66,20,"saut","tshirt,joie,rire"],["🏀",80,30,7,"vole"]] }, age:"4-10 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, youssouf:{ nom:"Youssouf", h:1.2, v:.95, c:"#FF9F1C", vx:"siwis+3" }, copain:{ nom:"Son copain", h:1.3, v:1, c:"#B9A3F0", vx:"siwis+4" },
+           doc:{ nom:"La docteure", h:1, v:.92, c:"#7FD3FF", vx:"siwis-1" } },
+  pages:[
+    { s:{ f:"cuisine", p:[["@youssouf",38,86,24,"","tshirt,debout,rire"],["@copain3",62,86,24,"","tshirt,debout,sourire"]] }, l:[["narr","Un matin, un copain vient manger chez Youssouf. Miam, ils mangent tout !"]] },
+    { s:{ f:"cuisine", p:[["@youssouf",38,86,24,"","tshirt,joie,rire"],["@copain3",62,86,24,"","tshirt,debout,surpris"],["💡",38,22,8,"vole"]] }, l:[["narr","Puis Youssouf a une super idée."],["youssouf","« Et si on allait au trampoline ? »"],["copain","« Oh oui, trop bien ! »"]] },
+    { s:{ f:"trampoline", p:[["@youssouf",30,58,21,"saut","tshirt,saut,rire"],["@copain3",62,70,20,"saut","tshirt,joie,rire"]] }, l:[["narr","Les voilà au trampoline park ! Ils sautent, ils sautent… toujours plus haut !"]] },
+    { s:{ f:"trampoline", p:[["@youssouf",72,52,20,"saut","tshirt,joie,rire"],["🏀",90,26,7,"vole"],["@copain3",36,80,20,"","tshirt,salut,surpris"]] }, l:[["narr","Ils font des paniers de basket en sautant. Et hop, dans le panier !"]] },
+    { s:{ f:"mousse", p:[["@youssouf",36,72,21,"","tshirt,joie,rire"],["@copain3",64,64,20,"","tshirt,vol,rire"]] }, l:[["narr","Puis ils plongent dans le bac à mousse. Plouf ! Ils disparaissent dans les cubes !"]] },
+    { s:{ f:"trampoline", p:[["@youssouf",30,56,21,"","tshirt,vol,rire","150"],["@copain3",68,66,20,"","tshirt,joie,rire","-60"],["✨",50,30,8,"vole"]] }, l:[["narr","Ils font des saltos, des roues, et encore des saltos. Ils s'amusent pendant un long moment."]] },
+    { s:{ f:"trampoline", p:[["@youssouf",40,84,22,"","tshirt,triste,triste"],["💥",48,74,7,""],["@copain3",70,84,20,"","tshirt,peur,surpris"]] }, l:[["narr","Mais oh non ! Youssouf tombe mal sur son pied. Il a très mal."],["youssouf","« Aïe ! Mon pied ! »"],["narr","Vite, il faut aller à l'hôpital !"]] },
+    { s:{ f:"route", p:[["🚗",50,74,22,"roule"],["🏠",14,60,14,""],["🏥",86,60,14,""]] }, l:[["narr","On ramène vite le copain chez lui, et on file à l'hôpital."]] },
+    { s:{ f:"radio", p:[["@docteure",54,86,25,"","blouse,salut,sourire"],["@youssouf",22,76,21,"","tshirt,debout,sourire"]] }, l:[["narr","Au début, Youssouf a pleuré. Mais pour la radio, il ne pleure pas : il est très courageux !"],["doc","« Ne bouge pas… Clic ! C'est fini. »"]] },
+    { s:{ f:"radio", p:[["@docteure",40,86,25,"","blouse,salut,surpris"],["@youssouf",18,76,21,"","tshirt,debout,surpris"],["👉",48,40,7,""]] }, l:[["doc","« Regarde la radio : ta jambe est cassée. Mais ne t'inquiète pas, elle va guérir. »"]] },
+    { s:{ f:"village", p:[["@youssouf",44,86,24,"","tshirt,bequille,rire,platre+bequilles"],["⭐",62,30,8,"vole"]] }, l:[["narr","Youssouf rentre à la maison avec des béquilles. Bravo, champion, tu as été très courageux !"],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"Où vont Youssouf et son copain ?", c:["À la piscine","Au trampoline park","Au zoo"], r:1 }, { q:"Dans quoi plongent-ils ?", c:["Dans le bac à mousse","Dans la mer","Dans la neige"], r:0 },
+         { q:"Que fait Youssouf pendant la radio ?", c:["Il pleure","Il ne pleure pas, il est courageux","Il dort"], r:1 }, { q:"Avec quoi rentre-t-il à la maison ?", c:["Avec un ballon","Avec des béquilles","Avec un vélo"], r:1 } ]
+},
+{
   id:"dinosaures", titre:"Aleyah et la machine à remonter le temps", auteur:"Une histoire écrite en famille",
   couverture:{ f:"prehistoire", p:[["@diplo",44,86,40,"",""],["@aleyah",40,52,15,"saut","ecole,joie,rire"],["@trex",84,86,22,"balance","#FF9F1C,#E0761A,sourire"]] }, age:"4-10 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, aleyah:{ nom:"Aleyah", h:1.2, v:.95, c:"#FF8FD0", vx:"siwis+2" }, sci:{ nom:"La scientifique", h:1, v:.92, c:"#7FD3FF", vx:"siwis-2" },

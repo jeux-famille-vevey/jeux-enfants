@@ -337,6 +337,51 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
         for(var i = 0; i < 6; i++){ var a = -Math.PI * (.1 + i * .16); s += '<path d="M' + p[0] + ' ' + (p[1] - 150) + ' q' + (Math.cos(a) * 50).toFixed(0) + ' ' + (Math.sin(a) * 50 - 10).toFixed(0) + ' ' + (Math.cos(a) * 90).toFixed(0) + ' ' + (Math.sin(a) * 40 + 20).toFixed(0) + '" stroke="#3F8A2E" stroke-width="12" fill="none" stroke-linecap="round"/>'; } });
       for(var f = 0; f < 10; f++){ var x = (f * 83) % 800; s += '<path d="M' + x + ' 470 q10 -40 30 -50 M' + x + ' 470 q-14 -36 -34 -42 M' + x + ' 470 q2 -44 0 -60" stroke="#2F7A2A" stroke-width="7" fill="none" stroke-linecap="round"/>'; }
       return s; },
+    cuisine: function(){ var s = '<rect width="800" height="500" fill="#FFF1D6"/><rect x="0" y="370" width="800" height="130" fill="#D9A66B"/>';
+      for(var x = 0; x < 800; x += 50) s += '<rect x="' + x + '" y="370" width="2" height="130" fill="#C48F55"/>';
+      // la fenêtre, le plan de travail, le frigo
+      s += '<rect x="80" y="60" width="180" height="140" rx="8" fill="#9DDCFF" stroke="#FFFFFF" stroke-width="10"/><path d="M170 60 V200 M80 130 H260" stroke="#FFFFFF" stroke-width="8"/><circle cx="220" cy="100" r="18" fill="#FFD84D"/>';
+      s += '<rect x="0" y="250" width="330" height="120" fill="#8EC5FF"/><rect x="0" y="240" width="340" height="16" fill="#F4F0FF"/>';
+      for(var i = 0; i < 3; i++) s += '<rect x="' + (20 + i * 105) + '" y="272" width="90" height="80" rx="6" fill="#7AB4F0"/><circle cx="' + (95 + i * 105) + '" cy="312" r="4" fill="#F4F0FF"/>';
+      s += '<rect x="640" y="110" width="120" height="260" rx="14" fill="#F4F4F8" stroke="#C9CED8" stroke-width="4"/><path d="M640 200 H760" stroke="#C9CED8" stroke-width="4"/><rect x="650" y="140" width="8" height="40" rx="4" fill="#9AA0AE"/><rect x="650" y="220" width="8" height="50" rx="4" fill="#9AA0AE"/>';
+      return s + '<text x="520" y="140" font-size="54" text-anchor="middle">🕰️</text>'; },
+    cuisineDevant: function(){ // la table devant les enfants (on les voit assis derrière)
+      return '<rect x="150" y="360" width="500" height="26" rx="8" fill="#B5734A"/><rect x="170" y="384" width="22" height="116" fill="#9A5F3C"/><rect x="608" y="384" width="22" height="116" fill="#9A5F3C"/>' +
+        '<path d="M150 362 H650" stroke="#FFFFFF" stroke-width="4" opacity=".3"/><ellipse cx="300" cy="366" rx="46" ry="10" fill="#FFFFFF" stroke="#C9CED8" stroke-width="3"/><ellipse cx="500" cy="366" rx="46" ry="10" fill="#FFFFFF" stroke="#C9CED8" stroke-width="3"/>' +
+        '<text x="300" y="366" font-size="26" text-anchor="middle">🥞</text><text x="500" y="366" font-size="26" text-anchor="middle">🥞</text><text x="400" y="364" font-size="34" text-anchor="middle">🧃</text>'; },
+    trampoline: function(){ var s = '<rect width="800" height="500" fill="#2A2F6B"/>';
+      // les murs colorés et les lumières
+      s += '<rect x="0" y="0" width="800" height="40" fill="#1D2357"/>';
+      for(var l = 0; l < 6; l++) s += '<circle cx="' + (70 + l * 132) + '" cy="40" r="12" fill="#FFF3A0"/><path d="M' + (70 + l * 132) + ' 40 L' + (20 + l * 132) + ' 300 L' + (120 + l * 132) + ' 300Z" fill="#FFF3A0" opacity=".06"/>';
+      s += '<path d="M0 90 Q200 60 400 110 T800 90" stroke="#FF4FB0" stroke-width="18" fill="none" opacity=".7"/><path d="M0 140 Q220 110 420 160 T800 140" stroke="#4CC9F0" stroke-width="18" fill="none" opacity=".7"/>';
+      s += '<text x="400" y="230" text-anchor="middle" font-size="40" font-weight="700" fill="#FFD23F" font-family="Fredoka, sans-serif" opacity=".3">TRAMPOLINE PARK</text>';
+      // le panier de basket
+      s += '<rect x="690" y="150" width="90" height="64" rx="4" fill="#FFFFFF" stroke="#E5484D" stroke-width="4"/><rect x="718" y="176" width="34" height="26" fill="none" stroke="#E5484D" stroke-width="3"/>';
+      s += '<ellipse cx="735" cy="216" rx="26" ry="7" fill="none" stroke="#FF6A00" stroke-width="5"/><path d="M710 218 L720 252 M735 222 L735 256 M760 218 L750 252 M716 236 H754" stroke="#FFFFFF" stroke-width="2" opacity=".85"/>';
+      // le sol : les trampolines bleus entourés de coussins jaunes
+      s += '<rect x="0" y="330" width="800" height="170" fill="#FFD23F"/>';
+      for(var i = 0; i < 4; i++) s += '<rect x="' + (14 + i * 197) + '" y="344" width="180" height="150" rx="6" fill="#1F4FA8"/><rect x="' + (24 + i * 197) + '" y="354" width="160" height="130" rx="4" fill="#163D85"/>';
+      return s; },
+    mousse: function(){ var s = FONDS.trampoline().replace(/<rect x="690"[\s\S]*?opacity=".85"\/>/, "");
+      s += '<rect x="150" y="300" width="500" height="200" fill="#3D4A8F"/><rect x="140" y="292" width="520" height="22" rx="8" fill="#E5484D"/>';
+      return s; },
+    mousseDevant: function(){ // les cubes de mousse par-dessus les enfants
+      var c = ["#FF8FB8","#FFD23F","#4CC9F0","#7BE495","#FF9F1C","#B9A3F0"], s = "";
+      for(var r = 0; r < 5; r++) for(var i = 0; i < 12; i++){ var x = 160 + i * 42 + (r % 2) * 18, y = 360 + r * 30 + ((i * 7) % 11);
+        s += '<rect x="' + x + '" y="' + y + '" width="40" height="36" rx="7" fill="' + c[(i + r * 3) % 6] + '" stroke="rgba(0,0,0,.15)" stroke-width="2" transform="rotate(' + (((i * 13 + r * 7) % 24) - 12) + ' ' + (x + 20) + ' ' + (y + 18) + ')"/>'; }
+      return s + '<rect x="140" y="292" width="520" height="22" rx="8" fill="#E5484D"/>'; },
+    radio: function(){ var s = '<rect width="800" height="500" fill="#CFE3EE"/><rect x="0" y="380" width="800" height="120" fill="#9FC2D2"/>';
+      // l'écran lumineux avec la radio de la jambe
+      s += '<rect x="440" y="50" width="300" height="250" rx="10" fill="#22283A" stroke="#55586A" stroke-width="8"/><rect x="456" y="66" width="268" height="218" fill="#0E1626"/>';
+      s += '<path d="M560 80 Q540 80 548 100 L560 170 L600 170 L612 100 Q620 80 600 80Z" fill="#8FA6C0" opacity=".45"/>';                 // la cuisse
+      s += '<rect x="566" y="82" width="22" height="92" rx="10" fill="#EAF2FF"/><ellipse cx="577" cy="180" rx="22" ry="12" fill="#EAF2FF"/>';  // l'os de la cuisse et le genou
+      s += '<path d="M560 196 L558 238 L572 230 L568 270 L586 270 L588 230 L596 238 L594 196Z" fill="#EAF2FF"/>';                       // l'os de la jambe
+      s += '<path d="M558 238 L572 230 L588 236 L596 238" stroke="#E5484D" stroke-width="4" fill="none"/><circle cx="577" cy="234" r="20" fill="none" stroke="#FFD23F" stroke-width="4"/>'; // la fêlure entourée
+      s += '<path d="M560 270 Q556 284 584 284 Q600 284 596 270Z" fill="#EAF2FF"/>';
+      // la machine à radio
+      s += '<rect x="90" y="20" width="24" height="170" fill="#9AA0AE"/><rect x="60" y="180" width="140" height="56" rx="12" fill="#E8EDF2" stroke="#9AA0AE" stroke-width="4"/><circle cx="130" cy="208" r="14" fill="#4CC9F0"/>';
+      s += '<rect x="20" y="320" width="300" height="30" rx="8" fill="#FFFFFF" stroke="#9AA0AE" stroke-width="4"/><rect x="40" y="350" width="16" height="40" fill="#9AA0AE"/><rect x="284" y="350" width="16" height="40" fill="#9AA0AE"/>';
+      return s + '<text x="770" y="370" font-size="40" text-anchor="end">🏥</text>'; },
     ferme: function(){ return ciel("#8FD3FF","#E3F6FF") + soleil(90, 80) + nuage(380, 60) + '<rect x="0" y="320" width="800" height="180" fill="#7BCB6B"/>' +
       '<g transform="translate(540 170)"><rect x="0" y="60" width="200" height="150" fill="#C8433C"/><path d="M-14 66 L100 0 L214 66Z" fill="#8E2F2A"/><rect x="70" y="120" width="60" height="90" fill="#FFF8E7"/><path d="M70 120 L130 210 M130 120 L70 210" stroke="#C8433C" stroke-width="6"/></g>' +
       '<ellipse cx="400" cy="440" rx="200" ry="40" fill="#7A5230"/>' + (function(){ var s = ""; for(var x=0;x<520;x+=40) s += '<rect x="' + x + '" y="330" width="14" height="60" fill="#E9C79B"/>'; return s + '<rect x="0" y="345" width="520" height="8" fill="#D9B07E"/>'; })(); }
@@ -348,12 +393,13 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
       if(p[0].charAt(0) === "@" && window.DESSINS && DESSINS[p[0].slice(1)]){ // personnage dessiné en entier (persos.js)
         var nom = p[0].slice(1), h = t * 1.25, sol = y + t * .08, k = h / ((window.DESSINS_HAUTEUR || {})[nom] || 200);
         s += '<g class="' + (p[4] || "") + '"><ellipse cx="' + x + '" cy="' + sol + '" rx="' + (h * .2) + '" ry="' + (h * .035) + '" fill="rgba(0,0,0,.18)"/>' +
-          '<g transform="translate(' + x + ' ' + sol + ') scale(' + k.toFixed(3) + ')">' + DESSINS[nom](p[5] || "") + "</g></g>";
+          '<g transform="translate(' + x + ' ' + sol + ') scale(' + k.toFixed(3) + ')' + (p[6] ? ' rotate(' + p[6] + ' 0 -100)' : '') + '">' + DESSINS[nom](p[5] || "") + "</g></g>";
         return;
       }
       s += '<g class="' + (p[4] || "") + '"><ellipse cx="' + x + '" cy="' + (y + t*.08) + '" rx="' + (t*.32) + '" ry="' + (t*.06) + '" fill="rgba(0,0,0,.18)"/>' +
         '<text x="' + x + '" y="' + y + '" font-size="' + t + '" text-anchor="middle">' + p[0] + "</text></g>";
     });
+    if(FONDS[sc.f + "Devant"]) s += FONDS[sc.f + "Devant"]();   // ce qui passe devant les personnages (une table, des cubes de mousse…)
     return s + "</svg>";
   }
 

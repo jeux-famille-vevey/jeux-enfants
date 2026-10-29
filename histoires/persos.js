@@ -40,6 +40,8 @@
     triste: { bg:[[-27,-110],[-30,-90],[-24,-70]], bd:[[27,-110],[30,-90],[24,-70]], jg:[[-11,-62],[-10,-36],[-10,-10]], jd:[[11,-62],[10,-36],[10,-10]] },
     peur:   { bg:[[-27,-112],[-36,-120],[-20,-134]], bd:[[27,-112],[36,-120],[20,-134]], jg:[[-11,-62],[-16,-36],[-20,-10]], jd:[[11,-62],[16,-36],[20,-10]] },
     salut:  { bg:[[-27,-112],[-26,-94],[-4,-102]], bd:[[27,-112],[26,-94],[4,-102]], jg:[[-11,-62],[-11,-36],[-11,-10]], jd:[[11,-62],[11,-36],[11,-10]] },
+    bequille: { bg:[[-27,-112],[-40,-94],[-46,-76]], bd:[[27,-112],[40,-94],[46,-76]], jg:[[-11,-62],[-12,-36],[-12,-10]], jd:[[11,-62],[16,-38],[30,-30]] },
+    assis:  { bg:[[-27,-112],[-34,-92],[-30,-72]], bd:[[27,-112],[34,-92],[30,-72]], jg:[[-11,-62],[-30,-60],[-30,-30]], jd:[[11,-62],[30,-60],[30,-30]] },
     vol:    { bg:[[-27,-112],[-36,-138],[-34,-166]], bd:[[27,-112],[34,-138],[30,-168]], jg:[[-11,-62],[-20,-40],[-30,-22]], jd:[[11,-62],[6,-38],[2,-16]] }
   };
   var TENUES = {
@@ -110,6 +112,9 @@
     if(!pant){ // chaussettes
       [pose.jg, pose.jd].forEach(function(j){ var c = j[2], g = j[1]; s += chemin("M" + (c[0] + (g[0]-c[0])*.35) + " " + (c[1] + (g[1]-c[1])*.35) + " L" + c[0] + " " + c[1], tenue.chaussettes || "#FFFFFF", 13); });
     }
+    var plus = (o[3] || "").split("+");
+    if(plus.indexOf("platre") >= 0){ var jd = pose.jd; s += chemin("M" + (jd[1][0] + (jd[0][0]-jd[1][0])*.3) + " " + (jd[1][1] + (jd[0][1]-jd[1][1])*.3) + " L" + jd[1][0] + " " + jd[1][1] + " L" + jd[2][0] + " " + jd[2][1], "#FFFFFF", 22) +
+      chemin("M" + jd[1][0] + " " + jd[1][1] + " L" + jd[2][0] + " " + jd[2][1], "#E8EDF2", 4) + ovale(jd[2][0] + 6, jd[2][1] + 4, 15, 9, "#FFFFFF", ' stroke="#C9CED8" stroke-width="2"'); }
     if(tenue.robe){ // une robe (jusqu'aux genoux, ou longue pour Maman)
       var bas_ = tenue.robeLongue ? -8 : -34, large = tenue.robeLongue ? 40 : 46;
       s += '<path d="M-28 -78 L28 -78 L' + large + ' ' + bas_ + ' Q0 ' + (bas_ + 8) + ' -' + large + ' ' + bas_ + 'Z" fill="' + tenue.robe + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
@@ -139,6 +144,8 @@
     if(tenue.main === "baguette"){ var m = pose.bd[2]; s += ligne(m[0], m[1], m[0] + 14, m[1] - 34, "#3A2A1A", 4) + '<text x="' + (m[0] + 15) + '" y="' + (m[1] - 30) + '" font-size="22" text-anchor="middle" fill="#FFD23F">★</text>'; }
     if(tenue.main === "pinceau"){ var m3 = pose.bd[2]; s += ligne(m3[0], m3[1], m3[0] + 10, m3[1] - 30, "#8A5A3B", 4) + ovale(m3[0] + 12, m3[1] - 36, 5, 8, "#FF8FB8"); }
     if(tenue.main === "epee"){ var m2 = pose.bd[2]; s += ligne(m2[0] - 8, m2[1] + 2, m2[0] + 8, m2[1] - 2, "#8A5A3B", 5) + ligne(m2[0], m2[1], m2[0] + 18, m2[1] - 46, "#C9CED8", 6) + ligne(m2[0], m2[1], m2[0] + 18, m2[1] - 46, "#8A5A3B", 1); }
+    if(plus.indexOf("bequilles") >= 0) [-1, 1].forEach(function(c){ // les béquilles : sous les bras jusqu'au sol
+      s += ligne(c * 44, -108, c * 52, 0, "#9AA0AE", 6) + ligne(c * 36, -110, c * 52, -110, "#5A5F6E", 7) + ligne(c * 40, -76, c * 54, -76, "#5A5F6E", 6) + ovale(c * 52, 1, 6, 3, "#3A3F4E"); });
     // cou et tête
     var penche = o[1] === "triste" ? 8 : o[1] === "salut" ? 10 : 0;
     s += '<rect x="-7" y="-128" width="14" height="12" fill="' + peau + '"/>';
@@ -407,6 +414,7 @@
     fille2Rate: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true, ebouriffe:true, rate:true }); },
     maquilleuse: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#8E5BC4", longs:true }); },
     // l'histoire de motocross
+    docteure: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#6B3E23", longs:true }); },
     youssouf: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F" }); },
     moto: motoCross,
     podium: podium,
