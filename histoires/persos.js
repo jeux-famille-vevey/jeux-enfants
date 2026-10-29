@@ -153,6 +153,8 @@
     if(couleurs.ebouriffe) for(var e = 0; e < 9; e++){ var a = Math.PI * (1.05 + e * .11); extra += chemin("M" + (Math.cos(a) * 30).toFixed(1) + " " + (-156 + Math.sin(a) * 30).toFixed(1) + " l" + (Math.cos(a) * 18 + (e % 2 ? 6 : -6)).toFixed(1) + " " + (Math.sin(a) * 18).toFixed(1), couleurs.cheveux, 6); }
     if(couleurs.lunettes) extra += rond(-12, -149, 10, "none", ' stroke="' + TRAIT + '" stroke-width="3"') + rond(12, -149, 10, "none", ' stroke="' + TRAIT + '" stroke-width="3"') + ligne(-2, -150, 2, -150, TRAIT, 3);
     if(couleurs.rate) extra += ovale(-20, -140, 9, 6, "#FF4FB0", ' opacity=".75"') + ovale(21, -142, 10, 5, "#3D7BD9", ' opacity=".6"') + ovale(-12, -160, 8, 4, "#3FCF6A", ' opacity=".6"') + ovale(2, -132, 11, 4, "#E5484D", ' opacity=".6"');
+    if(plus.indexOf("chat") >= 0) extra += '<path d="M-30 -172 L-24 -200 L-6 -182Z M30 -172 L24 -200 L6 -182Z" fill="#22232B"/><path d="M-24 -178 L-22 -192 L-12 -182Z M24 -178 L22 -192 L12 -182Z" fill="#FFB3C6"/>' +
+      '<path d="M-5 -145 L5 -145 L0 -139Z" fill="#22232B"/>' + chemin("M-14 -138 L-34 -142 M-14 -134 L-34 -130 M14 -138 L34 -142 M14 -134 L34 -130", "#22232B", 2);
     if(tenue.voile) s += '<g transform="rotate(' + penche + ' 0 -126)">' + teteVoile(peau, tenue.voile, expr) + "</g>";
     else s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(couleurs.casque ? "casqueCross:" + couleurs.casque : tenue.chapeau) + extra + "</g>";
     return s;
@@ -199,6 +201,24 @@
     return s;
   }
 
+
+  /* ---------- un petit chat roux (assis) ; option « boite » : il dépasse d'un carton ---------- */
+  function chaton(opts){
+    var o = (opts || "").split(","), boite = o[0] === "boite", s = "", C = "#F4A340", F = "#D9822B";
+    if(!boite) s += chemin("M28 -8 Q62 -10 58 -46 Q56 -62 46 -58", C, 10) + chemin("M50 -40 L56 -50", F, 4);                 // la queue
+    s += ovale(0, -30, 30, 30, C, ' stroke="' + TRAIT + '" stroke-width="2"') + chemin("M-12 -50 L-8 -40 M0 -54 L0 -42 M12 -50 L8 -40", F, 4); // le corps
+    s += ovale(-14, -2, 10, 6, "#FFF1DE") + ovale(14, -2, 10, 6, "#FFF1DE");                                                    // les pattes
+    s += '<path d="M-30 -82 L-24 -108 L-8 -88Z M30 -82 L24 -108 L8 -88Z" fill="' + C + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
+    s += '<path d="M-24 -88 L-22 -100 L-14 -90Z M24 -88 L22 -100 L14 -90Z" fill="#FFB3C6"/>';                                     // les oreilles
+    s += ovale(0, -72, 32, 27, C, ' stroke="' + TRAIT + '" stroke-width="2"') + chemin("M-8 -96 L-6 -86 M0 -98 L0 -88 M8 -96 L6 -86", F, 3.5); // la tête
+    s += ovale(0, -62, 14, 9, "#FFF1DE");
+    [-12, 12].forEach(function(dx){ s += ovale(dx, -76, 6, 7.5, "#FFFFFF") + ovale(dx + 1, -75, 3.6, 6, "#2E7D32") + rond(dx + 2.5, -78, 1.5, "#FFFFFF"); });
+    s += '<path d="M-4 -66 L4 -66 L0 -61Z" fill="#FF7A8A"/>' + chemin("M0 -61 Q-4 -56 -8 -58 M0 -61 Q4 -56 8 -58", TRAIT, 2);
+    s += chemin("M-14 -64 L-36 -68 M-14 -61 L-36 -58 M14 -64 L36 -68 M14 -61 L36 -58", TRAIT, 1.5);                              // les moustaches
+    if(boite) s += '<path d="M-56 -36 L56 -36 L52 0 L-52 0Z" fill="#C8955A" stroke="' + TRAIT + '" stroke-width="2"/><path d="M-56 -36 L-74 -56 L-40 -50Z M56 -36 L74 -56 L40 -50Z" fill="#B5814A" stroke="' + TRAIT + '" stroke-width="2"/>' +
+      chemin("M-20 -18 L20 -18", "#A6733F", 4);
+    return s;
+  }
   /* ---------- Balou, le ballon magique ---------- */
   function balou(opts){
     var expr = (opts || "").split(",")[2] || "rire", s = "";
@@ -414,6 +434,8 @@
     fille2Rate: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true, ebouriffe:true, rate:true }); },
     maquilleuse: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#8E5BC4", longs:true }); },
     // l'histoire de motocross
+    gigi: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#3D7BD9" }); },
+    chaton: chaton,
     docteure: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#6B3E23", longs:true }); },
     youssouf: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F" }); },
     moto: motoCross,
@@ -421,5 +443,5 @@
     pilote: function(opts){ var o = (opts || "").split(","), c = o[3] || "#3D7BD9"; return enfant(o.slice(0, 3).join(","), { peau:"#E8B98E", cheveux:"#22150F", haut:c, casque:c }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
-  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110, moto:230, podium:120, diplo:330, trex:240 };
+  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110, moto:230, podium:120, diplo:330, trex:240, chaton:110 };
 })();

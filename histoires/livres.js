@@ -8,6 +8,29 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"chat", titre:"Amira et le chat", auteur:"Une histoire écrite en famille",
+  couverture:{ f:"chambre", p:[["@amira",36,86,19,"","robeJaune,joie,rire"],["@chaton",58,86,13,"saut","boite"]] }, age:"3-8 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FFD23F", vx:"siwis+4" }, maman:{ nom:"Maman", h:1, v:.92, c:"#7BE495", vx:"siwis" },
+           baba:{ nom:"Baba", h:.9, v:.92, c:"#7FD3FF", vx:"tom" }, aleyah:{ nom:"Aleyah", h:1.2, v:.95, c:"#FF8FD0", vx:"siwis+2" }, youssouf:{ nom:"Youssouf", h:1.2, v:.95, c:"#FF9F1C", vx:"siwis+3" },
+           gigi:{ nom:"Gigi", h:1.1, v:.95, c:"#8EC5FF", vx:"tom+3" }, chaton:{ nom:"Le petit chat", h:1.6, v:1, c:"#F4A340", vx:"siwis+3" } },
+  pages:[
+    { s:{ f:"salon", p:[["@baba",22,86,30,"","papa,debout,sourire"],["@maman",40,86,29,"","maman,debout,sourire"],["@amira",66,86,19,"saut","robeJaune,joie,rire"]] }, l:[["amira","« Baba, Maman, je peux avoir un chat ? S'il vous plaît ! »"]] },
+    { s:{ f:"salon", p:[["@baba",22,86,30,"","papa,debout,fache"],["@maman",40,86,29,"","maman,triste,triste"],["@amira",66,86,19,"","robeJaune,debout,surpris"]] }, l:[["narr","Maman aimerait bien, mais elle dit non : Baba est allergique aux poils de chat."],["maman","« Désolée, ma chérie. C'est non. »"],["baba","« Non, non et non ! Pas de chat à la maison ! »"]] },
+    { s:{ f:"salon", p:[["@amira",50,86,21,"","robeJaune,salut,fache"],["💢",62,40,8,""]] }, l:[["narr","Amira est très fâchée."],["amira","« Ce n'est pas juste ! »"]] },
+    { s:{ f:"jardin", p:[["@amira",34,86,21,"","robeJaune,peur,surpris"],["@chaton",60,86,13,"saut",""]] }, l:[["narr","Dehors, Amira trouve un petit chat tout seul."],["chaton","« Miaou, miaou ! »"],["narr","Elle décide de le prendre avec elle."]] },
+    { s:{ f:"chambre", p:[["@amira",36,86,20,"","robeJaune,salut,rire"],["@chaton",54,86,13,"","boite"],["🤫",36,30,8,"vole"]] }, l:[["narr","Elle le met dans une boîte, et elle le cache dans sa chambre. Chut !"]] },
+    { s:{ f:"chambre", p:[["@aleyah",16,86,24,"","robeVerte,salut,fache"],["@youssouf",32,86,22,"","tshirt,debout,surpris"],["@amira",52,86,19,"","robeJaune,debout,fache"],["@chaton",66,86,12,"","boite"]] }, l:[["narr","Youssouf et Aleyah le découvrent."],["aleyah","« Amira, tu as fait une bêtise ! »"],["youssouf","« Il faut aller reposer le chat dehors ! »"],["amira","« Non, je n'ai pas envie ! »"]] },
+    { s:{ f:"chambre", p:[["@gigi",22,86,26,"","tshirt,salut,surpris"],["@amira",46,86,19,"","robeJaune,triste,triste"],["💧",50,46,5,"vole"],["@chaton",64,86,12,"","boite"]] }, l:[["narr","Puis Gigi voit le chat, lui aussi."],["gigi","« Amira, il faut aller le ramener. Sinon, je vais le dire à Maman ! »"],["narr","Amira pleure. Heureusement, Baba et Maman ne sont pas là."]] },
+    { s:{ f:"chambre", p:[["@gigi",24,86,26,"","tshirt,debout,sourire"],["@amira",44,86,19,"","robeJaune,joie,rire"],["@chaton",62,86,13,"saut",""],["⏳",80,26,10,"vole"]] }, l:[["narr","Finalement, Gigi ne dit rien. Et le petit chat reste caché pendant un mois entier, sans que les parents ne s'aperçoivent de rien !"]] },
+    { s:{ f:"chambre", p:[["@baba",30,86,30,"","papa,peur,surpris"],["🤧",42,30,8,""],["@chaton",62,86,13,"",""]] }, l:[["narr","Mais un jour, quand Amira rentre de l'école, Baba est en train de ranger sa chambre. Oh non… le chat est là !"],["baba","« Atchoum ! Atchoum ! »"]] },
+    { s:{ f:"chambre", p:[["@baba",26,86,30,"","papa,salut,fache"],["@amira",50,86,19,"","robeJaune,debout,surpris"],["@chaton",68,86,13,"",""]] }, l:[["baba","« Amira, pourquoi il y a un chat ici ? »"],["amira","« Euh… je ne sais pas ! »"]] },
+    { s:{ f:"chambre", p:[["@amira",42,86,20,"","robeJaune,triste,triste"],["💨",64,60,10,""]] }, l:[["narr","Et après, le petit chat n'était plus là. Amira n'était pas très contente…"]] },
+    { s:{ f:"chambre", p:[["@amira",44,86,27,"saut","robeJaune,joie,rire,chat"],["🐾",66,40,8,"vole"]] }, l:[["narr","Alors elle s'est maquillée comme un chat !"],["amira","« Miaou ! Je suis un chat ! »"],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"Pourquoi les parents ne veulent pas de chat ?", c:["Baba est allergique aux poils de chat","Les chats font trop de bruit","Il n'y a pas de place"], r:0 }, { q:"Où Amira cache-t-elle le chat ?", c:["Dans la cuisine","Dans une boîte, dans sa chambre","Dans le jardin"], r:1 },
+         { q:"Combien de temps le chat reste-t-il caché ?", c:["Un jour","Un mois entier","Un an"], r:1 }, { q:"À la fin, comment Amira se maquille-t-elle ?", c:["Comme une princesse","Comme un chat","Comme un clown"], r:1 } ]
+},
+{
   id:"trampoline", titre:"Youssouf au trampoline park", auteur:"Une histoire écrite en famille",
   couverture:{ f:"trampoline", p:[["@youssouf",34,60,21,"saut","tshirt,saut,rire"],["@copain3",64,66,20,"saut","tshirt,joie,rire"],["🏀",80,30,7,"vole"]] }, age:"4-10 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, youssouf:{ nom:"Youssouf", h:1.2, v:.95, c:"#FF9F1C", vx:"siwis+3" }, copain:{ nom:"Son copain", h:1.3, v:1, c:"#B9A3F0", vx:"siwis+4" },
