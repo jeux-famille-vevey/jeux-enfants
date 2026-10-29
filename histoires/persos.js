@@ -61,6 +61,7 @@
     robeVerte: { haut:"#3FA34D", bas:"#3FA34D", jambe:"peau", chaussure:"#2F7D4A", manche:"courte", robe:"#2F9E4F" },
     robeJaune: { haut:"#FFD23F", bas:"#FFD23F", jambe:"peau", chaussure:"#E0A43A", manche:"courte", robe:"#F2B91F" },
     maquilleuse: { haut:"#22232B", bas:"#22232B", jambe:"pant", chaussure:"#22232B", manche:"longue", main:"pinceau" },
+    blouse:    { haut:"#FFFFFF", bas:"#3D4A5A", jambe:"pant", chaussure:"#2B2140", manche:"longue", robe:"#FFFFFF", poches:true },
     tshirt:    { haut:"#FF9F1C", bas:"#1D2357", jambe:"peau", chaussure:"#3D7BD9", manche:"courte" },
     papy:      { haut:"#8A5A3B", bas:"#4A4F5E", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
     mamy:      { haut:"#E5484D", bas:"#E5484D", jambe:"peau", chaussure:"#22232B", manche:"longue", robe:"#C23B40", robeLongue:true }
@@ -113,7 +114,8 @@
       var bas_ = tenue.robeLongue ? -8 : -34, large = tenue.robeLongue ? 40 : 46;
       s += '<path d="M-28 -78 L28 -78 L' + large + ' ' + bas_ + ' Q0 ' + (bas_ + 8) + ' -' + large + ' ' + bas_ + 'Z" fill="' + tenue.robe + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
       if(tenue.bord) s += chemin("M-" + (large - 2) + " " + (bas_ - 3) + " Q0 " + (bas_ + 5) + " " + (large - 2) + " " + (bas_ - 3), tenue.bord, 5);
-      if(tenue.motifRobe) [[-16,-52],[10,-40],[22,-60],[-6,-24],[18,-20],[-22,-30]].forEach(function(p){ s += rond(p[0], p[1], 3, tenue.motifRobe); });
+      if(tenue.poches) s += '<rect x="-24" y="-60" width="14" height="12" fill="none" stroke="' + TRAIT + '" stroke-width="1.5"/><rect x="10" y="-60" width="14" height="12" fill="none" stroke="' + TRAIT + '" stroke-width="1.5"/>' + chemin("M0 -78 L0 -36", TRAIT, 1.5);
+    if(tenue.motifRobe) [[-16,-52],[10,-40],[22,-60],[-6,-24],[18,-20],[-22,-30]].forEach(function(p){ s += rond(p[0], p[1], 3, tenue.motifRobe); });
       if(tenue.etoilesRobe) [[-18,-50],[14,-60],[24,-42],[-4,-40]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="13" text-anchor="middle" fill="#FFD23F">★</text>'; });
     } else {
       // short / bas du kimono
@@ -142,6 +144,7 @@
     s += '<rect x="-7" y="-128" width="14" height="12" fill="' + peau + '"/>';
     var extra = "";
     if(couleurs.ebouriffe) for(var e = 0; e < 9; e++){ var a = Math.PI * (1.05 + e * .11); extra += chemin("M" + (Math.cos(a) * 30).toFixed(1) + " " + (-156 + Math.sin(a) * 30).toFixed(1) + " l" + (Math.cos(a) * 18 + (e % 2 ? 6 : -6)).toFixed(1) + " " + (Math.sin(a) * 18).toFixed(1), couleurs.cheveux, 6); }
+    if(couleurs.lunettes) extra += rond(-12, -149, 10, "none", ' stroke="' + TRAIT + '" stroke-width="3"') + rond(12, -149, 10, "none", ' stroke="' + TRAIT + '" stroke-width="3"') + ligne(-2, -150, 2, -150, TRAIT, 3);
     if(couleurs.rate) extra += ovale(-20, -140, 9, 6, "#FF4FB0", ' opacity=".75"') + ovale(21, -142, 10, 5, "#3D7BD9", ' opacity=".6"') + ovale(-12, -160, 8, 4, "#3FCF6A", ' opacity=".6"') + ovale(2, -132, 11, 4, "#E5484D", ' opacity=".6"');
     if(tenue.voile) s += '<g transform="rotate(' + penche + ' 0 -126)">' + teteVoile(peau, tenue.voile, expr) + "</g>";
     else s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(couleurs.casque ? "casqueCross:" + couleurs.casque : tenue.chapeau) + extra + "</g>";
@@ -336,6 +339,31 @@
       '<rect x="60" y="-46" width="100" height="46" fill="#E09A5A" stroke="' + TRAIT + '" stroke-width="3"/><text x="110" y="-12" text-anchor="middle" font-size="34" font-weight="700" fill="' + TRAIT + '" font-family="Fredoka, Arial">3</text>';
   }
 
+  /* ---------- les dinosaures ---------- */
+  function diplodocus(opts){
+    var o = (opts || "").split(","), c = o[0] || "#7BC96F", c2 = o[1] || "#5DA85A", s = "";
+    s += '<path d="M-110 -120 Q-200 -110 -250 -60 Q-190 -80 -100 -90Z" fill="' + c + '" stroke="' + TRAIT + '" stroke-width="3"/>';                       // queue
+    [[-70,0],[-30,0],[40,0],[80,0]].forEach(function(p){ s += '<rect x="' + (p[0] - 14) + '" y="-80" width="28" height="80" rx="10" fill="' + c2 + '" stroke="' + TRAIT + '" stroke-width="3"/>'; }); // pattes
+    s += ovale(0, -110, 120, 60, c, ' stroke="' + TRAIT + '" stroke-width="3"');                                                                         // ventre
+    s += '<path d="M80 -140 Q120 -220 150 -300 Q160 -320 180 -310 Q170 -290 150 -220 Q130 -150 110 -100Z" fill="' + c + '" stroke="' + TRAIT + '" stroke-width="3"/>'; // cou
+    s += ovale(180, -316, 30, 20, c, ' stroke="' + TRAIT + '" stroke-width="3"') + rond(188, -322, 6, "#FFFFFF") + rond(190, -322, 3, TRAIT) + chemin("M190 -306 q8 5 16 -2", TRAIT, 2.5); // tête
+    [[-40,-130],[10,-140],[50,-120],[-70,-105]].forEach(function(p){ s += ovale(p[0], p[1], 14, 9, c2); });
+    return s;
+  }
+  function trex(opts){
+    var o = (opts || "").split(","), c = o[0] || "#FF9F1C", c2 = o[1] || "#E0761A", expr = o[2] || "sourire", s = "";
+    s += '<path d="M-40 -110 Q-140 -100 -190 -40 Q-120 -70 -30 -80Z" fill="' + c + '" stroke="' + TRAIT + '" stroke-width="3"/>';                         // queue
+    s += '<path d="M-30 -90 L-40 0 L-6 0 L0 -70Z M20 -80 L18 0 L50 0 L44 -80Z" fill="' + c2 + '" stroke="' + TRAIT + '" stroke-width="3"/>';             // jambes
+    s += ovale(0, -120, 60, 56, c, ' stroke="' + TRAIT + '" stroke-width="3"');                                                                           // corps
+    s += '<path d="M40 -150 Q60 -150 66 -132 L58 -128 Q54 -142 40 -140Z M30 -136 Q50 -134 52 -118 L44 -116 Q42 -128 30 -126Z" fill="' + c2 + '"/>';     // petits bras
+    s += '<path d="M10 -170 Q20 -240 90 -236 Q140 -232 140 -200 Q138 -176 100 -172 L30 -160Z" fill="' + c + '" stroke="' + TRAIT + '" stroke-width="3"/>'; // tête
+    s += rond(70, -214, 9, "#FFFFFF") + rond(72, -214, 5, TRAIT) + rond(74, -216, 2, "#FFFFFF");
+    s += chemin("M60 -186 Q100 " + (expr === "fache" ? "-190" : "-172") + " 136 -190", TRAIT, 3);
+    for(var i = 0; i < 6; i++) s += '<path d="M' + (72 + i * 11) + ' -186 l4 8 l4 -8Z" fill="#FFFFFF" stroke="' + TRAIT + '" stroke-width="1"/>';
+    [[-20,-140],[10,-100],[-30,-110]].forEach(function(p){ s += ovale(p[0], p[1], 10, 7, c2); });
+    return s;
+  }
+
   var MIKAEL = { peau:"#C98E62", cheveux:"#22150F" }; // couleurs de Mikael : faciles à changer ici
   var COPAINS = [
     { peau:"#F2C9A0", cheveux:"#E0A43A", haut:"#E5484D" },
@@ -368,6 +396,10 @@
     jahyan: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#2BB3C0" }); },
     nono: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#C9CED8" }); },
     nona: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#D9DDE5", longs:true }); },
+    // l'histoire des dinosaures
+    scientifique: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#9AA0AE", lunettes:true }); },
+    diplo: diplodocus,
+    trex: trex,
     // l'histoire du défilé de mode
     fille1: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#E0A43A", longs:true }); },
     fille2: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true }); },
@@ -381,5 +413,5 @@
     pilote: function(opts){ var o = (opts || "").split(","), c = o[3] || "#3D7BD9"; return enfant(o.slice(0, 3).join(","), { peau:"#E8B98E", cheveux:"#22150F", haut:c, casque:c }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
-  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110, moto:230, podium:120 };
+  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110, moto:230, podium:120, diplo:330, trex:240 };
 })();

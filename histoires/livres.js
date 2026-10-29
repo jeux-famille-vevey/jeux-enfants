@@ -8,6 +8,26 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"dinosaures", titre:"Aleyah et la machine à remonter le temps", auteur:"Une histoire écrite en famille",
+  couverture:{ f:"prehistoire", p:[["@diplo",44,86,40,"",""],["@aleyah",40,52,15,"saut","ecole,joie,rire"],["@trex",84,86,22,"balance","#FF9F1C,#E0761A,sourire"]] }, age:"4-10 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, aleyah:{ nom:"Aleyah", h:1.2, v:.95, c:"#FF8FD0", vx:"siwis+2" }, sci:{ nom:"La scientifique", h:1, v:.92, c:"#7FD3FF", vx:"siwis-2" },
+           enfants:{ nom:"Les enfants", h:1.3, v:1.05, c:"#FFD23F", vx:"siwis+4" } },
+  pages:[
+    { s:{ f:"chambreVide", p:[["@aleyah",46,86,24,"","ecole,triste,triste"],["💤",64,40,8,"vole"]] }, l:[["narr","Aleyah s'ennuie. Nous sommes en 2026, et il ne se passe rien de rigolo."],["aleyah","« J'aimerais tellement retourner dans le passé ! »"]] },
+    { s:{ f:"village", p:[["@aleyah",30,86,22,"","ecole,court,sourire"],["🔬",72,58,10,"balance"]] }, l:[["narr","Elle part se promener… et elle arrive chez des scientifiques."]] },
+    { s:{ f:"labo", p:[["@aleyah",16,86,21,"","ecole,debout,surpris"],["@scientifique",34,86,27,"","blouse,salut,rire"]] }, l:[["aleyah","« Est-ce que c'est possible de voyager dans le temps ? »"],["sci","« Oui ! Regarde : voici notre machine à remonter le temps. »"]] },
+    { s:{ f:"labo", p:[["@aleyah",16,86,21,"","ecole,joie,rire"],["@scientifique",34,86,27,"","blouse,peur,surpris"]] }, l:[["aleyah","« Je peux aller à l'époque des dinosaures ? »"],["sci","« Oui… mais c'est risqué ! »"],["aleyah","« Tant pis, j'y vais quand même ! »"]] },
+    { s:{ f:"laboFlash", p:[["@aleyah",65,80,20,"vole","ecole,saut,rire"],["✨",50,30,9,"vole"]] }, l:[["narr","Elle entre dans la machine à remonter le temps. Trois, deux, un… et zou !"]] },
+    { s:{ f:"prehistoire", p:[["@diplo",44,86,40,"",""],["@aleyah",40,52,15,"saut","ecole,joie,rire"]] }, l:[["narr","La voici à l'époque des dinosaures !"],["narr","Elle va voir un grand dinosaure au long cou. Elle monte sur son dos et elle s'amuse comme une folle."]] },
+    { s:{ f:"prehistoire", p:[["@trex",62,86,30,"","#FF9F1C,#E0761A,sourire"],["@trex",80,86,22,"","#E5484D,#B83A3E,sourire"],["@aleyah",22,86,21,"","ecole,peur,surpris"]] }, l:[["narr","Puis arrivent les dinosaures carnivores, avec leurs grandes dents. Aleyah tremble un peu…"],["narr","Mais ils sont gentils avec elle !"]] },
+    { s:{ f:"prehistoire", p:[["@diplo",64,86,34,"balance","#9BE07A,#6FB565"],["@aleyah",24,86,21,"","ecole,salut,rire"],["🌀",14,40,12,"vole"]] }, l:[["narr","Pour revenir en 2026, Aleyah emmène un petit dinosaure herbivore avec elle."]] },
+    { s:{ f:"village", p:[["@diplo",72,86,34,"","#9BE07A,#6FB565"],["@copain1",12,86,18,"saut","foot,peur,surpris"],["@copine2",26,86,18,"saut","ecole,peur,surpris"],["@aleyah",40,86,21,"","ecole,joie,rire"]] }, l:[["enfants","« Au secours ! Un dinosaure ! »"],["aleyah","« Mais non, ce n'est rien ! Regardez, il est gentil ! »"]] },
+    { s:{ f:"village", p:[["@diplo",48,86,40,"balance","#9BE07A,#6FB565"],["@aleyah",42,56,14,"saut","ecole,joie,rire"],["@copain1",50,54,13,"saut","foot,joie,rire"],["@copine2",34,58,13,"saut","ecole,joie,rire"],["❤️",80,30,7,"vole"]] }, l:[["narr","Et depuis ce jour, le dinosaure fait des balades avec tous les enfants !"],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"Où veut aller Aleyah ?", c:["À la plage","À l'époque des dinosaures","Sur la Lune"], r:1 }, { q:"Comment voyage-t-elle dans le temps ?", c:["En avion","Avec une machine à remonter le temps","À vélo"], r:1 },
+         { q:"Les dinosaures carnivores sont-ils méchants avec elle ?", c:["Oui","Non, ils sont gentils"], r:1 }, { q:"Qui revient avec Aleyah en 2026 ?", c:["Un dinosaure herbivore","Un chat","Un robot"], r:0 } ]
+},
+{
   id:"defile", titre:"Amira, la star du défilé", auteur:"Une histoire écrite en famille",
   couverture:{ f:"defile", p:[["@amira",50,62,26,"","princesse,joie,rire"],["⭐",30,20,7,"vole"],["⭐",70,16,6,"vole"]] }, age:"3-8 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FF8FD0", vx:"siwis+4" }, filles:{ nom:"Les autres filles", h:1.1, v:1, c:"#9EE6A8", vx:"siwis+2" },

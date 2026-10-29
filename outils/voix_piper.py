@@ -9,6 +9,7 @@ MODELES = {
     "jessica": ("vits-piper-fr_FR-upmc-medium/fr_FR-upmc-medium", 0, 1.0),
     "pierre": ("vits-piper-fr_FR-upmc-medium/fr_FR-upmc-medium", 1, 1.0),
     "siwis": ("vits-piper-fr_FR-siwis-medium/fr_FR-siwis-medium", None, 1.0),
+    "tom": ("vits-piper-fr_FR-tom-medium/fr_FR-tom-medium", None, 1.0),   # jeu de données AGPLv3
     "miro": ("vits-piper-fr_FR-miro-high/fr_FR-miro-high", None, 0.82),  # cette voix parle trop lentement d'origine
 }
 
