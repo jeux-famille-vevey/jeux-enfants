@@ -8,7 +8,7 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
-  id:"defile", cache:true, titre:"Amira, la star du défilé", auteur:"Une histoire écrite en famille",
+  id:"defile", titre:"Amira, la star du défilé", auteur:"Une histoire écrite en famille",
   couverture:{ f:"defile", p:[["@amira",50,62,26,"","princesse,joie,rire"],["⭐",30,20,7,"vole"],["⭐",70,16,6,"vole"]] }, age:"3-8 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FF8FD0", vx:"siwis+4" }, filles:{ nom:"Les autres filles", h:1.1, v:1, c:"#9EE6A8", vx:"siwis+2" },
            maquilleuse:{ nom:"La maquilleuse", h:1, v:.92, c:"#C9A8FF", vx:"siwis-1" } },
