@@ -8,7 +8,7 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
-  id:"espagne", cache:true, titre:"Maman revient d'Espagne", auteur:"Une histoire imaginée par Aleyah",
+  id:"espagne", titre:"Maman revient d'Espagne", auteur:"Une histoire imaginée par Aleyah",
   couverture:{ f:"plage", p:[["@maman",26,84,28,"","maman,joie,rire"],["🎁",48,70,9,"saut"],["@yusuf",64,86,17,"saut","tshirt,joie,rire"],["@amira",82,86,17,"saut","sorciere,joie,rire"]] }, age:"3-10 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, aleyah:{ nom:"Aleyah", h:1.2, v:.95, c:"#C9A8FF", vx:"siwis+2" }, maman:{ nom:"Maman", h:1, v:.92, c:"#7BE495", vx:"siwis" },
            yusuf:{ nom:"Yusuf", h:1.2, v:1, c:"#FF9F1C", vx:"pierre+4" }, amyrah:{ nom:"Amyrah", h:1.4, v:.95, c:"#FF8FD0", vx:"siwis+4" }, nonos:{ nom:"Nono et Nona", h:.9, v:.9, c:"#FFD23F", vx:"pierre" } },
