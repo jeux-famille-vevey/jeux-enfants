@@ -49,7 +49,12 @@
     ecole:   { haut:"#FF9F1C", bas:"#3D4A8F", jambe:"pant", chaussure:"#2B2140", manche:"courte", sac:true },
     heros:   { haut:"#8E5BC4", bas:"#5A3A9A", jambe:"pant", chaussure:"#FFD23F", manche:"longue", cape:"#FF4FB0", logo:true },
     heros2:  { haut:"#3D7BD9", bas:"#1D2357", jambe:"pant", chaussure:"#FFFFFF", manche:"longue", cape:"#4CC9F0", logo:true },
-    heros3:  { haut:"#3FA34D", bas:"#2F7D4A", jambe:"pant", chaussure:"#FF8FB8", manche:"longue", cape:"#FFD23F", logo:true }
+    heros3:  { haut:"#3FA34D", bas:"#2F7D4A", jambe:"pant", chaussure:"#FF8FB8", manche:"longue", cape:"#FFD23F", logo:true },
+    princesse: { haut:"#FF8FD0", bas:"#FF8FD0", jambe:"peau", chaussure:"#FFD23F", manche:"courte", robe:"#FF6FB0", bord:"#FFD23F", chapeau:"couronne" },
+    sorciere:  { haut:"#6B3FA0", bas:"#6B3FA0", jambe:"peau", chaussure:"#22232B", manche:"longue", robe:"#4A2C7A", etoilesRobe:true, chapeau:"sorciere", main:"baguette", chaussettes:"#FF9F1C" },
+    chevalier: { haut:"#C9CED8", bas:"#9AA0AE", jambe:"pant", chaussure:"#5A5F6E", manche:"longue", chapeau:"casque", main:"epee", bouclier:"#3D7BD9", armure:true },
+    papa:      { haut:"#3D7BD9", bas:"#3D4A5A", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
+    maman:     { haut:"#3FA34D", bas:"#3FA34D", jambe:"peau", chaussure:"#8A5A3B", manche:"longue", robe:"#2F7D4A", robeLongue:true }
   };
 
   function visage(cx, cy, expr, peau){
@@ -93,25 +98,48 @@
     s += jambe(pose.jg[0], pose.jg[1], pose.jg[2], pant ? bas : peau, peau, pant ? 15 : 12, tenue.chaussure, -1);
     s += jambe(pose.jd[0], pose.jd[1], pose.jd[2], pant ? bas : peau, peau, pant ? 15 : 12, tenue.chaussure, 1);
     if(!pant){ // chaussettes
-      [pose.jg, pose.jd].forEach(function(j){ var c = j[2], g = j[1]; s += chemin("M" + (c[0] + (g[0]-c[0])*.35) + " " + (c[1] + (g[1]-c[1])*.35) + " L" + c[0] + " " + c[1], "#FFFFFF", 13); });
+      [pose.jg, pose.jd].forEach(function(j){ var c = j[2], g = j[1]; s += chemin("M" + (c[0] + (g[0]-c[0])*.35) + " " + (c[1] + (g[1]-c[1])*.35) + " L" + c[0] + " " + c[1], tenue.chaussettes || "#FFFFFF", 13); });
     }
-    // short / bas du kimono
-    s += '<path d="M-27 -72 L27 -72 L29 -50 L4 -50 L0 -58 L-4 -50 L-29 -50Z" fill="' + bas + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
+    if(tenue.robe){ // une robe (jusqu'aux genoux, ou longue pour Maman)
+      var bas_ = tenue.robeLongue ? -8 : -34, large = tenue.robeLongue ? 40 : 46;
+      s += '<path d="M-28 -78 L28 -78 L' + large + ' ' + bas_ + ' Q0 ' + (bas_ + 8) + ' -' + large + ' ' + bas_ + 'Z" fill="' + tenue.robe + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
+      if(tenue.bord) s += chemin("M-" + (large - 2) + " " + (bas_ - 3) + " Q0 " + (bas_ + 5) + " " + (large - 2) + " " + (bas_ - 3), tenue.bord, 5);
+      if(tenue.etoilesRobe) [[-18,-50],[14,-60],[24,-42],[-4,-40]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="13" text-anchor="middle" fill="#FFD23F">★</text>'; });
+    } else {
+      // short / bas du kimono
+      s += '<path d="M-27 -72 L27 -72 L29 -50 L4 -50 L0 -58 L-4 -50 L-29 -50Z" fill="' + bas + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
+    }
     // corps
     s += '<path d="M-26 -120 Q0 -128 26 -120 L30 -70 Q0 -64 -30 -70Z" fill="' + haut + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
     if(tenue.numero) s += '<text x="0" y="-84" text-anchor="middle" font-size="26" font-weight="700" fill="#FFFFFF" font-family="Fredoka, Arial, sans-serif">' + tenue.numero + '</text>' +
       '<path d="M-26 -120 Q0 -128 26 -120 L27 -114 Q0 -121 -27 -114Z" fill="#FFFFFF"/>';
     if(o[0] === "kimono") s += chemin("M-14 -122 L4 -86", "#D9D9D0", 3) + chemin("M14 -122 L-4 -96", "#D9D9D0", 3) + '<rect x="-30" y="-78" width="60" height="9" rx="3" fill="' + tenue.ceinture + '"/>' +
       chemin("M4 -72 l6 16", tenue.ceinture, 5) + chemin("M-2 -72 l-5 15", tenue.ceinture, 5);
+    if(tenue.armure) s += chemin("M-22 -112 Q0 -104 22 -112", "#9AA0AE", 3) + chemin("M-24 -96 Q0 -88 24 -96", "#9AA0AE", 3) + '<path d="M-8 -118 L8 -118 L6 -100 L0 -94 L-6 -100Z" fill="#E5484D"/>';
+    if(tenue.col) s += '<path d="M-10 -124 L0 -112 L10 -124Z" fill="#FFFFFF" stroke="' + TRAIT + '" stroke-width="1.5"/>' + rond(0, -104, 2, "#FFFFFF") + rond(0, -92, 2, "#FFFFFF") + rond(0, -80, 2, "#FFFFFF");
     if(tenue.logo) s += '<path d="M0 -116 L5 -104 L18 -104 L8 -96 L12 -84 L0 -91 L-12 -84 L-8 -96 L-18 -104 L-5 -104Z" fill="#FFD23F" stroke="' + TRAIT + '" stroke-width="1.5"/>';
     if(tenue.etoiles) [[-12,-104],[12,-92],[-6,-82],[16,-112]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="11" text-anchor="middle" fill="#FFD23F">★</text>'; });
-    // bras
-    s += bras(pose.bg[0], pose.bg[1], pose.bg[2], haut, peau, longue) + bras(pose.bd[0], pose.bd[1], pose.bd[2], haut, peau, longue);
+    // bras (et ce qu'on tient dans la main droite / le bouclier sur le bras gauche)
+    s += bras(pose.bg[0], pose.bg[1], pose.bg[2], haut, peau, longue);
+    if(tenue.bouclier){ var b = pose.bg[2]; s += '<path d="M' + (b[0]-16) + ' ' + (b[1]-22) + ' L' + (b[0]+16) + ' ' + (b[1]-22) + ' L' + (b[0]+16) + ' ' + (b[1]+4) + ' Q' + b[0] + ' ' + (b[1]+26) + ' ' + (b[0]-16) + ' ' + (b[1]+4) + 'Z" fill="' + tenue.bouclier + '" stroke="' + TRAIT + '" stroke-width="2.5"/>' +
+      '<path d="M' + b[0] + ' ' + (b[1]-16) + ' L' + b[0] + ' ' + (b[1]+14) + ' M' + (b[0]-11) + ' ' + (b[1]-4) + ' L' + (b[0]+11) + ' ' + (b[1]-4) + '" stroke="#FFD23F" stroke-width="4"/>'; }
+    s += bras(pose.bd[0], pose.bd[1], pose.bd[2], haut, peau, longue);
+    if(tenue.main === "baguette"){ var m = pose.bd[2]; s += ligne(m[0], m[1], m[0] + 14, m[1] - 34, "#3A2A1A", 4) + '<text x="' + (m[0] + 15) + '" y="' + (m[1] - 30) + '" font-size="22" text-anchor="middle" fill="#FFD23F">★</text>'; }
+    if(tenue.main === "epee"){ var m2 = pose.bd[2]; s += ligne(m2[0] - 8, m2[1] + 2, m2[0] + 8, m2[1] - 2, "#8A5A3B", 5) + ligne(m2[0], m2[1], m2[0] + 18, m2[1] - 46, "#C9CED8", 6) + ligne(m2[0], m2[1], m2[0] + 18, m2[1] - 46, "#8A5A3B", 1); }
     // cou et tête
     var penche = o[1] === "triste" ? 8 : o[1] === "salut" ? 10 : 0;
     s += '<rect x="-7" y="-128" width="14" height="12" fill="' + peau + '"/>';
-    s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + "</g>";
+    s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(tenue.chapeau) + "</g>";
     return s;
+  }
+  /* couronne de princesse, chapeau de sorcière, casque de chevalier (posés sur la tête : centre 0,-152, rayon 33) */
+  function chapeau(c){
+    if(c === "couronne") return '<path d="M-24 -182 L-24 -202 L-12 -190 L0 -208 L12 -190 L24 -202 L24 -182Z" fill="#FFD23F" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>' + rond(0, -192, 3.5, "#E5484D") + rond(-16, -188, 2.5, "#4CC9F0") + rond(16, -188, 2.5, "#4CC9F0");
+    if(c === "sorciere") return ovale(0, -180, 50, 9, "#2E1A4F", ' stroke="' + TRAIT + '" stroke-width="2"') + '<path d="M-28 -182 Q-10 -228 22 -252 Q8 -224 28 -182Z" fill="#4A2C7A" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M-27 -190 Q0 -196 27 -190 L28 -182 Q0 -188 -28 -182Z" fill="#FF9F1C"/>' + '<text x="4" y="-205" font-size="14" text-anchor="middle" fill="#FFD23F">★</text>';
+    if(c === "casque") return '<path d="M-36 -150 Q-38 -194 0 -196 Q38 -194 36 -150 L26 -150 L26 -164 L-26 -164 L-26 -150Z" fill="#C9CED8" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M0 -196 Q10 -214 26 -214 Q16 -204 4 -194Z" fill="#E5484D"/>' + chemin("M-30 -170 L30 -170", "#9AA0AE", 3);
+    return "";
   }
   function tete(peau, chev, expr){
     var s = rond(-32, -150, 7.5, peau) + rond(32, -150, 7.5, peau);
@@ -261,7 +289,13 @@
     etoile: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#4A2C1A", longs:true }); },
     aleyah: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", longs:true }); },
     copine1: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#E0A43A", longs:true }); },
-    copine2: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true }); }
+    copine2: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true }); },
+    // l'histoire « La princesse Amira et la petite sorcière »
+    amira: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", longs:true }); },
+    sorciere: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#C8502E", longs:true }); },
+    chevalier: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#6B3E23" }); },
+    baba: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F" }); },
+    maman: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#4A2C1A", longs:true }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
   window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110 };

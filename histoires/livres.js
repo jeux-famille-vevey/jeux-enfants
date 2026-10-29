@@ -8,6 +8,25 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"amira", cache:true, titre:"La princesse Amira et la petite sorcière", auteur:"Une histoire imaginée par la grande sœur d'Amira",
+  couverture:{ f:"ecole", p:[["@amira",30,82,22,"saut","princesse,joie,rire"],["@sorciere",62,82,22,"","sorciere,salut,sourire"],["❤️",46,30,7,"vole"]] }, age:"3-6 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FF8FD0", vx:"siwis+4" }, sorciere:{ nom:"La petite sorcière", h:1.2, v:.95, c:"#C9A8FF", vx:"siwis+2" },
+           chevalier:{ nom:"Chevalier", h:1, v:1, c:"#9EE6A8", vx:"pierre+3" }, parents:{ nom:"Baba et Maman", h:.9, v:.95, c:"#FFD23F", vx:"pierre" } },
+  pages:[
+    { s:{ f:"ecole", p:[["@amira",40,82,24,"saut","princesse,joie,rire"],["🏫",76,40,12,""]] }, l:[["narr","Voici Amira. C'est une princesse !"],["narr","Aujourd'hui, elle va à l'école pour rencontrer ses nouveaux amis."],["amira","« J'adore l'école ! »"]] },
+    { s:{ f:"ecole", p:[["@amira",24,82,22,"","princesse,salut,sourire"],["@chevalier",48,82,22,"","chevalier,debout,rire"],["@copain2",72,84,19,"balance","ecole,joie,rire"]] }, l:[["narr","À l'école, Amira joue avec ses copains."],["narr","Il y a son ami Chevalier, avec son casque et son épée en bois."]] },
+    { s:{ f:"ecole", p:[["@sorciere",62,82,22,"","sorciere,debout,surpris"],["@amira",22,84,20,"","princesse,debout,surpris"],["✨",74,34,7,"vole"]] }, l:[["narr","Un matin, une nouvelle fille arriva dans la classe."],["narr","C'était une petite sorcière, avec un grand chapeau pointu."],["sorciere","« Bonjour… »"]] },
+    { s:{ f:"ecole", p:[["@sorciere",70,82,22,"","sorciere,triste,triste"],["@copain2",22,84,19,"","ecole,peur,surpris"],["@copine1",40,84,19,"","ecole,peur,surpris"]] }, l:[["narr","Mais personne ne voulait jouer avec elle."],["narr","Les enfants avaient un peu peur. La petite sorcière était toute triste."]] },
+    { s:{ f:"ecole", p:[["@chevalier",34,82,23,"saut","chevalier,tir,fache"],["@sorciere",72,82,21,"","sorciere,peur,surpris"]] }, l:[["chevalier","« Une sorcière ! Je vais l'attaquer ! »"]] },
+    { s:{ f:"ecole", p:[["@chevalier",20,82,22,"","chevalier,debout,surpris"],["@amira",46,82,23,"","princesse,salut,fache"],["@sorciere",74,82,21,"","sorciere,debout,surpris"]] }, l:[["amira","« Non, Chevalier ! Arrête ! »"],["amira","« Elle est peut-être gentille. Elle peut devenir notre amie ! »"]] },
+    { s:{ f:"ecole", p:[["@amira",36,82,22,"saut","princesse,joie,rire"],["@sorciere",62,82,22,"saut","sorciere,joie,rire"],["🖍️",50,46,8,"balance"],["🎨",80,60,8,""]] }, l:[["narr","Amira prit la main de la petite sorcière."],["narr","Elles jouèrent ensemble, elles dessinèrent… et devinrent les meilleures amies du monde !"]] },
+    { s:{ f:"ecole", p:[["@baba",20,84,30,"","papa,salut,sourire"],["@maman",38,84,29,"","maman,salut,sourire"],["@amira",64,84,21,"","princesse,triste,triste"],["@sorciere",84,84,20,"","sorciere,triste,triste"]] }, l:[["narr","À la fin de la journée, Baba et Maman vinrent chercher Amira."],["amira","« Je ne suis pas contente… Je veux que mon amie vienne avec moi ! »"]] },
+    { s:{ f:"jardin", p:[["@baba",14,84,30,"","papa,joie,rire"],["@maman",30,84,29,"","maman,joie,rire"],["@amira",56,84,22,"saut","princesse,joie,rire"],["@sorciere",78,84,22,"saut","sorciere,joie,rire"],["❤️",66,30,7,"vole"]] }, l:[["parents","« Bien sûr ! Ton amie peut venir jouer à la maison ! »"],["narr","Et la petite sorcière vint chez Amira. Les deux amies jouèrent ensemble tout l'après-midi."],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"Qui est la nouvelle fille à l'école ?", c:["Une petite sorcière","Une sirène","Une fée"], r:0 }, { q:"Que veut faire Chevalier ?", c:["Danser","L'attaquer","Dormir"], r:1 },
+         { q:"Que dit Amira ?", c:["Elle peut devenir notre amie","Va-t'en","J'ai peur"], r:0 }, { q:"Où va la petite sorcière à la fin ?", c:["À la piscine","Chez Amira","Sur la Lune"], r:1 } ]
+},
+{
   id:"zouli", titre:"Les extraterrestres de Vevey", auteur:"Une histoire imaginée par Aleyah", couverture:{ f:"vevey", p:[["@soucoupe",64,26,13,"vole","x,rayon"],["@zouli",48,80,19,"saut","x,joie,rire,0"],["@aleyah",24,80,23,"","heros,joie,rire"],["@copine1",10,82,20,"","heros2,debout,sourire"]] }, age:"4-10 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"jessica" }, zouli:{ nom:"Zouli", h:1.6, v:1.05, c:"#7BE495", vx:"jessica+6" }, aleyah:{ nom:"Super Aleyah", h:1.2, v:.95, c:"#FF8FD0", vx:"siwis" },
            lune:{ nom:"Super Lune", h:1.2, v:.95, c:"#7FD3FF", vx:"siwis+2" }, arc:{ nom:"Super Arc-en-ciel", h:1.2, v:.95, c:"#9BE07A", vx:"jessica+2" },
