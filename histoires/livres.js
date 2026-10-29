@@ -8,6 +8,24 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"motocross", cache:true, titre:"Youssouf, champion de motocross", auteur:"Une histoire écrite en famille",
+  couverture:{ f:"cross", p:[["@moto",46,76,26,"vole","#FF9F1C,5,rire,saut,1"],["🏆",82,40,11,"balance"]] }, age:"3-8 ans",
+  persos:{ narr:{ nom:"", h:1, v:.92, vx:"siwis" }, youssouf:{ nom:"Youssouf", h:1.2, v:1, c:"#FF9F1C", vx:"siwis+3" } },
+  pages:[
+    { s:{ f:"cross", p:[["@youssouf",30,84,23,"","cross,salut,rire"],["@moto",66,82,25,"","#FF9F1C,5,rire,roule,1"]] }, l:[["narr","Voici Youssouf. Il a cinq ans, il est en 2P… et il adore la motocross !"],["narr","Aujourd'hui, il va faire une course."]] },
+    { s:{ f:"cross", p:[["@youssouf",42,84,24,"","cross,peur,surpris"]] }, l:[["narr","Youssouf est stressé. Il a un petit peu peur de sa course."],["youssouf","« J'ai un peu peur… »"]] },
+    { s:{ f:"cross", p:[["@youssouf",42,84,24,"","cross,debout,sourire"],["💨",62,50,8,"vole"]] }, l:[["narr","Mais il respire très fort. Il se calme, et il se concentre."],["youssouf","« Je peux le faire ! »"]] },
+    { s:{ f:"depart", p:[["@moto",22,80,20,"","#E5484D,7,rire,roule,0"],["@moto",46,80,20,"","#FF9F1C,5,rire,roule,1"],["@moto",70,80,20,"","#3D7BD9,3,rire,roule,0"]] }, l:[["narr","Bip… bip… bip ! La cloche sonne, et la barrière se couche."],["narr","C'est parti !"]] },
+    { s:{ f:"cross", p:[["@moto",64,76,24,"vole","#FF9F1C,5,rire,saut,1"],["@moto",30,82,20,"","#E5484D,7,rire,roule,0"],["@moto",12,84,18,"","#3D7BD9,3,rire,roule,0"]] }, l:[["narr","Youssouf part à toute vitesse !"],["narr","Il dépasse le pilote rouge. Il dépasse le pilote bleu. Il dépasse le pilote vert. Il dépasse le pilote orange."]] },
+    { s:{ f:"cross", p:[["@moto",70,74,24,"vole","#FF9F1C,5,rire,saut,1"],["@moto",36,82,20,"","#FF8FD0,9,rire,roule,0"],["@moto",16,84,18,"","#8E5BC4,4,rire,roule,0"],["🏁",90,46,10,"balance"]] }, l:[["narr","Il dépasse encore la pilote rose, la pilote violette et la pilote jaune !"],["narr","Youssouf passe la ligne d'arrivée le premier. Il gagne le premier tour !"]] },
+    { s:{ f:"cross", p:[["@moto",50,74,26,"vole","#FF9F1C,5,rire,saut,1"],["🏁",84,46,10,"balance"]] }, l:[["narr","Au deuxième tour, Youssouf va encore plus vite… et il gagne encore !"],["youssouf","« Youpi ! »"]] },
+    { s:{ f:"cross", p:[["@podium",50,84,28,"",""],["@youssouf",53,34,18,"saut","cross,joie,rire"],["@pilote",24,53,16,"","crossB,salut,sourire,#3D7BD9"],["@pilote",82,64,16,"","crossB,salut,sourire,#E5484D"]] }, l:[["narr","Sur le podium, Youssouf est à la première place. Le pilote bleu est deuxième, et le pilote rouge est troisième."]] },
+    { s:{ f:"cross", p:[["@podium",50,84,28,"",""],["@youssouf",53,34,18,"saut","cross,joie,rire"],["🏆",68,14,9,"balance"],["🥇",22,8,6,"vole"],["🥇",38,4,6,"vole"],["🥇",30,10,6,"vole"],["🥈",30,30,6,""],["🥉",90,42,6,""],["@pilote",24,53,16,"","crossB,joie,rire,#3D7BD9"],["@pilote",82,64,16,"","crossB,joie,rire,#E5484D"]] }, l:[["narr","Le pilote bleu reçoit une médaille d'argent, et le pilote rouge une médaille de bronze."],["narr","Et Youssouf gagne un trophée et trois médailles !"],["youssouf","« Je suis champion ! »"],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"Quel sport aime Youssouf ?", c:["La natation","La motocross","Le tennis"], r:1 }, { q:"Que fait Youssouf quand il a peur ?", c:["Il pleure","Il respire et se concentre","Il rentre à la maison"], r:1 },
+         { q:"Qui gagne la course ?", c:["Youssouf","Le pilote bleu","Le pilote rouge"], r:0 }, { q:"Qu'est-ce que Youssouf gagne à la fin ?", c:["Un ballon","Un trophée et trois médailles","Un gâteau"], r:1 } ]
+},
+{
   id:"espagne", titre:"Maman revient d'Espagne", auteur:"Une histoire imaginée par Aleyah",
   couverture:{ f:"plage", p:[["@maman",26,84,28,"","maman,joie,rire"],["🎁",48,70,9,"saut"],["@yusuf",64,86,17,"saut","tshirt,joie,rire"],["@amira",82,86,17,"saut","sorciere,joie,rire"]] }, age:"3-10 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, aleyah:{ nom:"Aleyah", h:1.2, v:.95, c:"#C9A8FF", vx:"siwis+2" }, maman:{ nom:"Maman", h:1, v:.92, c:"#7BE495", vx:"siwis" },

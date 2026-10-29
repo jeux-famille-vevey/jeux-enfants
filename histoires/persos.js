@@ -56,6 +56,8 @@
     papa:      { haut:"#3D7BD9", bas:"#3D4A5A", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
     maman:     { haut:"#3FA34D", bas:"#3FA34D", jambe:"peau", chaussure:"#8A5A3B", manche:"longue", robe:"#2F7D4A", robeLongue:true },
     priere:    { haut:"#F4F0FF", bas:"#F4F0FF", jambe:"peau", chaussure:"#C9A8FF", manche:"longue", robe:"#EDE6FF", robeLongue:true, voile:"#C9A8FF", motifRobe:"#B9A3F0" },
+    cross:     { haut:"#FF9F1C", bas:"#F4F4F4", jambe:"pant", chaussure:"#22232B", manche:"longue", numero:"5" },
+    crossB:    { haut:"#3D7BD9", bas:"#F4F4F4", jambe:"pant", chaussure:"#22232B", manche:"longue" },
     tshirt:    { haut:"#FF9F1C", bas:"#1D2357", jambe:"peau", chaussure:"#3D7BD9", manche:"courte" },
     papy:      { haut:"#8A5A3B", bas:"#4A4F5E", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
     mamy:      { haut:"#E5484D", bas:"#E5484D", jambe:"peau", chaussure:"#22232B", manche:"longue", robe:"#C23B40", robeLongue:true }
@@ -135,7 +137,7 @@
     var penche = o[1] === "triste" ? 8 : o[1] === "salut" ? 10 : 0;
     s += '<rect x="-7" y="-128" width="14" height="12" fill="' + peau + '"/>';
     if(tenue.voile) s += '<g transform="rotate(' + penche + ' 0 -126)">' + teteVoile(peau, tenue.voile, expr) + "</g>";
-    else s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(tenue.chapeau) + "</g>";
+    else s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(couleurs.casque ? "casqueCross:" + couleurs.casque : tenue.chapeau) + "</g>";
     return s;
   }
   /* la tête avec un foulard (habit de prière) : le tissu entoure le visage et tombe sur les épaules */
@@ -151,6 +153,9 @@
     if(c === "couronne") return '<path d="M-24 -182 L-24 -202 L-12 -190 L0 -208 L12 -190 L24 -202 L24 -182Z" fill="#FFD23F" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>' + rond(0, -192, 3.5, "#E5484D") + rond(-16, -188, 2.5, "#4CC9F0") + rond(16, -188, 2.5, "#4CC9F0");
     if(c === "sorciere") return ovale(0, -180, 50, 9, "#2E1A4F", ' stroke="' + TRAIT + '" stroke-width="2"') + '<path d="M-28 -182 Q-10 -228 22 -252 Q8 -224 28 -182Z" fill="#4A2C7A" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>' +
       '<path d="M-27 -190 Q0 -196 27 -190 L28 -182 Q0 -188 -28 -182Z" fill="#FF9F1C"/>' + '<text x="4" y="-205" font-size="14" text-anchor="middle" fill="#FFD23F">★</text>';
+    if(c && c.indexOf("casqueCross") === 0){ var col = c.split(":")[1] || "#3D7BD9";
+      return rond(0, -154, 40, col, ' stroke="' + TRAIT + '" stroke-width="2.5"') + '<path d="M-30 -166 Q0 -176 30 -166 L28 -142 Q0 -134 -28 -142Z" fill="#2B2B3A"/>' +
+        '<path d="M-22 -160 Q-4 -166 10 -160" stroke="#FFFFFF" stroke-width="3" fill="none" opacity=".6"/>' + '<path d="M-20 -194 Q0 -210 30 -196 L34 -186 Q4 -196 -20 -186Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2"/>'; }
     if(c === "casque") return '<path d="M-36 -150 Q-38 -194 0 -196 Q38 -194 36 -150 L26 -150 L26 -164 L-26 -164 L-26 -150Z" fill="#C9CED8" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>' +
       '<path d="M0 -196 Q10 -214 26 -214 Q16 -204 4 -194Z" fill="#E5484D"/>' + chemin("M-30 -170 L30 -170", "#9AA0AE", 3);
     return "";
@@ -283,6 +288,47 @@
     return s;
   }
 
+  /* ---------- un pilote sur sa moto de cross ----------
+     options : "couleur,numero,visage,pose,visible"  pose : roule | saut ; visible = 1 : on voit le visage (Youssouf) */
+  function motoCross(opts){
+    var o = (opts || "").split(","), col = o[0] || "#E5484D", num = o[1] || "", expr = o[2] || "rire", pose = o[3] || "roule", visible = o[4] === "1", peau = o[5] || "#C98E62";
+    var s = "";
+    if(pose === "saut") s += '<g transform="translate(0 -40) rotate(-14 0 -60)">';
+    // lignes de vitesse
+    [[-150,-120,-110],[-160,-90,-120],[-145,-60,-105]].forEach(function(l){ s += ligne(l[0], l[1], l[2], l[1], "rgba(255,255,255,.75)", 4); });
+    // roues
+    [[-72,-36],[74,-36]].forEach(function(w){ s += rond(w[0], w[1], 36, "#22232B") + rond(w[0], w[1], 36, "none", ' stroke="#55586A" stroke-width="6" stroke-dasharray="7 6"') + rond(w[0], w[1], 15, "#C9CED8") + rond(w[0], w[1], 5, "#55586A"); });
+    // cadre, fourche, garde-boue, plaque
+    s += chemin("M-72 -36 L-20 -70 L30 -70", "#9AA0AE", 8) + chemin("M74 -36 L50 -118", "#C9CED8", 9);
+    s += '<path d="M-110 -86 Q-80 -110 -40 -100 L-30 -82 Q-70 -86 -110 -86Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2"/>';
+    s += '<path d="M-44 -102 L30 -104 Q40 -96 34 -84 L-34 -80Z" fill="#22232B"/>';
+    s += '<path d="M-30 -80 L32 -84 L44 -64 L-14 -52Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2"/>';
+    s += '<path d="M56 -78 Q90 -84 110 -64 Q86 -66 60 -66Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2"/>';
+    s += ovale(58, -110, 18, 14, "#FFFFFF", ' stroke="' + TRAIT + '" stroke-width="2"') + '<text x="58" y="-104" text-anchor="middle" font-size="16" font-weight="700" fill="' + TRAIT + '" font-family="Fredoka, Arial, sans-serif">' + num + "</text>";
+    s += chemin("M36 -128 L62 -134", "#22232B", 6);
+    // le pilote
+    s += chemin("M-6 -100 L22 -82 L4 -56", "#F4F4F4", 15) + ovale(10, -52, 16, 8, "#22232B");   // jambe + botte
+    s += '<path d="M-22 -104 Q-12 -160 22 -158 L30 -150 Q8 -132 6 -100Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>'; // dos
+    s += '<text x="0" y="-122" text-anchor="middle" font-size="16" font-weight="700" fill="#FFFFFF" font-family="Fredoka, Arial, sans-serif">' + num + "</text>";
+    s += chemin("M18 -150 L40 -132 L56 -132", col, 12) + rond(57, -132, 6.5, "#22232B");          // bras + gant
+    // casque (avec le visage visible pour Youssouf)
+    s += rond(30, -182, 27, col, ' stroke="' + TRAIT + '" stroke-width="2.5"');
+    if(visible){ s += '<path d="M36 -192 Q58 -190 56 -170 Q48 -162 34 -166Z" fill="' + peau + '"/>' +
+      '<rect x="36" y="-196" width="22" height="10" rx="5" fill="#4CC9F0" stroke="' + TRAIT + '" stroke-width="2"/>' +
+      (expr === "peur" || expr === "surpris" ? ovale(49, -172, 3, 3.5, "#8A2C4A") : chemin("M42 -174 q7 6 13 0", TRAIT, 2.2)); }
+    else s += '<path d="M34 -196 Q60 -194 56 -170 Q46 -164 34 -168Z" fill="#2B2B3A"/>';
+    s += '<path d="M8 -204 Q30 -218 56 -200 L58 -192 Q32 -206 8 -196Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2"/>';
+    s += '<path d="M44 -170 L66 -164 L58 -156 L40 -160Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2"/>';   // mentonnière
+    if(pose === "saut") s += "</g>";
+    return s;
+  }
+  /* le podium (1er au milieu, 2e à gauche, 3e à droite) */
+  function podium(){
+    return '<rect x="-140" y="-70" width="100" height="70" fill="#C9CED8" stroke="' + TRAIT + '" stroke-width="3"/><text x="-90" y="-22" text-anchor="middle" font-size="40" font-weight="700" fill="' + TRAIT + '" font-family="Fredoka, Arial">2</text>' +
+      '<rect x="-40" y="-110" width="100" height="110" fill="#FFD23F" stroke="' + TRAIT + '" stroke-width="3"/><text x="10" y="-50" text-anchor="middle" font-size="46" font-weight="700" fill="' + TRAIT + '" font-family="Fredoka, Arial">1</text>' +
+      '<rect x="60" y="-46" width="100" height="46" fill="#E09A5A" stroke="' + TRAIT + '" stroke-width="3"/><text x="110" y="-12" text-anchor="middle" font-size="34" font-weight="700" fill="' + TRAIT + '" font-family="Fredoka, Arial">3</text>';
+  }
+
   var MIKAEL = { peau:"#C98E62", cheveux:"#22150F" }; // couleurs de Mikael : faciles à changer ici
   var COPAINS = [
     { peau:"#F2C9A0", cheveux:"#E0A43A", haut:"#E5484D" },
@@ -314,8 +360,13 @@
     yusuf: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#FF9F1C" }); },
     jahyan: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#2BB3C0" }); },
     nono: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#C9CED8" }); },
-    nona: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#D9DDE5", longs:true }); }
+    nona: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#D9DDE5", longs:true }); },
+    // l'histoire de motocross
+    youssouf: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F" }); },
+    moto: motoCross,
+    podium: podium,
+    pilote: function(opts){ var o = (opts || "").split(","), c = o[3] || "#3D7BD9"; return enfant(o.slice(0, 3).join(","), { peau:"#E8B98E", cheveux:"#22150F", haut:c, casque:c }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
-  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110 };
+  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110, moto:230, podium:120 };
 })();
