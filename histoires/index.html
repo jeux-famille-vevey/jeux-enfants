@@ -288,6 +288,33 @@ h1{margin:6px 0 4px;text-align:center;font-size:clamp(2.2rem,7vmin,3.4rem);color
       s += '<rect x="40" y="398" width="720" height="12" fill="#C9CED8" stroke="#55586A" stroke-width="2"/>';
       for(var x = 60; x < 760; x += 80) s += '<rect x="' + x + '" y="372" width="8" height="40" fill="#55586A"/>';
       return s + '<rect x="360" y="150" width="80" height="34" rx="8" fill="#22232B"/><circle cx="380" cy="167" r="9" fill="#E5484D"/><circle cx="400" cy="167" r="9" fill="#FFD23F"/><circle cx="420" cy="167" r="9" fill="#3FA34D"/>'; },
+    loge: function(){ var s = '<rect width="800" height="500" fill="#F7D6E6"/><rect x="0" y="380" width="800" height="120" fill="#C98E9C"/>';
+      // le grand miroir avec ses ampoules, la table de maquillage
+      s += '<rect x="230" y="40" width="340" height="230" rx="14" fill="#DDEFFF" stroke="#FFF8E7" stroke-width="14"/><path d="M260 80 L330 60 M270 120 L380 70" stroke="#FFFFFF" stroke-width="10" opacity=".6"/>';
+      for(var i = 0; i < 8; i++){ s += '<circle cx="' + (240 + i * 46) + '" cy="34" r="11" fill="#FFF3A0"/><circle cx="' + (240 + i * 46) + '" cy="34" r="20" fill="#FFF3A0" opacity=".3"/>'; }
+      s += '<rect x="200" y="300" width="400" height="22" rx="6" fill="#FFFFFF"/><rect x="220" y="322" width="14" height="80" fill="#E8C4D4"/><rect x="566" y="322" width="14" height="80" fill="#E8C4D4"/>';
+      s += '<rect x="260" y="276" width="14" height="26" rx="4" fill="#E5484D"/><rect x="290" y="282" width="34" height="20" rx="5" fill="#8E5BC4"/><circle cx="520" cy="290" r="12" fill="#FF8FB8"/>';
+      // le portant de robes
+      s += '<rect x="640" y="120" width="140" height="8" fill="#9AA0AE"/><rect x="646" y="128" width="6" height="260" fill="#9AA0AE"/><rect x="770" y="128" width="6" height="260" fill="#9AA0AE"/>';
+      [["#FF6FB0",660],["#3FA34D",700],["#FFD23F",740]].forEach(function(r){ s += '<path d="M' + r[1] + ' 130 L' + (r[1] + 24) + ' 130 L' + (r[1] + 34) + ' 230 L' + (r[1] - 10) + ' 230Z" fill="' + r[0] + '"/>'; });
+      return s; },
+    defile: function(){ var s = '<rect width="800" height="500" fill="#2A1F4A"/>';
+      // les projecteurs
+      [[120,"#FFF3A0"],[400,"#FFD9F0"],[680,"#BFE6FF"]].forEach(function(p){ s += '<path d="M' + p[0] + ' 0 L' + (p[0] - 110) + ' 500 L' + (p[0] + 110) + ' 500Z" fill="' + p[1] + '" opacity=".16"/><circle cx="' + p[0] + '" cy="12" r="16" fill="' + p[1] + '"/>'; });
+      // le rideau, le podium du défilé et le public
+      s += '<path d="M0 0 H120 Q90 120 110 240 Q60 180 0 240Z M800 0 H680 Q710 120 690 240 Q740 180 800 240Z" fill="#C2185B"/>';
+      s += '<path d="M260 300 L540 300 L700 500 L100 500Z" fill="#F4F0FF"/><path d="M270 300 L530 300 L536 308 L264 308Z" fill="#FFD23F"/>';
+      for(var i = 0; i < 18; i++){ var x = i < 9 ? 10 + i * 28 : 540 + (i - 9) * 28, y = 420 + (i % 3) * 22; s += '<circle cx="' + x + '" cy="' + y + '" r="12" fill="#15102E"/><rect x="' + (x - 14) + '" y="' + (y + 10) + '" width="28" height="40" rx="12" fill="#15102E"/>'; }
+      for(var k = 0; k < 14; k++) s += '<circle cx="' + ((k * 61) % 800) + '" cy="' + (40 + (k * 37) % 200) + '" r="3" fill="#FFFFFF" opacity=".6"/>';
+      return s; },
+    aquaparc: function(){ var s = ciel("#7CC8FF","#E2F4FF") + soleil(700, 70) + nuage(120, 50);
+      s += '<rect x="0" y="360" width="800" height="140" fill="#F2D49A"/><path d="M300 380 Q500 360 780 390 L780 470 Q520 490 300 470Z" fill="#3CB8F0"/><path d="M330 400 Q500 388 740 408" stroke="#FFFFFF" stroke-width="5" fill="none" opacity=".6"/>';
+      // la tour et le méga toboggan
+      s += '<rect x="60" y="60" width="90" height="320" fill="#FFD23F" stroke="#E0A43A" stroke-width="4"/><rect x="50" y="50" width="110" height="20" fill="#E5484D"/>';
+      for(var y = 90; y < 380; y += 40) s += '<rect x="66" y="' + y + '" width="78" height="6" fill="#E0A43A"/>';
+      s += '<path d="M150 80 C320 60 180 200 330 210 S280 340 450 380" stroke="#FF6FB0" stroke-width="44" fill="none" stroke-linecap="round"/><path d="M150 80 C320 60 180 200 330 210 S280 340 450 380" stroke="#FFC2DE" stroke-width="14" fill="none" stroke-linecap="round"/>';
+      s += '<path d="M150 150 C260 160 200 260 300 280 S300 360 380 390" stroke="#4CC9F0" stroke-width="34" fill="none" stroke-linecap="round" opacity=".9"/>';
+      return s + '<rect x="600" y="300" width="8" height="70" fill="#8A5A3B"/><path d="M560 304 Q604 260 648 304Z" fill="#3FA34D"/>'; },
     ferme: function(){ return ciel("#8FD3FF","#E3F6FF") + soleil(90, 80) + nuage(380, 60) + '<rect x="0" y="320" width="800" height="180" fill="#7BCB6B"/>' +
       '<g transform="translate(540 170)"><rect x="0" y="60" width="200" height="150" fill="#C8433C"/><path d="M-14 66 L100 0 L214 66Z" fill="#8E2F2A"/><rect x="70" y="120" width="60" height="90" fill="#FFF8E7"/><path d="M70 120 L130 210 M130 120 L70 210" stroke="#C8433C" stroke-width="6"/></g>' +
       '<ellipse cx="400" cy="440" rx="200" ry="40" fill="#7A5230"/>' + (function(){ var s = ""; for(var x=0;x<520;x+=40) s += '<rect x="' + x + '" y="330" width="14" height="60" fill="#E9C79B"/>'; return s + '<rect x="0" y="345" width="520" height="8" fill="#D9B07E"/>'; })(); }

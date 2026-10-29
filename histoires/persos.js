@@ -58,6 +58,9 @@
     priere:    { haut:"#F4F0FF", bas:"#F4F0FF", jambe:"peau", chaussure:"#C9A8FF", manche:"longue", robe:"#EDE6FF", robeLongue:true, voile:"#C9A8FF", motifRobe:"#B9A3F0" },
     cross:     { haut:"#FF9F1C", bas:"#F4F4F4", jambe:"pant", chaussure:"#22232B", manche:"longue", numero:"5" },
     crossB:    { haut:"#3D7BD9", bas:"#F4F4F4", jambe:"pant", chaussure:"#22232B", manche:"longue" },
+    robeVerte: { haut:"#3FA34D", bas:"#3FA34D", jambe:"peau", chaussure:"#2F7D4A", manche:"courte", robe:"#2F9E4F" },
+    robeJaune: { haut:"#FFD23F", bas:"#FFD23F", jambe:"peau", chaussure:"#E0A43A", manche:"courte", robe:"#F2B91F" },
+    maquilleuse: { haut:"#22232B", bas:"#22232B", jambe:"pant", chaussure:"#22232B", manche:"longue", main:"pinceau" },
     tshirt:    { haut:"#FF9F1C", bas:"#1D2357", jambe:"peau", chaussure:"#3D7BD9", manche:"courte" },
     papy:      { haut:"#8A5A3B", bas:"#4A4F5E", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
     mamy:      { haut:"#E5484D", bas:"#E5484D", jambe:"peau", chaussure:"#22232B", manche:"longue", robe:"#C23B40", robeLongue:true }
@@ -132,12 +135,16 @@
       '<path d="M' + b[0] + ' ' + (b[1]-16) + ' L' + b[0] + ' ' + (b[1]+14) + ' M' + (b[0]-11) + ' ' + (b[1]-4) + ' L' + (b[0]+11) + ' ' + (b[1]-4) + '" stroke="#FFD23F" stroke-width="4"/>'; }
     s += bras(pose.bd[0], pose.bd[1], pose.bd[2], haut, peau, longue);
     if(tenue.main === "baguette"){ var m = pose.bd[2]; s += ligne(m[0], m[1], m[0] + 14, m[1] - 34, "#3A2A1A", 4) + '<text x="' + (m[0] + 15) + '" y="' + (m[1] - 30) + '" font-size="22" text-anchor="middle" fill="#FFD23F">★</text>'; }
+    if(tenue.main === "pinceau"){ var m3 = pose.bd[2]; s += ligne(m3[0], m3[1], m3[0] + 10, m3[1] - 30, "#8A5A3B", 4) + ovale(m3[0] + 12, m3[1] - 36, 5, 8, "#FF8FB8"); }
     if(tenue.main === "epee"){ var m2 = pose.bd[2]; s += ligne(m2[0] - 8, m2[1] + 2, m2[0] + 8, m2[1] - 2, "#8A5A3B", 5) + ligne(m2[0], m2[1], m2[0] + 18, m2[1] - 46, "#C9CED8", 6) + ligne(m2[0], m2[1], m2[0] + 18, m2[1] - 46, "#8A5A3B", 1); }
     // cou et tête
     var penche = o[1] === "triste" ? 8 : o[1] === "salut" ? 10 : 0;
     s += '<rect x="-7" y="-128" width="14" height="12" fill="' + peau + '"/>';
+    var extra = "";
+    if(couleurs.ebouriffe) for(var e = 0; e < 9; e++){ var a = Math.PI * (1.05 + e * .11); extra += chemin("M" + (Math.cos(a) * 30).toFixed(1) + " " + (-156 + Math.sin(a) * 30).toFixed(1) + " l" + (Math.cos(a) * 18 + (e % 2 ? 6 : -6)).toFixed(1) + " " + (Math.sin(a) * 18).toFixed(1), couleurs.cheveux, 6); }
+    if(couleurs.rate) extra += ovale(-20, -140, 9, 6, "#FF4FB0", ' opacity=".75"') + ovale(21, -142, 10, 5, "#3D7BD9", ' opacity=".6"') + ovale(-12, -160, 8, 4, "#3FCF6A", ' opacity=".6"') + ovale(2, -132, 11, 4, "#E5484D", ' opacity=".6"');
     if(tenue.voile) s += '<g transform="rotate(' + penche + ' 0 -126)">' + teteVoile(peau, tenue.voile, expr) + "</g>";
-    else s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(couleurs.casque ? "casqueCross:" + couleurs.casque : tenue.chapeau) + "</g>";
+    else s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(couleurs.casque ? "casqueCross:" + couleurs.casque : tenue.chapeau) + extra + "</g>";
     return s;
   }
   /* la tête avec un foulard (habit de prière) : le tissu entoure le visage et tombe sur les épaules */
@@ -361,6 +368,12 @@
     jahyan: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#2BB3C0" }); },
     nono: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#C9CED8" }); },
     nona: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#D9DDE5", longs:true }); },
+    // l'histoire du défilé de mode
+    fille1: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#E0A43A", longs:true }); },
+    fille2: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true }); },
+    fille1Rate: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#E0A43A", longs:true, ebouriffe:true, rate:true }); },
+    fille2Rate: function(opts){ return enfant(opts, { peau:"#8D5B3C", cheveux:"#1E1410", longs:true, ebouriffe:true, rate:true }); },
+    maquilleuse: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#8E5BC4", longs:true }); },
     // l'histoire de motocross
     youssouf: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F" }); },
     moto: motoCross,

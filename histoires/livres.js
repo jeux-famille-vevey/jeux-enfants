@@ -8,6 +8,25 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"defile", cache:true, titre:"Amira, la star du défilé", auteur:"Une histoire écrite en famille",
+  couverture:{ f:"defile", p:[["@amira",50,62,26,"","princesse,joie,rire"],["⭐",30,20,7,"vole"],["⭐",70,16,6,"vole"]] }, age:"3-8 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FF8FD0", vx:"siwis+4" }, filles:{ nom:"Les autres filles", h:1.1, v:1, c:"#9EE6A8", vx:"siwis+2" },
+           maquilleuse:{ nom:"La maquilleuse", h:1, v:.92, c:"#C9A8FF", vx:"siwis-1" } },
+  pages:[
+    { s:{ f:"loge", p:[["@amira",42,86,24,"","princesse,peur,surpris"]] }, l:[["narr","Aujourd'hui, Amira fait un défilé de mode !"],["amira","« Oh là là… Je suis un peu stressée… »"]] },
+    { s:{ f:"loge", p:[["@amira",42,86,24,"balance","princesse,joie,sourire"],["👗",70,52,9,""],["💄",24,56,7,"saut"]] }, l:[["narr","Elle s'habille bien, elle se maquille et elle se coiffe."]] },
+    { s:{ f:"loge", p:[["@fille1",18,86,22,"","robeVerte,salut,fache"],["@fille2",34,86,22,"","robeJaune,salut,fache"],["@amira",68,86,24,"","princesse,debout,sourire"]] }, l:[["filles","« Tu n'es pas belle ! »"],["narr","Mais Amira ne les écoute pas. Elle continue à se préparer."]] },
+    { s:{ f:"loge", p:[["@maquilleuse",34,86,29,"","maquilleuse,debout,rire"],["@amira",62,86,23,"","princesse,joie,rire"],["✨",76,44,7,"vole"]] }, l:[["narr","La maquilleuse vient l'aider. Elle la coiffe et elle la maquille."],["maquilleuse","« Tu vas être magnifique ! »"]] },
+    { s:{ f:"defile", p:[["@amira",50,62,26,"","princesse,joie,rire"],["⭐",28,24,7,"vole"],["⭐",72,20,6,"vole"]] }, l:[["narr","Trois… deux… un… Amira entre en scène !"],["narr","Elle défile comme une star, comme une vraie princesse, avec sa couronne sur la tête et sa robe rose."]] },
+    { s:{ f:"defile", p:[["@fille1Rate",50,62,25,"","robeVerte,debout,surpris"]] }, l:[["narr","Ensuite, une autre fille défile, avec une robe verte."],["narr","Mais son maquillage est tout raté, et sa coiffure est toute ébouriffée !"]] },
+    { s:{ f:"defile", p:[["@fille2Rate",50,62,25,"","robeJaune,debout,surpris"]] }, l:[["narr","Puis une troisième fille arrive… et ce n'est pas très joli non plus !"]] },
+    { s:{ f:"defile", p:[["@fille1Rate",20,74,20,"","robeVerte,debout,triste"],["@amira",50,62,26,"saut","princesse,joie,rire"],["@fille2Rate",80,74,20,"","robeJaune,debout,triste"],["🏆",66,24,9,"balance"],["🎟️",34,26,8,"vole"]] }, l:[["narr","À la fin, le jury annonce la plus belle fille du défilé… c'est Amira !"],["narr","Elle gagne un bon pour l'Aquaparc !"]] },
+    { s:{ f:"aquaparc", p:[["@amira",42,62,16,"vole","princesse,vol,rire"],["@baba",62,92,24,"","papa,joie,rire"],["@maman",76,92,23,"","maman,joie,rire"],["@aleyah",90,92,18,"saut","ecole,joie,rire"],["💦",54,70,8,"vole"]] }, l:[["narr","Amira va à l'Aquaparc avec toute sa famille. Elle descend un méga toboggan !"],["amira","« Ouiii ! C'est trop cool ! »"],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"Que fait Amira dans cette histoire ?", c:["Un défilé de mode","Une course de moto","Un gâteau"], r:0 }, { q:"Que fait Amira quand les filles disent qu'elle n'est pas belle ?", c:["Elle pleure","Elle ne les écoute pas","Elle rentre à la maison"], r:1 },
+         { q:"De quelle couleur est la robe d'Amira ?", c:["Verte","Rose","Bleue"], r:1 }, { q:"Qu'est-ce qu'Amira gagne ?", c:["Un bon pour l'Aquaparc","Une moto","Un chat"], r:0 } ]
+},
+{
   id:"motocross", titre:"Youssouf, champion de motocross", auteur:"Une histoire écrite en famille",
   couverture:{ f:"cross", p:[["@moto",46,76,26,"vole","#FF9F1C,5,rire,saut,1"],["🏆",82,40,11,"balance"]] }, age:"3-8 ans",
   persos:{ narr:{ nom:"", h:1, v:.92, vx:"siwis" }, youssouf:{ nom:"Youssouf", h:1.2, v:1, c:"#FF9F1C", vx:"siwis+3" } },
