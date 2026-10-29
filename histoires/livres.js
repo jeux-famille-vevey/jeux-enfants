@@ -8,7 +8,7 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
-  id:"motocross", cache:true, titre:"Youssouf, champion de motocross", auteur:"Une histoire écrite en famille",
+  id:"motocross", titre:"Youssouf, champion de motocross", auteur:"Une histoire écrite en famille",
   couverture:{ f:"cross", p:[["@moto",46,76,26,"vole","#FF9F1C,5,rire,saut,1"],["🏆",82,40,11,"balance"]] }, age:"3-8 ans",
   persos:{ narr:{ nom:"", h:1, v:.92, vx:"siwis" }, youssouf:{ nom:"Youssouf", h:1.2, v:1, c:"#FF9F1C", vx:"siwis+3" } },
   pages:[
