@@ -8,7 +8,7 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
-  id:"amira", cache:true, titre:"La princesse Amira et la petite sorcière", auteur:"Une histoire imaginée par la grande sœur d'Amira",
+  id:"amira", titre:"La princesse Amira et la petite sorcière", auteur:"Une histoire imaginée par la grande sœur d'Amira",
   couverture:{ f:"ecole", p:[["@amira",30,82,22,"saut","princesse,joie,rire"],["@sorciere",62,82,22,"","sorciere,salut,sourire"],["❤️",46,30,7,"vole"]] }, age:"3-6 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FF8FD0", vx:"siwis+4" }, sorciere:{ nom:"La petite sorcière", h:1.2, v:.95, c:"#C9A8FF", vx:"siwis+2" },
            chevalier:{ nom:"Chevalier", h:1, v:1, c:"#9EE6A8", vx:"pierre+3" }, parents:{ nom:"Baba et Maman", h:.9, v:.95, c:"#FFD23F", vx:"pierre" } },
