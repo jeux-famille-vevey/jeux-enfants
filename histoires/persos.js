@@ -54,7 +54,11 @@
     sorciere:  { haut:"#6B3FA0", bas:"#6B3FA0", jambe:"peau", chaussure:"#22232B", manche:"longue", robe:"#4A2C7A", etoilesRobe:true, chapeau:"sorciere", main:"baguette", chaussettes:"#FF9F1C" },
     chevalier: { haut:"#C9CED8", bas:"#9AA0AE", jambe:"pant", chaussure:"#5A5F6E", manche:"longue", chapeau:"casque", main:"epee", bouclier:"#3D7BD9", armure:true },
     papa:      { haut:"#3D7BD9", bas:"#3D4A5A", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
-    maman:     { haut:"#3FA34D", bas:"#3FA34D", jambe:"peau", chaussure:"#8A5A3B", manche:"longue", robe:"#2F7D4A", robeLongue:true }
+    maman:     { haut:"#3FA34D", bas:"#3FA34D", jambe:"peau", chaussure:"#8A5A3B", manche:"longue", robe:"#2F7D4A", robeLongue:true },
+    priere:    { haut:"#F4F0FF", bas:"#F4F0FF", jambe:"peau", chaussure:"#C9A8FF", manche:"longue", robe:"#EDE6FF", robeLongue:true, voile:"#C9A8FF", motifRobe:"#B9A3F0" },
+    tshirt:    { haut:"#FF9F1C", bas:"#1D2357", jambe:"peau", chaussure:"#3D7BD9", manche:"courte" },
+    papy:      { haut:"#8A5A3B", bas:"#4A4F5E", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
+    mamy:      { haut:"#E5484D", bas:"#E5484D", jambe:"peau", chaussure:"#22232B", manche:"longue", robe:"#C23B40", robeLongue:true }
   };
 
   function visage(cx, cy, expr, peau){
@@ -104,6 +108,7 @@
       var bas_ = tenue.robeLongue ? -8 : -34, large = tenue.robeLongue ? 40 : 46;
       s += '<path d="M-28 -78 L28 -78 L' + large + ' ' + bas_ + ' Q0 ' + (bas_ + 8) + ' -' + large + ' ' + bas_ + 'Z" fill="' + tenue.robe + '" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>';
       if(tenue.bord) s += chemin("M-" + (large - 2) + " " + (bas_ - 3) + " Q0 " + (bas_ + 5) + " " + (large - 2) + " " + (bas_ - 3), tenue.bord, 5);
+      if(tenue.motifRobe) [[-16,-52],[10,-40],[22,-60],[-6,-24],[18,-20],[-22,-30]].forEach(function(p){ s += rond(p[0], p[1], 3, tenue.motifRobe); });
       if(tenue.etoilesRobe) [[-18,-50],[14,-60],[24,-42],[-4,-40]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="13" text-anchor="middle" fill="#FFD23F">★</text>'; });
     } else {
       // short / bas du kimono
@@ -129,8 +134,17 @@
     // cou et tête
     var penche = o[1] === "triste" ? 8 : o[1] === "salut" ? 10 : 0;
     s += '<rect x="-7" y="-128" width="14" height="12" fill="' + peau + '"/>';
-    s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(tenue.chapeau) + "</g>";
+    if(tenue.voile) s += '<g transform="rotate(' + penche + ' 0 -126)">' + teteVoile(peau, tenue.voile, expr) + "</g>";
+    else s += '<g transform="rotate(' + penche + ' 0 -126)">' + tete(peau, chev, expr) + chapeau(tenue.chapeau) + "</g>";
     return s;
+  }
+  /* la tête avec un foulard (habit de prière) : le tissu entoure le visage et tombe sur les épaules */
+  function teteVoile(peau, coul, expr){
+    var s = '<path d="M-44 -150 Q-46 -196 0 -198 Q46 -196 44 -150 Q46 -118 30 -104 L-30 -104 Q-46 -118 -44 -150Z" fill="' + coul + '" stroke="' + TRAIT + '" stroke-width="2"/>';
+    s += rond(0, -150, 31, peau);
+    s += '<path d="M-33 -150 Q-34 -186 0 -187 Q34 -186 33 -150 Q30 -176 0 -177 Q-30 -176 -33 -150Z" fill="' + coul + '"/>';
+    s += chemin("M-31 -150 Q-34 -188 0 -188 Q34 -188 31 -150 Q30 -122 0 -118 Q-30 -122 -31 -150", "rgba(0,0,0,.18)", 2);
+    return s + visage(0, -148, expr, peau);
   }
   /* couronne de princesse, chapeau de sorcière, casque de chevalier (posés sur la tête : centre 0,-152, rayon 33) */
   function chapeau(c){
@@ -295,7 +309,12 @@
     sorciere: function(opts){ return enfant(opts, { peau:"#F2C9A0", cheveux:"#C8502E", longs:true }); },
     chevalier: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#6B3E23" }); },
     baba: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F" }); },
-    maman: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#4A2C1A", longs:true }); }
+    maman: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#4A2C1A", longs:true }); },
+    // l'histoire « Maman revient d'Espagne »
+    yusuf: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#FF9F1C" }); },
+    jahyan: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#2BB3C0" }); },
+    nono: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#C9CED8" }); },
+    nona: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#D9DDE5", longs:true }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
   window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110 };

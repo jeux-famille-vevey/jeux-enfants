@@ -31,7 +31,8 @@ def voix(nom):
 
 
 # mots que la voix prononce mal : on lui donne une écriture « phonétique » (le texte affiché ne change pas)
-PRONONCIATION = {"taekwondo": "tékwondo", "Taekwondo": "Tékwondo", "ananas": "ananasse"}
+PRONONCIATION = {"taekwondo": "tékwondo", "Taekwondo": "Tékwondo", "ananas": "ananasse",
+                 "Yusuf": "Youssouf", "Amyrah": "Amira", "Aleyah": "Aléya", "Jahyan": "Jaïane"}
 
 
 def enregistrer(texte, vx, vitesse, sortie):

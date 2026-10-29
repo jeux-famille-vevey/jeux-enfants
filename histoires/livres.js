@@ -8,6 +8,26 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"espagne", cache:true, titre:"Maman revient d'Espagne", auteur:"Une histoire imaginée par Aleyah",
+  couverture:{ f:"plage", p:[["@maman",26,84,28,"","maman,joie,rire"],["🎁",48,70,9,"saut"],["@yusuf",64,86,17,"saut","tshirt,joie,rire"],["@amira",82,86,17,"saut","sorciere,joie,rire"]] }, age:"3-10 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, aleyah:{ nom:"Aleyah", h:1.2, v:.95, c:"#C9A8FF", vx:"siwis+2" }, maman:{ nom:"Maman", h:1, v:.92, c:"#7BE495", vx:"siwis" },
+           yusuf:{ nom:"Yusuf", h:1.2, v:1, c:"#FF9F1C", vx:"pierre+4" }, amyrah:{ nom:"Amyrah", h:1.4, v:.95, c:"#FF8FD0", vx:"siwis+4" }, nonos:{ nom:"Nono et Nona", h:.9, v:.9, c:"#FFD23F", vx:"pierre" } },
+  pages:[
+    { s:{ f:"chambreVide", p:[["@baba",14,86,29,"","papa,debout,sourire"],["@jahyan",32,86,19,"","ecole,debout,sourire"],["@aleyah",50,86,22,"","ecole,salut,sourire"],["@yusuf",68,86,17,"balance","tshirt,debout,rire"],["@amira",84,86,16,"balance","princesse,debout,rire"]] },
+      l:[["narr","Aujourd'hui, Maman revient d'Espagne !"],["narr","Nous l'attendons tous à la maison : Baba, Jahyan, Yusuf, Amyrah et moi, Aleyah."]] },
+    { s:{ f:"chambreVide", p:[["@maman",34,86,29,"saut","maman,joie,rire"],["🧳",56,80,11,""],["🎁",72,74,8,"saut"],["🎁",84,80,7,"saut"]] }, l:[["narr","La porte s'ouvre. Et voici Maman ! Elle a une grosse valise pleine de cadeaux."],["maman","« Bonjour mes chéris ! J'ai des cadeaux pour tout le monde ! »"]] },
+    { s:{ f:"chambreVide", p:[["@yusuf",36,86,19,"saut","tshirt,joie,rire"],["🏍️",64,78,14,"balance"]] }, l:[["narr","Pour Yusuf, Maman a apporté une moto !"],["yusuf","« Vroum vroum ! Merci Maman ! »"]] },
+    { s:{ f:"chambreVide", p:[["@amira",44,86,19,"saut","sorciere,joie,rire"],["✨",62,40,8,"vole"],["⭐",30,34,6,"vole"]] }, l:[["narr","Pour Amyrah, un déguisement de sorcière, avec un grand chapeau pointu !"],["amyrah","« Regardez, je suis une sorcière ! »"]] },
+    { s:{ f:"chambreVide", p:[["@aleyah",44,86,23,"","priere,salut,rire"],["💜",64,36,7,"vole"]] }, l:[["narr","Et pour moi, Maman a apporté un bel habit pour la prière."],["aleyah","« Il est magnifique ! Merci Maman ! »"]] },
+    { s:{ f:"chambreVide", p:[["@baba",18,86,29,"","papa,joie,rire"],["🎁",36,78,8,"saut"],["@jahyan",54,86,19,"saut","ecole,joie,rire"],["🎁",72,78,8,"saut"],["@maman",86,86,27,"","maman,debout,rire"]] }, l:[["narr","Il y avait aussi des cadeaux pour Baba et pour Jahyan."],["narr","Tout le monde était très content ! Merci Maman !"]] },
+    { s:{ f:"route", p:[["✈️",40,30,14,"vole"],["☁️",72,22,9,"vole"],["☁️",18,40,7,"vole"]] }, l:[["narr","Et puis, toute la famille est partie en Espagne !"]] },
+    { s:{ f:"jardin", p:[["@nono",22,86,28,"","papy,joie,rire"],["@nona",38,86,27,"","mamy,joie,rire"],["@aleyah",60,86,21,"saut","ecole,joie,rire"],["@yusuf",76,86,16,"saut","tshirt,joie,rire"],["@amira",90,86,15,"saut","princesse,joie,rire"]] }, l:[["narr","Là-bas, Nono et Nona nous attendaient."],["nonos","« Bienvenue, nos chéris ! Nous sommes si contents de vous voir ! »"]] },
+    { s:{ f:"piscine", p:[["@aleyah",28,64,19,"vole","ecole,vol,rire"],["@yusuf",50,70,16,"vole","tshirt,saut,rire"],["@amira",70,66,15,"vole","princesse,vol,rire"],["💦",40,44,8,"vole"],["💦",62,38,7,"vole"]] }, l:[["narr","Et hop ! Tout le monde a sauté dans la piscine !"],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"D'où revient Maman ?", c:["D'Espagne","De la Lune","De l'école"], r:0 }, { q:"Quel cadeau a reçu Yusuf ?", c:["Un ballon","Une moto","Un chapeau"], r:1 },
+         { q:"Quel déguisement a reçu Amyrah ?", c:["Une princesse","Une sorcière","Un pirate"], r:1 }, { q:"Qui attend la famille en Espagne ?", c:["Nono et Nona","Le chevalier","Zouli"], r:0 } ]
+},
+{
   id:"amira", titre:"La princesse Amira et la petite sorcière", auteur:"Une histoire imaginée par la grande sœur d'Amira",
   couverture:{ f:"ecole", p:[["@amira",30,82,22,"saut","princesse,joie,rire"],["@sorciere",62,82,22,"","sorciere,salut,sourire"],["❤️",46,30,7,"vole"]] }, age:"3-6 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FF8FD0", vx:"siwis+4" }, sorciere:{ nom:"La petite sorcière", h:1.2, v:.95, c:"#C9A8FF", vx:"siwis+2" },
