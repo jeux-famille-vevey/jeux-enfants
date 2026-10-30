@@ -63,6 +63,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .enfant .e{font-size:3rem;line-height:1.1}
 .enfant b{font-size:1.5rem}
 .enfant small{font-size:.95rem;opacity:.85}
+.enfant.gerer{outline:4px dashed #E5484D;outline-offset:3px}
 .enfant.dernier{outline:4px solid #fff;outline-offset:3px}
 .ajout{display:flex;gap:8px;margin-top:22px;max-width:420px}
 .ajout input{flex:1;min-width:0;font:inherit;font-size:1.15rem;border-radius:16px;border:3px solid var(--panneau2);background:var(--panneau);color:var(--encre);padding:10px 14px}
@@ -156,6 +157,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <p>Touche ton nom. Chaque enfant a ses propres dessins.</p>
     <div class="enfants" id="enfants"></div>
     <form id="formAjout" class="ajout"><input id="nomAjout" maxlength="14" placeholder="Le prénom" autocomplete="off" aria-label="Le prénom du nouvel enfant"><button type="submit">➕ Ajouter</button></form>
+    <button class="moi" id="gerer" style="margin-top:14px">⚙️ Enlever un enfant</button>
   </div>
 </section>
 
@@ -261,6 +263,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 <img id="impression" alt="">
 <script src="dessins.js?v=1"></script>
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

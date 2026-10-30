@@ -11,11 +11,11 @@
   /* ---------- les enfants (les mêmes joueurs que dans les autres jeux du site) ---------- */
   var BASE = [{ id: "aleyah", nom: "Aleyah", e: "⭐" }, { id: "mikael", nom: "Mikael", e: "⚽" }];
   function ajoutes(){ var l = []; try{ l = JSON.parse(lire("profils-ajoutes") || "[]") || []; }catch(e){} return Array.isArray(l) ? l : []; }
-  (function(){ // Amira et Youssouf ajoutés une fois pour toute la famille
-    var l = ajoutes(), change = false;
-    [{ id: "amira", nom: "Amira", e: "🦄", numero: 3 }, { id: "youssouf", nom: "Youssouf", e: "🏍️", numero: 9 }].forEach(function(p){ if(!l.some(function(x){ return x.id === p.id; })){ l.push(p); change = true; } });
-    if(change) ecrire("profils-ajoutes", JSON.stringify(l));
+  (function(){ // on enlève les comptes en trop (demandé par Papa) : Amira et Youssouf ajoutés par erreur, et « pirate yusuf »
+    var l = ajoutes(), garde = l.filter(function(p){ return p.id !== "amira" && p.id !== "youssouf" && !/^\s*pirate\s*yusuf\s*$/i.test(p.nom || ""); });
+    if(garde.length !== l.length) ecrire("profils-ajoutes", JSON.stringify(garde));
   })();
+  var gerer = false;
   function enfants(){ return BASE.concat(ajoutes(), [{ id: "invite", nom: "Invité", e: "🙂" }]); }
   var profil = null;
   function nomDe(id){ var p = enfants().filter(function(x){ return x.id === id; })[0]; return p ? p : { id: id, nom: "?", e: "🙂" }; }
@@ -28,7 +28,18 @@
         b.innerHTML = '<span class="e"></span><b></b><small></small>';
         b.querySelector(".e").textContent = p.e || "🙂"; b.querySelector("b").textContent = p.nom;
         b.querySelector("small").textContent = n ? n + " dessin" + (n > 1 ? "s" : "") : "pas encore de dessin";
-        b.onclick = function(){ choisirEnfant(p.id); };
+        var effacable = p.id !== "invite" && !BASE.some(function(x){ return x.id === p.id; });
+        if(gerer && effacable){
+          b.classList.add("gerer"); b.querySelector("small").textContent = "🗑️ Touche pour enlever" + (n ? " (avec ses " + n + " dessin" + (n > 1 ? "s" : "") + ")" : "");
+          b.onclick = function(){
+            if(!b.dataset.sur){ b.dataset.sur = "1"; b.querySelector("small").textContent = "❓ Sûr ? Touche encore"; setTimeout(function(){ if(b.dataset.sur) majEnfants(); }, 3000); return; }
+            ecrire("profils-ajoutes", JSON.stringify(ajoutes().filter(function(x){ return x.id !== p.id; })));
+            l.filter(function(r){ return r.profil === p.id; }).forEach(function(r){ enlever(r.id); });
+            ecrire("coloriage-brouillon-" + p.id, null); if(lire("coloriage-profil") === p.id) ecrire("coloriage-profil", null);
+            majEnfants();
+          };
+        } else if(gerer){ b.disabled = true; b.style.opacity = .45; }
+        else b.onclick = function(){ choisirEnfant(p.id); };
         box.appendChild(b);
       });
     });
@@ -40,6 +51,7 @@
     tousDeTous().then(function(l){ l.filter(function(r){ return !r.profil; }).forEach(function(r){ r.profil = id; garder(r); }); aller("eAccueil"); });
     bip(600, 900, .1);
   }
+  $("gerer").onclick = function(){ gerer = !gerer; $("gerer").textContent = gerer ? "✅ J'ai fini" : "⚙️ Enlever un enfant"; majEnfants(); };
   $("formAjout").onsubmit = function(e){
     e.preventDefault(); var nom = $("nomAjout").value.trim().slice(0, 14); if(!nom) return;
     var l = ajoutes(), id = "p" + Date.now().toString(36); l.push({ id: id, nom: nom, e: "🙂", numero: 3 + l.length }); ecrire("profils-ajoutes", JSON.stringify(l));
