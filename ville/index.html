@@ -84,15 +84,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .apercu{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;padding:10px;background:radial-gradient(circle at 50% 60%,#5A61B8,#272C6B 70%);min-height:0}
 .apercu svg{width:100%;flex:1;min-height:0}
 .apercu input{font:inherit;font-size:1.2rem;text-align:center;border-radius:14px;border:3px solid var(--soleil);background:var(--nuit);color:var(--encre);padding:6px 10px;width:100%;max-width:240px;user-select:text}
-.choix{display:flex;flex-direction:column;min-height:0;padding:8px}
-.onglets{display:flex;gap:6px;overflow-x:auto;flex:none;padding-bottom:6px}
+.choix{display:flex;flex-direction:column;min-height:0;min-width:0;padding:8px}
+.apercu{min-width:0}
+.onglets{display:flex;flex-wrap:wrap;gap:6px;flex:none;padding-bottom:8px}
 .onglets button{border:0;background:var(--panneau2);border-radius:999px;padding:7px 12px;font-weight:600;font-size:.95rem;white-space:nowrap;flex:none}
 .onglets button.on{background:var(--soleil);color:var(--nuit)}
-.options{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;align-content:start;padding:4px}
+.options{flex:1;overflow-y:auto;overflow-x:hidden;display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;align-content:start;padding:4px}
 .options button{border:3px solid transparent;background:var(--panneau2);border-radius:16px;padding:4px;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.85rem;font-weight:600}
 .options button svg{width:100%;height:84px;pointer-events:none}
 .options button.on{border-color:var(--soleil);background:#454CB0}
-.options button.pastille{border-radius:50%;aspect-ratio:1;min-height:0}
+.options button.pastille{border-radius:50%;aspect-ratio:1;min-height:0;width:100%;max-width:76px;justify-self:center}
 .options button.pastille.on{box-shadow:0 0 0 3px var(--soleil)}
 .basBoite{display:flex;gap:8px;padding:8px;flex:none;flex-wrap:wrap}
 .basBoite button{border:0;border-radius:16px;padding:10px 16px;font-weight:700;font-size:1.05rem;background:var(--panneau2)}
@@ -153,6 +154,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 <script src="perso.js?v=1"></script>
 <script src="objets.js?v=1"></script>
 <script src="lieux.js?v=1"></script>
-<script src="jeu.js?v=1"></script>
+<script src="jeu.js?v=2"></script>
 </body>
 </html>

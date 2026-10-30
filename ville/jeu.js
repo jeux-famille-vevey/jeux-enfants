@@ -271,6 +271,8 @@
     if(e.clientY > t.top){ ranger(g.o); return; }
     lacher(g.o);
   }
+  // la molette de la souris fait défiler de gauche à droite (sur l'ordinateur)
+  [scene, $("tiroir")].forEach(function(el){ el.addEventListener("wheel", function(e){ if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ el.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false }); });
   scene.addEventListener("pointerup", finGeste); scene.addEventListener("pointercancel", finGeste);
 
   /* ranger : un personnage retourne dans le tiroir, un objet disparaît */
