@@ -8,13 +8,52 @@
   function ecrire(k, v){ try{ if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
   function clone(o){ return JSON.parse(JSON.stringify(o)); }
 
+  /* ---------- les enfants (les mêmes joueurs que dans les autres jeux du site) ---------- */
+  var BASE = [{ id: "aleyah", nom: "Aleyah", e: "⭐" }, { id: "mikael", nom: "Mikael", e: "⚽" }];
+  function ajoutes(){ var l = []; try{ l = JSON.parse(lire("profils-ajoutes") || "[]") || []; }catch(e){} return Array.isArray(l) ? l : []; }
+  (function(){ // Amira et Youssouf ajoutés une fois pour toute la famille
+    var l = ajoutes(), change = false;
+    [{ id: "amira", nom: "Amira", e: "🦄", numero: 3 }, { id: "youssouf", nom: "Youssouf", e: "🏍️", numero: 9 }].forEach(function(p){ if(!l.some(function(x){ return x.id === p.id; })){ l.push(p); change = true; } });
+    if(change) ecrire("profils-ajoutes", JSON.stringify(l));
+  })();
+  function enfants(){ return BASE.concat(ajoutes(), [{ id: "invite", nom: "Invité", e: "🙂" }]); }
+  var profil = null;
+  function nomDe(id){ var p = enfants().filter(function(x){ return x.id === id; })[0]; return p ? p : { id: id, nom: "?", e: "🙂" }; }
+  function majEnfants(){
+    var box = $("enfants"); box.innerHTML = ""; var dernier = lire("coloriage-profil");
+    tousDeTous().then(function(l){
+      enfants().forEach(function(p){
+        var n = l.filter(function(r){ return r.profil === p.id; }).length;
+        var b = document.createElement("button"); b.className = "enfant" + (p.id === dernier ? " dernier" : "");
+        b.innerHTML = '<span class="e"></span><b></b><small></small>';
+        b.querySelector(".e").textContent = p.e || "🙂"; b.querySelector("b").textContent = p.nom;
+        b.querySelector("small").textContent = n ? n + " dessin" + (n > 1 ? "s" : "") : "pas encore de dessin";
+        b.onclick = function(){ choisirEnfant(p.id); };
+        box.appendChild(b);
+      });
+    });
+  }
+  function choisirEnfant(id){
+    profil = id; ecrire("coloriage-profil", id);
+    var p = nomDe(id); $("moi").textContent = p.e + " " + p.nom;
+    // les dessins faits avant qu'il y ait des prénoms vont au premier enfant choisi
+    tousDeTous().then(function(l){ l.filter(function(r){ return !r.profil; }).forEach(function(r){ r.profil = id; garder(r); }); aller("eAccueil"); });
+    bip(600, 900, .1);
+  }
+  $("formAjout").onsubmit = function(e){
+    e.preventDefault(); var nom = $("nomAjout").value.trim().slice(0, 14); if(!nom) return;
+    var l = ajoutes(), id = "p" + Date.now().toString(36); l.push({ id: id, nom: nom, e: "🙂", numero: 3 + l.length }); ecrire("profils-ajoutes", JSON.stringify(l));
+    $("nomAjout").value = ""; majEnfants();
+  };
+
   /* ---------- changer d'écran ---------- */
-  var ecranActuel = "eAccueil";
+  var ecranActuel = "eQui";
   function aller(id){
     document.querySelectorAll(".ecran").forEach(function(e){ e.classList.toggle("actif", e.id === id); });
     ecranActuel = id; window.scrollTo(0, 0);
     if(id === "eAccueil") majAccueil();
     if(id === "eMes") majMesDessins();
+    if(id === "eQui") majEnfants();
   }
   document.querySelectorAll("[data-aller]").forEach(function(b){
     b.addEventListener("click", function(){ var c = b.getAttribute("data-aller"); if(c === "eCreer") nouveauCreer(); aller(c); });
@@ -71,7 +110,8 @@
       return new Promise(function(ok){ var t = base.transaction("dessins", "readwrite"); t.objectStore("dessins").put(rec); t.oncomplete = ok; t.onerror = function(){ memoire[rec.id] = rec; ok(); }; });
     });
   }
-  function tous(){
+  function tous(){ return tousDeTous().then(function(l){ return l.filter(function(r){ return !r.profil || r.profil === profil; }); }); }
+  function tousDeTous(){
     return pretBase.then(function(){
       if(!base) return Object.values(memoire);
       return new Promise(function(ok){ var r = base.transaction("dessins").objectStore("dessins").getAll(); r.onsuccess = function(){ ok(r.result.concat(Object.values(memoire))); }; r.onerror = function(){ ok(Object.values(memoire)); }; });
@@ -102,7 +142,7 @@
 
   /* ---------- mes dessins ---------- */
   function majMesDessins(){
-    var box = $("mesDessins");
+    var box = $("mesDessins"), p = nomDe(profil); $("titreMes").textContent = "🖼️ Les dessins de " + p.nom;
     tous().then(function(l){
       box.innerHTML = "";
       if(!l.length){ box.innerHTML = '<p class="vide">Pas encore de dessin. Va colorier, et ton dessin apparaîtra ici tout seul ! 🖍️</p>'; return; }
@@ -195,7 +235,7 @@
   function ouvrirPeindre(o){
     retourVers = o.retour || "eChoix";
     var garderCouleurs = o.garderCouleurs && dessin;
-    if(!garderCouleurs){ dessin = { id: null, nom: o.nom, source: o.source }; xC.fillStyle = "#fff"; xC.fillRect(0, 0, W, W); choisirOutil("seau"); document.querySelector('[data-motif="uni"]').click(); }
+    if(!garderCouleurs){ dessin = { id: null, nom: o.nom, source: o.source, profil: profil }; xC.fillStyle = "#fff"; xC.fillRect(0, 0, W, W); choisirOutil("seau"); document.querySelector('[data-motif="uni"]').click(); }
     else { dessin.source = o.source; }
     pile = []; majBoutons();
     $("titrePeindre").textContent = "🎨 " + o.nom;
@@ -206,7 +246,7 @@
     traitsDepuisSVG(o.svg).then(function(){ if(garderCouleurs) sauverBientot(); });
   }
   function ouvrirGarde(r, retour){
-    retourVers = retour; dessin = { id: r.id, nom: r.nom, source: r.source, date: r.date };
+    retourVers = retour; dessin = { id: r.id, nom: r.nom, source: r.source, date: r.date, profil: r.profil || profil };
     pile = []; majBoutons();
     $("titrePeindre").textContent = "🎨 " + r.nom; $("modifier").style.display = r.source && r.source.type === "creation" ? "" : "none";
     xC.fillStyle = "#fff"; xC.fillRect(0, 0, W, W); xT.clearRect(0, 0, W, W);
@@ -323,7 +363,7 @@
     dessin.date = Date.now();
     var d = dessin, apercu = composer(true, 300).toDataURL("image/jpeg", .8);
     Promise.all([versBlob(cC), versBlob(cT)]).then(function(b){
-      return garder({ id: d.id, nom: d.nom, date: d.date, source: d.source, couleurs: b[0], traits: b[1], apercu: apercu });
+      return garder({ id: d.id, profil: d.profil || profil, nom: d.nom, date: d.date, source: d.source, couleurs: b[0], traits: b[1], apercu: apercu });
     });
   }
   window.addEventListener("pagehide", sauverMaintenant);
@@ -362,12 +402,12 @@
 
   function nouveauCreer(){
     ed.lien = false; ed.sel = null; ed.pile = [];
-    var b = null; try{ b = JSON.parse(lire("coloriage-brouillon") || "null"); }catch(e){}
+    var b = null; try{ b = JSON.parse(lire("coloriage-brouillon-" + profil) || "null"); }catch(e){}
     ed.objs = Array.isArray(b) ? b : []; ed.objs.forEach(function(o){ o.id = ++ed.n; });
     rendre();
     astuce($("astuceCreer"), ed.objs.length ? "👉 Continue ton dessin !" : "👉 Touche ou glisse une image sur la feuille");
   }
-  function brouillon(){ if(!ed.lien) ecrire("coloriage-brouillon", JSON.stringify(ed.objs.map(function(o){ var c = clone(o); delete c.id; return c; }))); }
+  function brouillon(){ if(!ed.lien) ecrire("coloriage-brouillon-" + profil, JSON.stringify(ed.objs.map(function(o){ var c = clone(o); delete c.id; return c; }))); }
   function rendre(){ gObj.innerHTML = ed.objs.map(function(o){ return objetSVG(o, true); }).join(""); dessinerSel(); }
   function trouver(id){ for(var i = 0; i < ed.objs.length; i++) if(ed.objs[i].id === id) return ed.objs[i]; return null; }
   function majObjet(o){ var g = gObj.querySelector('[data-id="' + o.id + '"]'); if(g) g.outerHTML = objetSVG(o, true); dessinerSel(); }
@@ -518,10 +558,37 @@
     if(!ed.objs.length){ astuce($("astuceCreer"), "👉 Ajoute d'abord des images sur la feuille"); return; }
     var objets = ed.objs.map(function(o){ var c = clone(o); delete c.id; return c; });
     var garder = ed.lien; ed.sel = null; dessinerSel();
-    if(!ed.lien) ecrire("coloriage-brouillon", null);
+    if(!ed.lien) ecrire("coloriage-brouillon-" + profil, null);
     ouvrirPeindre({ nom: garder && dessin ? dessin.nom : "Mon dessin", source: { type: "creation", objets: objets }, svg: svgComplet(objets.map(function(o){ return objetSVG(o); }).join("")), retour: "eAccueil", garderCouleurs: garder });
   };
 
-  majAccueil();
+  /* ---------- copier les dessins d'un enfant sur un autre appareil (un fichier) ---------- */
+  function enTexte(blob){ return new Promise(function(ok){ var f = new FileReader(); f.onload = function(){ ok(f.result); }; f.readAsDataURL(blob); }); }
+  function enBlob(url){ return fetch(url).then(function(r){ return r.blob(); }); }
+  function message(t){ var m = $("msgTransfert"); m.textContent = t; m.style.display = t ? "block" : "none"; }
+  $("exporter").onclick = function(){
+    var p = nomDe(profil);
+    tous().then(function(l){
+      if(!l.length){ message("Il n'y a pas encore de dessin à copier."); return; }
+      return Promise.all(l.map(function(r){ return Promise.all([enTexte(r.couleurs), enTexte(r.traits)]).then(function(t){ return { id: r.id, nom: r.nom, date: r.date, source: r.source, apercu: r.apercu, couleurs: t[0], traits: t[1] }; }); }))
+        .then(function(liste){
+          var b = new Blob([JSON.stringify({ type: "coin-coloriage", version: 1, enfant: p.nom, dessins: liste })], { type: "application/json" });
+          var a = document.createElement("a"), u = URL.createObjectURL(b); a.href = u; a.download = "dessins-" + p.nom.replace(/[^\wÀ-ÿ-]/g, "") + ".json"; document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function(){ URL.revokeObjectURL(u); }, 4000);
+          message("📤 Le fichier « dessins-" + p.nom + ".json » est prêt. Ouvre ce coin coloriage sur l'autre appareil, choisis " + p.nom + ", puis « Récupérer des dessins ».");
+        });
+    });
+  };
+  $("importer").onchange = function(e){
+    var f = e.target.files && e.target.files[0]; if(!f) return; e.target.value = "";
+    f.text().then(function(t){
+      var d = JSON.parse(t); if(!d || d.type !== "coin-coloriage" || !Array.isArray(d.dessins)) throw new Error("format");
+      return Promise.all(d.dessins.map(function(r){ return Promise.all([enBlob(r.couleurs), enBlob(r.traits)]).then(function(b){
+        return garder({ id: r.id, profil: profil, nom: r.nom, date: r.date, source: r.source, apercu: r.apercu, couleurs: b[0], traits: b[1] }); }); }))
+        .then(function(){ message("📥 " + d.dessins.length + " dessin" + (d.dessins.length > 1 ? "s" : "") + " récupéré" + (d.dessins.length > 1 ? "s" : "") + " !"); majMesDessins(); });
+    }).catch(function(){ message("😕 Ce fichier n'est pas un fichier de dessins du coin coloriage."); });
+  };
+
+  majEnfants();
   window.__coloriage = { remplir: function(x, y){ return remplir(x, y); }, xC: xC, ed: ed, ajouter: ajouter, dessin: function(){ return dessin; }, tous: tous };
 })();
