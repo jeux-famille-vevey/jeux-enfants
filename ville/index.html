@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Ma petite ville</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --nuit:#1D2357; --ciel:#3B3F8F; --encre:#FFF8E7; --doux:#C9CCF2; --soleil:#FFD23F; --orange:#FF9F1C; --panneau:#272C6B; --panneau2:#323889; --bord:#161A45;
+  --police:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:linear-gradient(var(--nuit),var(--ciel));color:var(--encre);font-family:var(--police);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+.ecran{display:none;position:fixed;inset:0;flex-direction:column}
+.ecran.actif{display:flex}
+.defile{overflow:auto;flex:1}
+.barre{display:flex;align-items:center;gap:8px;padding:8px 10px;flex:none}
+.barre h1{margin:0;font-size:clamp(1.2rem,4vw,1.9rem);color:var(--soleil);text-shadow:0 3px 0 var(--orange);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rond{border:0;background:var(--panneau);min-width:48px;height:48px;border-radius:24px;font-size:1.35rem;display:grid;place-items:center;flex:none;text-decoration:none;color:var(--encre);padding:0 10px}
+.rond:active{transform:scale(.93)}
+.moi{border:0;background:var(--panneau);border-radius:999px;padding:8px 14px;font-weight:700;font-size:1rem;flex:none}
+.contenu{max-width:1000px;margin:0 auto;width:100%;padding:6px 16px 30px}
+.contenu p{color:var(--doux);font-size:1.1rem;margin:0 0 14px}
+
+/* qui joue ? */
+.enfants{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.enfant{border:0;border-radius:26px;padding:18px 10px;background:linear-gradient(135deg,#FF9FC4,#B9A3F0);color:var(--nuit);display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.enfant:nth-child(4n+2){background:linear-gradient(135deg,#FFD23F,#FF9F1C)}
+.enfant:nth-child(4n+3){background:linear-gradient(135deg,#7BE495,#2EC4B6)}
+.enfant:nth-child(4n+4){background:linear-gradient(135deg,#8EC5FF,#5A61B8)}
+.enfant .e{font-size:2.8rem;line-height:1.1}
+.enfant b{font-size:1.45rem}
+.enfant.dernier{outline:4px solid #fff;outline-offset:3px}
+.ajout{display:flex;gap:8px;margin-top:20px;max-width:420px}
+.ajout input{flex:1;min-width:0;font:inherit;font-size:1.1rem;border-radius:16px;border:3px solid var(--panneau2);background:var(--panneau);color:var(--encre);padding:10px 14px;user-select:text}
+.ajout button{border:0;border-radius:16px;background:var(--soleil);color:var(--nuit);font-weight:700;padding:0 16px}
+
+/* la carte de la ville */
+.lieux{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.lieu{border:0;border-radius:26px;padding:16px;color:var(--nuit);display:flex;flex-direction:column;align-items:flex-start;gap:4px;box-shadow:0 6px 0 rgba(0,0,0,.25);min-height:140px;text-align:left}
+.lieu:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.lieu .e{font-size:3rem;line-height:1}
+.lieu b{font-size:1.4rem}
+.lieu small{font-size:.95rem;opacity:.85}
+.lieu.creer{background:linear-gradient(135deg,#FFFFFF,#E8F0FF)}
+
+/* un lieu */
+#scene{flex:1;overflow-x:auto;overflow-y:hidden;position:relative;scrollbar-width:none;touch-action:none;background:#1D2357}
+#scene::-webkit-scrollbar{display:none}
+#svgLieu{height:100%;display:block;touch-action:none}
+#tiroir{flex:none;height:96px;display:flex;gap:8px;align-items:center;padding:6px 8px;background:rgba(29,35,87,.96);overflow-x:auto;overflow-y:hidden;transition:background .2s}
+#tiroir.cible{background:#E5484D}
+#tiroir.cible::before{content:"🎒 Lâche ici pour ranger";position:absolute;left:50%;transform:translateX(-50%);font-weight:700;font-size:1.2rem;color:#fff;pointer-events:none}
+.carteP{flex:none;border:0;width:78px;height:84px;border-radius:16px;background:var(--panneau2);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:2px;position:relative;touch-action:none;box-shadow:0 3px 0 var(--bord)}
+.carteP svg{width:66px;height:60px;pointer-events:none}
+.carteP span{font-size:.72rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:74px;pointer-events:none}
+.carteP.ici{background:#454CB0;outline:3px solid var(--soleil)}
+.carteP .ou{position:absolute;top:2px;left:4px;font-size:.9rem;pointer-events:none}
+.carteP .modif{position:absolute;top:-2px;right:-2px;width:30px;height:30px;border-radius:50%;border:0;background:var(--soleil);color:var(--nuit);font-size:.85rem;display:grid;place-items:center;padding:0}
+.carteP.nouveau{background:linear-gradient(135deg,#FFD23F,#FF9F1C);color:var(--nuit);justify-content:center;font-size:2rem}
+.carteP.nouveau span{font-size:.75rem}
+
+/* les animations */
+.saute{animation:saute .5s ease-out}
+@keyframes saute{0%{transform:translateY(0)}35%{transform:translateY(-60px)}70%{transform:translateY(0)}85%{transform:translateY(-12px)}100%{transform:translateY(0)}}
+.balance{animation:balance 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0%}
+.balancePerso{animation:balance 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% -90%}
+@keyframes balance{0%,100%{transform:rotate(16deg)}50%{transform:rotate(-16deg)}}
+.yeux{animation:cligne 4.2s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes cligne{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.tremble{animation:tremble .3s linear 3}
+@keyframes tremble{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.saute,.balance,.balancePerso,.yeux,.tremble{animation:none}}
+
+/* les fenêtres par-dessus (créer un personnage, les objets) */
+.fenetre{position:fixed;inset:0;background:rgba(10,12,40,.7);display:none;align-items:center;justify-content:center;z-index:20;padding:10px}
+.fenetre.voir{display:flex}
+.boite{background:var(--panneau);border-radius:26px;width:min(1000px,100%);height:min(680px,100%);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 0 var(--bord)}
+.boite .barre{background:var(--panneau2)}
+.atelier{flex:1;display:grid;grid-template-columns:minmax(180px,38%) 1fr;min-height:0}
+.apercu{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;padding:10px;background:radial-gradient(circle at 50% 60%,#5A61B8,#272C6B 70%);min-height:0}
+.apercu svg{width:100%;flex:1;min-height:0}
+.apercu input{font:inherit;font-size:1.2rem;text-align:center;border-radius:14px;border:3px solid var(--soleil);background:var(--nuit);color:var(--encre);padding:6px 10px;width:100%;max-width:240px;user-select:text}
+.choix{display:flex;flex-direction:column;min-height:0;padding:8px}
+.onglets{display:flex;gap:6px;overflow-x:auto;flex:none;padding-bottom:6px}
+.onglets button{border:0;background:var(--panneau2);border-radius:999px;padding:7px 12px;font-weight:600;font-size:.95rem;white-space:nowrap;flex:none}
+.onglets button.on{background:var(--soleil);color:var(--nuit)}
+.options{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;align-content:start;padding:4px}
+.options button{border:3px solid transparent;background:var(--panneau2);border-radius:16px;padding:4px;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.85rem;font-weight:600}
+.options button svg{width:100%;height:84px;pointer-events:none}
+.options button.on{border-color:var(--soleil);background:#454CB0}
+.options button.pastille{border-radius:50%;aspect-ratio:1;min-height:0}
+.options button.pastille.on{box-shadow:0 0 0 3px var(--soleil)}
+.basBoite{display:flex;gap:8px;padding:8px;flex:none;flex-wrap:wrap}
+.basBoite button{border:0;border-radius:16px;padding:10px 16px;font-weight:700;font-size:1.05rem;background:var(--panneau2)}
+.basBoite .ok{background:linear-gradient(135deg,#7BE495,#2EC4B6);color:var(--nuit);margin-left:auto}
+.basBoite .danger{background:#7A2E3A}
+.objetsGrille{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:8px;align-content:start}
+.objetsGrille button{border:0;background:#FFF8E7;border-radius:16px;padding:4px;display:flex;flex-direction:column;align-items:center;color:var(--nuit);font-size:.78rem;font-weight:600;min-height:100px}
+.objetsGrille svg{width:100%;height:72px;pointer-events:none}
+.bulle{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:#fff;color:var(--nuit);font-weight:700;padding:10px 18px;border-radius:999px;box-shadow:0 4px 0 rgba(0,0,0,.2);z-index:30;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92%;text-align:center}
+@media (max-width:640px){ .atelier{grid-template-columns:1fr;grid-template-rows:38% 1fr} .apercu{flex-direction:row} .apercu input{max-width:150px;font-size:1rem} #tiroir{height:86px} .carteP{width:70px;height:76px} }
+@media (max-height:500px){ .barre{padding:4px 8px} .rond{height:42px;min-width:42px} #tiroir{height:78px} .carteP{height:70px} .carteP svg{height:48px} }
+</style>
+</head>
+<body>
+
+<section class="ecran actif" id="eQui">
+  <div class="barre"><a class="rond" href="../" aria-label="Retour aux jeux">⬅️</a><h1>🏙️ Qui joue ?</h1></div>
+  <div class="defile"><div class="contenu">
+    <p>Touche ton nom. Chaque enfant a sa propre ville et ses personnages.</p>
+    <div class="enfants" id="enfants"></div>
+    <form id="formAjout" class="ajout"><input id="nomAjout" maxlength="14" placeholder="Le prénom" autocomplete="off" aria-label="Le prénom du nouvel enfant"><button type="submit">➕ Ajouter</button></form>
+  </div></div>
+</section>
+
+<section class="ecran" id="eCarte">
+  <div class="barre"><button class="rond" id="versQui" aria-label="Changer d'enfant">⬅️</button><h1>🏙️ Ma petite ville</h1><button class="moi" id="moi"></button></div>
+  <div class="defile"><div class="contenu">
+    <p>Où veux-tu aller ?</p>
+    <div class="lieux" id="lieux"></div>
+  </div></div>
+</section>
+
+<section class="ecran" id="eLieu">
+  <div class="barre"><button class="rond" id="versCarte" aria-label="Retour à la ville">🗺️</button><h1 id="titreLieu"></h1>
+    <button class="rond" id="btnObjets" aria-label="Ajouter des objets">🧺</button><button class="rond" id="btnSon" aria-label="Le son">🔊</button><button class="rond" id="btnReset" aria-label="Remettre comme au début">🔄</button></div>
+  <div id="scene"><svg id="svgLieu" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div id="tiroir"></div>
+</section>
+
+<!-- créer / changer un personnage -->
+<div class="fenetre" id="fCreer"><div class="boite">
+  <div class="barre"><h1 id="titreCreer">🧑‍🎨 Mon personnage</h1></div>
+  <div class="atelier">
+    <div class="apercu"><svg id="apercu" viewBox="-130 -330 260 340"></svg><input id="nomPerso" maxlength="14" placeholder="Son prénom" autocomplete="off" aria-label="Le prénom du personnage"></div>
+    <div class="choix"><div class="onglets" id="ongletsCreer"></div><div class="options" id="optionsCreer"></div></div>
+  </div>
+  <div class="basBoite"><button id="hasard">🎲 Au hasard</button><button class="danger" id="supprPerso">🗑️ Enlever</button><button class="ok" id="finiCreer">✅ C'est fini !</button></div>
+</div></div>
+
+<!-- ajouter des objets -->
+<div class="fenetre" id="fObjets"><div class="boite">
+  <div class="barre"><h1>🧺 Ajouter</h1><button class="rond" id="fermerObjets" aria-label="Fermer">✖️</button></div>
+  <div class="onglets" id="ongletsObjets" style="padding:8px 8px 0"></div>
+  <div class="objetsGrille" id="grilleObjets"></div>
+</div></div>
+
+<div class="bulle" id="bulle"></div>
+<script src="perso.js?v=1"></script>
+<script src="objets.js?v=1"></script>
+<script src="lieux.js?v=1"></script>
+<script src="jeu.js?v=1"></script>
+</body>
+</html>
