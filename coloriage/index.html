@@ -111,10 +111,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 .action:disabled{opacity:.4}
 
 /* les autocollants à glisser */
-.onglets{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;flex:none}
+.onglets{display:flex;flex-wrap:wrap;gap:6px;padding-bottom:2px;flex:none}
 .onglets button{border:0;background:var(--panneau2);border-radius:999px;padding:6px 12px;font-size:1.3rem;flex:none}
 .onglets button.on{background:var(--soleil)}
 .bac{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:auto;min-height:120px}
+.bac .ecrire{grid-column:1/-1;display:flex;gap:6px}
+.bac .ecrire input{flex:1;min-width:0;font:inherit;font-size:1.1rem;border-radius:12px;border:3px solid var(--soleil);background:var(--nuit);color:var(--encre);padding:8px 10px}
+.bac .ecrire button{aspect-ratio:auto;background:var(--soleil);color:var(--nuit);font-weight:700;padding:0 12px;border-radius:12px}
 .bac button{background:#fff;border:0;border-radius:14px;padding:6px;aspect-ratio:1;touch-action:none;box-shadow:0 3px 0 var(--bord);display:grid;place-items:center}
 .bac button svg{width:100%;height:100%;pointer-events:none}
 .bac button:active{transform:scale(.95)}
@@ -262,7 +265,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 </section>
 
 <img id="impression" alt="">
-<script src="dessins.js?v=1"></script>
-<script src="app.js?v=3"></script>
+<script src="dessins.js?v=3"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

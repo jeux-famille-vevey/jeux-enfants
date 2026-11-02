@@ -439,7 +439,7 @@
 
   /* ajouter une image */
   function ajouter(id, x, y){
-    var A = AUTO[id], deco = A.cat === "decors", o = { id: ++ed.n, s: id, t: deco ? 1000 : 260, r: 0, m: false };
+    var A = AUTO[id], deco = A.cat === "decors", o = { id: ++ed.n, s: id, t: deco ? 1000 : /^L\d+$/.test(id) ? 200 : 260, r: 0, m: false };
     if(x === undefined){
       if(deco){ o.x = 500; o.y = 1000 - A.h * (1000 / A.w) / 2; }
       else { o.x = 500 + (Math.random() - .5) * 240; o.y = 470 + (Math.random() - .5) * 240; }
@@ -456,8 +456,30 @@
     b.onclick = function(){ catActive = c[0]; document.querySelectorAll("#onglets button").forEach(function(x){ x.classList.toggle("on", x === b); }); remplirBac(); };
     $("onglets").appendChild(b);
   });
+  /* écrire un mot : chaque lettre arrive sur la feuille, à la suite (on peut ensuite la bouger) */
+  function ecrireMot(mot){
+    var lettres = Array.from(mot.trim()).slice(0, 24); if(!lettres.length) return;
+    // chaque lettre prend sa place : un « i » est étroit, un « M » est large
+    var mesure = document.createElement("canvas").getContext("2d"); mesure.font = "900 180px " + window.POLICE_LETTRES;
+    function largeur(ch){ return ch === " " ? .3 : mesure.measureText(ch).width / 200 + .06; }
+    var total = lettres.reduce(function(a, ch){ return a + largeur(ch); }, 0), t = Math.min(240, 920 / total), x = 500 - total * t / 2, y = 500, rien = true;
+    memoriserEd();
+    lettres.forEach(function(ch){
+      var w = largeur(ch) * t, id = window.LETTRES[ch] || window.LETTRES[ch.toUpperCase()];
+      if(id){ ed.objs.push({ id: ++ed.n, s: id, t: t, r: 0, m: false, x: x + w / 2, y: y }); rien = false; }
+      x += w;
+    });
+    if(rien){ ed.pile.pop(); return; }
+    ed.sel = null; rendre(); brouillon(); cacherAstuce($("astuceCreer")); bip(700, 1100, .12);
+  }
   function remplirBac(){
     var bac = $("bac"); bac.innerHTML = "";
+    if(catActive === "lettres" || catActive === "minuscules" || catActive === "chiffres"){
+      var f = document.createElement("form"); f.className = "ecrire";
+      f.innerHTML = '<input maxlength="24" placeholder="Écris un mot…" autocomplete="off" autocapitalize="off" aria-label="Écris un mot"><button type="submit">✍️ Écrire</button>';
+      f.onsubmit = function(e){ e.preventDefault(); var v = f.querySelector("input").value; if(v.trim()){ ecrireMot(v); f.querySelector("input").value = ""; } };
+      bac.appendChild(f);
+    }
     Object.keys(AUTO).forEach(function(id){
       var A = AUTO[id]; if(A.cat !== catActive) return;
       var b = document.createElement("button"); b.title = A.nom; b.setAttribute("aria-label", A.nom);

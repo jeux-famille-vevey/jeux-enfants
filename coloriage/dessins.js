@@ -275,9 +275,19 @@
   add("cloture", "La barrière", "decors",
     (function(){ var s = R(0, 44, 400, 14, 3) + R(0, 84, 400, 14, 3); for(var x = 10; x < 400; x += 48) s += P("M" + x + " 120 L" + x + " 26 L" + (x + 16) + " 10 L" + (x + 32) + " 26 L" + (x + 32) + " 120 Z"); return s; })(), 400, 120);
 
+  /* ---------------- Les lettres et les chiffres (creux, à colorier) ---------------- */
+  var POLICE = "Arial Black, Arial, Helvetica, Liberation Sans, DejaVu Sans, sans-serif"; window.POLICE_LETTRES = POLICE;
+  function lettre(ch, y, taille){ var t = ch.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    return '<text x="100" y="' + y + '" text-anchor="middle" font-size="' + taille + '" font-family="' + POLICE + '" font-weight="900">' + t + "</text>"; }
+  window.LETTRES = {};
+  [["lettres", "ABCDEFGHIJKLMNOPQRSTUVWXYZÉÈÊËÀÂÇÎÏÔÛÜ", 168, 180], ["minuscules", "abcdefghijklmnopqrstuvwxyzéèêëàâçîïôùûü", 146, 176], ["chiffres", "0123456789!?+-=&♥", 168, 180]].forEach(function(g){
+    Array.from(g[1]).forEach(function(ch){ var id = "L" + ch.codePointAt(0); window.LETTRES[ch] = id; add(id, "La lettre " + ch, g[0], lettre(ch, g[2], g[3])); });
+  });
+
   window.AUTOCOLLANTS = S;
   window.CATEGORIES = [["animaux", "🐱", "Animaux"], ["nature", "🌸", "Nature"], ["maison", "🏠", "Maison et véhicules"], ["gens", "🧒", "Personnages"],
-    ["fete", "🎂", "La fête"], ["espace", "🚀", "L'espace"], ["formes", "⭐", "Formes"], ["decors", "🌊", "Décors"]];
+    ["fete", "🎂", "La fête"], ["espace", "🚀", "L'espace"], ["formes", "⭐", "Formes"], ["decors", "🌊", "Décors"],
+    ["lettres", "🔤", "Les lettres ABC"], ["minuscules", "🔡", "Les lettres abc"], ["chiffres", "🔢", "Les chiffres"]];
 
   /* ---------------- Les mandalas (pour les plus grands) ---------------- */
   function mandala(type){
