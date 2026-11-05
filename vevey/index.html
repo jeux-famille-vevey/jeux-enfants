@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Balade à Vevey 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --sun:#FFD23F; --tang:#FF9F1C; --ink:#FFF8E7; --soft:#C9CCF2; --night:#1D2357; --panel:rgba(29,35,87,.86);
+  --font:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#A8DBFF;color:var(--ink);font-family:var(--font);user-select:none;-webkit-user-select:none}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+[hidden]{display:none !important}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+.rond{background:var(--panel);border-radius:999px;padding:9px 15px;font-weight:700;text-decoration:none;color:var(--ink);font-size:1.05rem}
+
+#menu{position:fixed;inset:0;display:flex;pointer-events:none}
+#menu .panneau{pointer-events:auto;width:min(540px,100%);height:100%;overflow:auto;padding:16px 20px 24px;background:linear-gradient(90deg,rgba(29,35,87,.96),rgba(29,35,87,.88) 82%,rgba(29,35,87,0))}
+#menu h1{margin:44px 0 2px;font-size:clamp(2rem,5.5vw,2.9rem);line-height:1.02;color:var(--sun);text-shadow:0 4px 0 var(--tang)}
+#menu .sous{margin:6px 0 10px;color:var(--soft);font-size:1.05rem}
+#menu h2{font-size:1.05rem;margin:16px 0 8px;color:var(--soft);font-weight:600}
+.puces{display:flex;flex-wrap:wrap;gap:8px}
+.puces button{background:#2E3580;border-radius:16px;padding:9px 13px;font-weight:600;font-size:1.02rem;border:3px solid transparent}
+.puces button.on{border-color:var(--sun);background:#3A429A}
+.gros{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border-radius:20px;padding:12px 16px;margin:6px 0;font-weight:700;font-size:1.25rem;color:var(--night);background:linear-gradient(100deg,#FFD23F,#FF9F1C);box-shadow:0 5px 0 #C9771A}
+.gros .e{font-size:2.2rem}
+.gros small{display:block;font-weight:500;font-size:.9rem;opacity:.85}
+.gros.bleu{background:linear-gradient(100deg,#7FD3FF,#4CC9F0);box-shadow:0 5px 0 #2B8FB5}
+.gros:active{transform:translateY(3px)}
+.aide{margin-top:14px;color:var(--soft);font-size:.95rem;line-height:1.5}
+.aide b{color:var(--ink)}
+.credit{margin-top:14px;font-size:.8rem;color:var(--soft)}
+.credit a{color:#7FD3FF}
+#accueil{position:fixed;top:12px;left:14px;pointer-events:auto}
+#sonBtn{position:fixed;top:12px;right:14px;pointer-events:auto;z-index:5}
+#lien{background:none;color:#7FD3FF;text-decoration:underline;font-size:.85rem;padding:0;margin-top:6px}
+
+#chargement,#erreur{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(29,35,87,.92);padding:20px;text-align:center;z-index:20}
+#chargeTexte,#erreurTexte{font-size:1.3rem;font-weight:600;max-width:600px}
+.jauge{width:min(420px,80vw);height:16px;border-radius:999px;background:#2E3580;overflow:hidden}
+#barre{height:100%;width:5%;background:linear-gradient(90deg,#4CC9F0,#FFD23F);transition:width .4s}
+.attends{color:var(--soft)}
+
+#hud{position:fixed;inset:0;pointer-events:none}
+#hautGauche{position:absolute;top:12px;left:12px;display:flex;gap:8px;pointer-events:auto;flex-wrap:wrap;max-width:70vw}
+#rue{position:absolute;top:66px;left:12px;background:var(--panel);border-radius:14px;padding:6px 12px;font-weight:600;max-width:60vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#carte{position:absolute;right:12px;bottom:12px;border-radius:14px;border:3px solid rgba(255,255,255,.85);box-shadow:0 4px 12px rgba(0,0,0,.3);max-width:34vw;height:auto}
+#message{position:absolute;bottom:160px;left:50%;transform:translateX(-50%);max-width:90vw;text-align:center;font-size:1.25rem;font-weight:700;background:var(--panel);padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .3s}
+#message.on{opacity:1}
+#endroits{position:fixed;top:70px;left:12px;bottom:12px;width:min(460px,92vw);background:rgba(29,35,87,.95);border-radius:20px;padding:12px 14px;overflow:auto;pointer-events:auto;z-index:8}
+#endroits h2{margin:0 0 6px;color:var(--sun);display:flex;justify-content:space-between;align-items:center}
+#endroits h3{margin:12px 0 6px;font-size:1rem;color:var(--soft)}
+
+#tactile{position:fixed;inset:0;pointer-events:none}
+#joy{position:absolute;left:28px;bottom:28px;width:130px;height:130px;border-radius:50%;background:rgba(29,35,87,.4);border:3px solid rgba(255,255,255,.5);pointer-events:auto;touch-action:none;display:grid;place-items:center}
+#joy i{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.85);display:block}
+.tb{position:absolute;width:76px;height:76px;border-radius:50%;background:rgba(29,35,87,.6);border:3px solid rgba(255,255,255,.6);font-size:2rem;pointer-events:auto;touch-action:none}
+#tSaut{right:28px;bottom:150px}
+#tCourse{right:120px;bottom:150px}
+#tCourse.on{background:var(--sun)}
+@media (max-height:520px){ #menu h1{margin-top:10px} #carte{max-width:26vw} }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="menu">
+  <div class="panneau">
+    <h1>🏙️ Balade à Vevey</h1>
+    <p class="sous">Promène-toi dans la vraie ville de Vevey : les rues, la gare, le lac, les écoles… Il y a des gens qui se promènent, le train qui passe et le bateau sur le lac.</p>
+    <h2>Qui se promène ?</h2>
+    <div class="puces" id="profils"></div>
+    <button class="gros" id="jouer"><span class="e">🚶</span><span>Se promener<small>La carte de Vevey se télécharge la première fois</small></span></button>
+    <button class="gros bleu" id="monPerso"><span class="e">🧑‍🎨</span><span>Mon personnage<small>Change les habits, les cheveux, les accessoires…</small></span></button>
+    <p class="aide" id="aideMenu"></p>
+    <p class="credit">Carte : © les contributeurs d'<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (licence ODbL).<br><button id="rafraichir">🔄 Re-télécharger la carte (si la ville a changé)</button></p>
+  </div>
+  <a class="rond" id="accueil" href="../">🏠 Tous les jeux</a>
+</div>
+<button class="rond" id="sonBtn" aria-label="Le son">🔊</button>
+
+<div id="chargement" hidden><div id="chargeTexte">🌍 Je télécharge la carte de Vevey…</div><div class="jauge"><div id="barre"></div></div><div class="attends">La première fois, ça peut prendre une minute. Ensuite, c'est tout de suite.</div></div>
+<div id="erreur" hidden><div id="erreurTexte"></div><div class="puces"><button id="reessayer" class="rond">🔁 Réessayer</button><button id="retourMenu" class="rond">⬅️ Retour</button></div></div>
+
+<div id="hud" hidden>
+  <div id="hautGauche"><button class="rond" id="versMenu">⬅️ Menu</button><button class="rond" id="btnEndroits">🗺️ Aller à…</button></div>
+  <div id="rue">📍 Vevey</div>
+  <canvas id="carte" width="220" height="150"></canvas>
+  <div id="message"></div>
+  <div id="endroits" hidden><h2>🗺️ Où veux-tu aller ? <button class="rond" id="fermerEndroits" aria-label="Fermer">✖️</button></h2><div id="listeEndroits"></div></div>
+</div>
+<div id="tactile" hidden><div id="joy"><i></i></div><button class="tb" id="tSaut" aria-label="Sauter">🦘</button><button class="tb" id="tCourse" aria-label="Courir">🏃</button></div>
+
+<script type="module" src="jeu.js?v=1"></script>
+</body>
+</html>
