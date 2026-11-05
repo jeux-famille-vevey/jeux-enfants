@@ -186,10 +186,10 @@ function arbres(c){
   const tete = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(2.4, 0), new THREE.MeshLambertMaterial({ color: "#4E9A45" }), N);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), v = new THREE.Vector3(), coul = new THREE.Color();
   for(let i = 0; i < N; i++){ const k = .8 + hash(i) * .6, p = pos[i];
-    m.compose(v.set(p[0], 1.5 * k, p[1]), q, s.set(k, k, k)); tronc.setMatrixAt(i, m);
-    m.compose(v.set(p[0], 4.2 * k, p[1]), q.setFromAxisAngle(v.set(0, 1, 0).normalize(), hash(i + 9) * 6), s.set(k, k * 1.15, k)); tete.setMatrixAt(i, m); q.identity();
+    const hs = hauteurSol(p[0], p[1]); m.compose(v.set(p[0], hs + 1.5 * k, p[1]), q, s.set(k, k, k)); tronc.setMatrixAt(i, m);
+    m.compose(v.set(p[0], hs + 4.2 * k, p[1]), q.setFromAxisAngle(v.set(0, 1, 0).normalize(), hash(i + 9) * 6), s.set(k, k * 1.15, k)); tete.setMatrixAt(i, m); q.identity();
     tete.setColorAt(i, coul.set(["#4E9A45", "#5BAA4E", "#3F8A3C", "#6BB55A"][Math.floor(hash(i + 3) * 4)])); }
-  monde.add(tronc); monde.add(tete); osm.push(tronc, tete);
+  monde.add(tronc); monde.add(tete); if(!suisse) osm.push(tronc, tete);
 }
 /* les panneaux qui flottent au-dessus des endroits connus */
 const EMOJI = { ecole: "🏫", garderie: "🧸", gare: "🚉", musee: "🏛️", oeuvre: "🎨", place: "⛲", jeux: "🛝", culte: "⛪", biblio: "📚", mairie: "🏛️", spectacle: "🎭", fontaine: "⛲", vue: "👀", hopital: "🏥", poste: "📮", pompiers: "🚒", police: "👮" };
@@ -486,7 +486,7 @@ async function chargerVraieVille(){
   try{
     suisse = await chargerSuisse(monde, rendu, camera, (t, p) => { $("chargeTexte").textContent = t; $("barre").style.width = Math.round(p * 100) + "%"; });
     hauteurSol = suisse.hauteur; niveauLac = suisse.lac;
-    osm.forEach(o => o.visible = false);
+    osm.forEach(o => o.visible = false); arbres(carte);   // les arbres, posés sur le vrai relief
     const lac = monde.userData.lac; if(lac) lac.position.y = niveauLac - .25;
     const f = monde.getObjectByName("fourchette"); if(f) f.position.y = niveauLac - .3;
     // au nord de la zone : un sol vert à la bonne hauteur, pour ne pas voir le vide
@@ -499,18 +499,11 @@ async function chargerVraieVille(){
     setTimeout(() => message("ℹ️ Les photos et les bâtiments 3D de swisstopo ne se sont pas chargés : voici la ville simple.", 6), 1500);
   }
 }
-/* les bâtiments 3D sont-ils bien posés sur le sol ? (on corrige la hauteur une fois, d'après les premiers bâtiments) */
-let calibre = false, tCal = 0;
-function calibrer(){
-  if(calibre || !suisse || (tCal += 1) % 30) return;
-  const ecarts = [], b = new THREE.Box3();
-  suisse.tuiles[0].group.traverse(o => { if(!o.isMesh || ecarts.length > 200) return; b.setFromObject(o); if(b.isEmpty()) return;
-    const cx = (b.min.x + b.max.x) / 2, cz = (b.min.z + b.max.z) / 2, h = Math.min(hauteurSol(b.min.x, b.min.z), hauteurSol(b.max.x, b.max.z), hauteurSol(b.min.x, b.max.z), hauteurSol(b.max.x, b.min.z), hauteurSol(cx, cz));
-    ecarts.push(b.min.y - h); });
-  if(ecarts.length < 8) return;
-  ecarts.sort((a, c) => a - c); const med = ecarts[Math.floor(ecarts.length / 2)];
-  if(Math.abs(med) > 1.5) suisse.tuiles.forEach(t => { t.group.matrix.elements[13] -= med; t.group.matrixWorldNeedsUpdate = true; });
-  calibre = true; window.__calibrage = med;
+/* pour comprendre ce qui se passe (adresse avec ?debug) */
+function debogue(){
+  if((debogue.t = (debogue.t || 0) + 1) % 20) return;
+  const d = suisse.diag(), j = joueur ? joueur.position : { x: 0, y: 0, z: 0 };
+  $("rue").textContent = "H0 " + d.H0.toFixed(1) + " · correction " + d.correction.toFixed(1) + " (" + d.n + " bât.) · moi y " + j.y.toFixed(1) + " sol " + hauteurSol(j.x, j.z).toFixed(1);
 }
 
 /* ================= la boucle ================= */
@@ -549,7 +542,7 @@ function boucle(maintenant){
     for(const s of panneauxListe){ const d = Math.hypot(s.position.x - joueur.position.x, s.position.z - joueur.position.z); s.visible = d < 260; if(suisse) s.position.y = s.userData.h + hauteurSol(s.position.x, s.position.z) + 6; }
     if((tRue -= dt) <= 0){ tRue = .5; const r = rueIci(); $("rue").textContent = r ? "📍 " + r : "📍 Vevey"; dessinerMinicarte(); }
   }
-  if(suisse && etat === "jeu"){ suisse.maj(); calibrer(); }
+  if(suisse && etat === "jeu"){ suisse.maj(); if(PARAMS.has("debug")) debogue(); }
   rendu.render(scene, camera);
   requestAnimationFrame(boucle);
 }

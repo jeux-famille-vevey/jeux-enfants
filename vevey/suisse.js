@@ -1,5 +1,5 @@
 /* Le vrai Vevey en 3D avec les données officielles suisses (© swisstopo, gratuites) :
-   - les bâtiments en 3D avec leurs vrais toits (swissBUILDINGS3D) et les arbres (végétation 3D),
+   - les bâtiments en 3D avec leurs vrais toits (swissBUILDINGS3D),
    - la photo aérienne (SWISSIMAGE) posée sur le vrai relief (les altitudes du modèle de terrain).
    Si quelque chose ne marche pas (pas d'Internet…), le jeu garde la ville simple d'OpenStreetMap. */
 import * as THREE from "three";
@@ -31,7 +31,7 @@ function versLatLon(x, z){ const KX = Math.cos(CENTRE.lat * Math.PI / 180) * 111
 function base(){ return new Promise((ok) => { try{ const r = indexedDB.open("vevey-3d", 1); r.onupgradeneeded = () => r.result.createObjectStore("cache"); r.onsuccess = () => ok(r.result); r.onerror = () => ok(null); }catch(e){ ok(null); } }); }
 async function lire(k){ const b = await base(); if(!b) return null; return new Promise((ok) => { try{ const r = b.transaction("cache").objectStore("cache").get(k); r.onsuccess = () => ok(r.result || null); r.onerror = () => ok(null); }catch(e){ ok(null); } }); }
 async function ecrire(k, v){ const b = await base(); if(!b) return; try{ b.transaction("cache", "readwrite").objectStore("cache").put(v, k); }catch(e){} }
-export async function oublierSuisse(){ const b = await base(); if(b) try{ const s = b.transaction("cache", "readwrite").objectStore("cache"); s.delete(CLE + "-relief"); s.delete(CLE + "-photo"); }catch(e){} }
+export async function oublierSuisse(){ const b = await base(); if(b) try{ const s = b.transaction("cache", "readwrite").objectStore("cache"); s.delete(CLE + "-relief"); s.delete(CLE + "-photo17"); s.delete(CLE + "-photo18"); s.delete(CLE + "-photo"); }catch(e){} }
 
 /* ---------- le relief : une grille d'altitudes (le service « profil » de geo.admin.ch, une ligne à la fois) ---------- */
 const COLS = 97, LIGNES = 45;
@@ -62,10 +62,10 @@ async function relief(progres){
 }
 
 /* ---------- la photo aérienne : les tuiles SWISSIMAGE collées dans une grande image ---------- */
-const ZOOM = 17;
+let ZOOM = 17;   // 18 (plus net) si la carte graphique accepte les grandes images
 function tuile(lat, lon, z){ const n = 2 ** z, x = (lon + 180) / 360 * n, s = Math.sin(lat * Math.PI / 180), y = (.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n; return [x, y]; }
 async function photo(progres){
-  const c = await lire(CLE + "-photo"); if(c && c.blob) return c;
+  const c = await lire(CLE + "-photo" + ZOOM); if(c && c.blob) return c;
   const [tx0, ty0] = tuile(ZONE.n, ZONE.w, ZOOM), [tx1, ty1] = tuile(ZONE.s, ZONE.e, ZOOM);
   const ax = Math.floor(tx0), ay = Math.floor(ty0), bx = Math.floor(tx1), by = Math.floor(ty1), nx = bx - ax + 1, ny = by - ay + 1;
   const cv = document.createElement("canvas"); cv.width = nx * 256; cv.height = ny * 256; const g = cv.getContext("2d"); g.fillStyle = "#8FAF7A"; g.fillRect(0, 0, cv.width, cv.height);
@@ -77,11 +77,12 @@ async function photo(progres){
   for(let i = 0; i < liste.length; i += 8) await Promise.all(liste.slice(i, i + 8).map(p => une(...p)));
   if(rate > total / 2) throw new Error("photos");
   const blob = await new Promise(r => cv.toBlob(r, "image/jpeg", .88));
-  const res = { blob, ax, ay, nx, ny }; ecrire(CLE + "-photo", res); return res;
+  const res = { blob, ax, ay, nx, ny }; ecrire(CLE + "-photo" + ZOOM, res); return res;
 }
 
 /* ---------- tout assembler ---------- */
 export async function chargerSuisse(scene, rendu, camera, progres){
+  ZOOM = rendu.capabilities.maxTextureSize >= 8192 && !matchMedia("(pointer: coarse)").matches ? 18 : 17;
   const R = await relief(progres);
   const P = await photo(progres);
   // l'altitude au centre (la gare) : y = 0 là-bas
@@ -143,10 +144,38 @@ export async function chargerSuisse(scene, rendu, camera, progres){
     scene.add(t.group);
     return t;
   };
-  const batiments = creer(URL_BATIMENTS, "batiments"), arbres = creer(URL_ARBRES, "arbres");
+  const batiments = creer(URL_BATIMENTS, "batiments");
+  /* poser les bâtiments sur le sol : pour chaque bâtiment chargé, on regarde son point le plus bas par rapport au terrain
+     (un bâtiment touche toujours le sol quelque part) ; la valeur du milieu de tous ces écarts = la correction à faire */
+  const ecarts = []; let correction = 0;
+  const base = batiments.group.matrix.elements[13];
+  batiments.addEventListener("load-model", (ev) => {
+    ev.scene.updateWorldMatrix(true, true);
+    // si le modèle n'est pas encore accroché à la ville, on ajoute nous-mêmes la position de la ville
+    batiments.group.updateMatrixWorld(true);
+    const parent = ev.scene.parent ? new THREE.Matrix4() : batiments.group.matrixWorld.clone(), M = new THREE.Matrix4();
+    const v = new THREE.Vector3();
+    ev.scene.traverse((o) => {
+      if(!o.isMesh) return; const p = o.geometry.attributes.position; if(!p) return;
+      M.multiplyMatrices(parent, o.matrixWorld);
+      // les sommets regroupés par petits carrés de 15 m : dans chaque carré, le point le plus bas par rapport au sol
+      const carres = new Map();
+      for(let k = 0; k < p.count; k += 1){
+        v.fromBufferAttribute(p, k).applyMatrix4(M);
+        const d = v.y - hauteur(v.x, v.z), cle = Math.floor(v.x / 15) + "," + Math.floor(v.z / 15);
+        const ancien = carres.get(cle); if(ancien === undefined || d < ancien) carres.set(cle, d);
+      }
+      for(const d of carres.values()) ecarts.push(d + correction);
+    });
+    if(ecarts.length >= 6){
+      const tri = ecarts.slice().sort((a, b) => a - b), med = tri[Math.floor(tri.length / 2)];
+      if(Math.abs(med - correction) > .3){ correction = med; batiments.group.matrix.elements[13] = base - correction; batiments.group.matrixWorldNeedsUpdate = true; }
+    }
+  });
   return {
-    hauteur, lac, sol, tuiles: [batiments, arbres],
-    maj(){ camera.updateMatrixWorld(); for(const t of [batiments, arbres]){ t.setResolutionFromRenderer(camera, rendu); t.update(); } },
+    hauteur, lac, sol, tuiles: [batiments],
+    diag(){ return { H0, correction, n: ecarts.length }; },
+    maj(){ camera.updateMatrixWorld(); batiments.setResolutionFromRenderer(camera, rendu); batiments.update(); },
     nbModeles(){ let n = 0; batiments.group.traverse(o => { if(o.isMesh) n++; }); return n; }
   };
 }
