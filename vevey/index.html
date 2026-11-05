@@ -48,6 +48,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 #hautGauche{position:absolute;top:12px;left:12px;display:flex;gap:8px;pointer-events:auto;flex-wrap:wrap;max-width:70vw}
 #rue{position:absolute;top:66px;left:12px;background:var(--panel);border-radius:14px;padding:6px 12px;font-weight:600;max-width:60vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #carte{position:absolute;right:12px;bottom:12px;border-radius:14px;border:3px solid rgba(255,255,255,.85);box-shadow:0 4px 12px rgba(0,0,0,.3);max-width:34vw;height:auto}
+#credit3d{position:absolute;left:8px;bottom:4px;font-size:.7rem;color:#fff;text-shadow:0 1px 2px #000}
 #message{position:absolute;bottom:160px;left:50%;transform:translateX(-50%);max-width:90vw;text-align:center;font-size:1.25rem;font-weight:700;background:var(--panel);padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .3s}
 #message.on{opacity:1}
 #endroits{position:fixed;top:70px;left:12px;bottom:12px;width:min(460px,92vw);background:rgba(29,35,87,.95);border-radius:20px;padding:12px 14px;overflow:auto;pointer-events:auto;z-index:8}
@@ -76,7 +77,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
     <button class="gros" id="jouer"><span class="e">🚶</span><span>Se promener<small>La carte de Vevey se télécharge la première fois</small></span></button>
     <button class="gros bleu" id="monPerso"><span class="e">🧑‍🎨</span><span>Mon personnage<small>Change les habits, les cheveux, les accessoires…</small></span></button>
     <p class="aide" id="aideMenu"></p>
-    <p class="credit">Carte : © les contributeurs d'<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (licence ODbL).<br><button id="rafraichir">🔄 Re-télécharger la carte (si la ville a changé)</button></p>
+    <p class="credit">Carte : © les contributeurs d'<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> (licence ODbL). Bâtiments 3D, arbres, photos aériennes et relief : © <a href="https://www.swisstopo.admin.ch" target="_blank" rel="noopener">swisstopo</a>.<br><button id="rafraichir">🔄 Re-télécharger la carte (si la ville a changé)</button></p>
   </div>
   <a class="rond" id="accueil" href="../">🏠 Tous les jeux</a>
 </div>
@@ -89,11 +90,13 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
   <div id="hautGauche"><button class="rond" id="versMenu">⬅️ Menu</button><button class="rond" id="btnEndroits">🗺️ Aller à…</button></div>
   <div id="rue">📍 Vevey</div>
   <canvas id="carte" width="220" height="150"></canvas>
+  <div id="credit3d" hidden>© swisstopo · © OpenStreetMap</div>
   <div id="message"></div>
   <div id="endroits" hidden><h2>🗺️ Où veux-tu aller ? <button class="rond" id="fermerEndroits" aria-label="Fermer">✖️</button></h2><div id="listeEndroits"></div></div>
 </div>
 <div id="tactile" hidden><div id="joy"><i></i></div><button class="tb" id="tSaut" aria-label="Sauter">🦘</button><button class="tb" id="tCourse" aria-label="Courir">🏃</button></div>
 
-<script type="module" src="jeu.js?v=1"></script>
+<script type="importmap">{ "imports": { "three": "../course3d/lib/three.module.min.js", "three/addons/": "./lib/three-addons/" } }</script>
+<script type="module" src="jeu.js?v=3"></script>
 </body>
 </html>

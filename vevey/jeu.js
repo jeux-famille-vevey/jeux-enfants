@@ -3,6 +3,7 @@ import * as THREE from "../course3d/lib/three.module.min.js";
 import { mergeGeometries } from "../course3d/lib/BufferGeometryUtils.js";
 import { profils, avatarDe, creerAvatar, animerAvatar, auHasard } from "../commun/avatar.js";
 import { chargerDonnees, interpreter, oublierCarte, limites } from "./carte.js";
+import { chargerSuisse, oublierSuisse } from "./suisse.js";
 
 const $ = (id) => document.getElementById(id);
 const lire = (k, d) => { try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } };
@@ -64,6 +65,8 @@ function montagnes(){
 
 /* ================= construire Vevey ================= */
 let carte = null, monde = new THREE.Group(); scene.add(monde);
+let suisse = null, hauteurSol = () => 0, niveauLac = -.5;   // avec les données suisses : le vrai relief
+const osm = [];   // les morceaux « simples » à cacher quand la vraie ville est là
 const GRILLE = 30, grilleBat = new Map();     // pour savoir vite quels bâtiments sont près de nous
 function cleG(x, z){ return Math.floor(x / GRILLE) + "," + Math.floor(z / GRILLE); }
 function dansPoly(x, z, pts){ let d = false; for(let i = 0, j = pts.length - 1; i < pts.length; j = i++){ const a = pts[i], b = pts[j]; if(((a[1] > z) !== (b[1] > z)) && (x < (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1] + 1e-9) + a[0])) d = !d; } return d; }
@@ -107,10 +110,10 @@ const COULEURS_ROUTES = { motorway: "#5E636E", trunk: "#5E636E", primary: "#6469
   pedestrian: "#DCCFB6", footway: "#E6D9BE", path: "#D9C9A3", cycleway: "#C98E8E", steps: "#C9BFAE", track: "#C2AF88", bridleway: "#C2AF88" };
 
 function construire(c){
-  monde.clear(); grilleBat.clear();
+  monde.clear(); grilleBat.clear(); osm.length = 0;
   const L = limites(), cx = (L.x0 + L.x1) / 2, cz = (L.z0 + L.z1) / 2, W = L.x1 - L.x0 + 4000, H = L.z1 - L.z0 + 4000;
   // le lac partout, puis la terre par-dessus
-  const lac = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000), new THREE.MeshLambertMaterial({ color: "#3E9BD6" })); lac.rotation.x = -Math.PI / 2; lac.position.set(cx, -.5, cz + 2000); monde.add(lac);
+  const lac = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000), new THREE.MeshLambertMaterial({ color: "#3E9BD6" })); lac.rotation.x = -Math.PI / 2; lac.position.set(cx, -.5, cz + 2000); monde.add(lac); monde.userData.lac = lac;
   const pos = [], col = [];
   if(c.terre) surfacePlate(c.terre.poly, 0, "#D6D0C2", pos, col);
   else { const p = [[L.x0 - 300, L.z0 - 300], [L.x1 + 300, L.z0 - 300], [L.x1 + 300, L.z1 + 300], [L.x0 - 300, L.z1 + 300]]; surfacePlate(p, 0, "#D6D0C2", pos, col); }
@@ -119,17 +122,17 @@ function construire(c){
   for(const v of c.verts) surfacePlate(v.pts, .03, COULEURS_VERTS[v.type] || "#9CD07F", pos, col);
   for(const e of c.eaux) surfacePlate(e, .05, "#4FA8DD", pos, col);
   for(const r of c.rivieres) ruban(r.pts, r.l, .045, "#4FA8DD", pos, col);
-  monde.add(meshCouleurs(pos, col));
+  const solOSM = meshCouleurs(pos, col); monde.add(solOSM); osm.push(solOSM);
   // les rues (les grandes d'abord, les chemins par-dessus)
   const rp = [], rc = [];
   const ordre = c.routes.slice().sort((a, b) => b.l - a.l);
   for(const r of ordre) if(!r.tunnel) ruban(r.pts, r.l, r.l >= 4 ? .07 : .09, COULEURS_ROUTES[r.type] || "#737884", rp, rc);
-  monde.add(meshCouleurs(rp, rc));
+  const routesOSM = meshCouleurs(rp, rc); monde.add(routesOSM); osm.push(routesOSM);
   // le chemin de fer
   const fp = [], fc = [];
   for(const r of c.rails) if(!r.tunnel){ ruban(r.pts, 3.6, .1, "#8E8170", fp, fc); }
   for(const r of c.rails) if(!r.tunnel){ [-.75, .75].forEach(d => ruban(decaler(r.pts, d), .16, .16, "#D4D8E0", fp, fc)); }
-  monde.add(meshCouleurs(fp, fc));
+  const railsOSM = meshCouleurs(fp, fc); monde.add(railsOSM); osm.push(railsOSM);
   // les bâtiments : les murs (avec des fenêtres) et les toits
   const murs = [], toits = [];
   for(const b of c.batiments){
@@ -155,7 +158,7 @@ function construire(c){
     for(let gx = Math.floor(boite[0] / GRILLE); gx <= Math.floor(boite[2] / GRILLE); gx++) for(let gz = Math.floor(boite[1] / GRILLE); gz <= Math.floor(boite[3] / GRILLE); gz++){
       const k = gx + "," + gz; if(!grilleBat.has(k)) grilleBat.set(k, []); grilleBat.get(k).push(rec); }
   }
-  const lot = (liste, mat) => { for(let i = 0; i < liste.length; i += 1500){ const g = mergeGeometries(liste.slice(i, i + 1500)); if(!g) continue; g.computeVertexNormals(); monde.add(new THREE.Mesh(g, mat)); } };
+  const lot = (liste, mat) => { for(let i = 0; i < liste.length; i += 1500){ const g = mergeGeometries(liste.slice(i, i + 1500)); if(!g) continue; g.computeVertexNormals(); const m = new THREE.Mesh(g, mat); monde.add(m); osm.push(m); } };
   lot(murs, new THREE.MeshLambertMaterial({ vertexColors: true, map: texFenetres() }));
   lot(toits, new THREE.MeshLambertMaterial({ vertexColors: true }));
   murs.forEach(g => g.dispose()); toits.forEach(g => g.dispose());
@@ -186,7 +189,7 @@ function arbres(c){
     m.compose(v.set(p[0], 1.5 * k, p[1]), q, s.set(k, k, k)); tronc.setMatrixAt(i, m);
     m.compose(v.set(p[0], 4.2 * k, p[1]), q.setFromAxisAngle(v.set(0, 1, 0).normalize(), hash(i + 9) * 6), s.set(k, k * 1.15, k)); tete.setMatrixAt(i, m); q.identity();
     tete.setColorAt(i, coul.set(["#4E9A45", "#5BAA4E", "#3F8A3C", "#6BB55A"][Math.floor(hash(i + 3) * 4)])); }
-  monde.add(tronc); monde.add(tete);
+  monde.add(tronc); monde.add(tete); osm.push(tronc, tete);
 }
 /* les panneaux qui flottent au-dessus des endroits connus */
 const EMOJI = { ecole: "🏫", garderie: "🧸", gare: "🚉", musee: "🏛️", oeuvre: "🎨", place: "⛲", jeux: "🛝", culte: "⛪", biblio: "📚", mairie: "🏛️", spectacle: "🎭", fontaine: "⛲", vue: "👀", hopital: "🏥", poste: "📮", pompiers: "🚒", police: "👮" };
@@ -204,7 +207,7 @@ function panneaux(c){
   for(const l of c.lieux){
     if(l.genre === "fontaine" || (l.genre === "oeuvre" && !l.nom)) continue;
     const s = etiquette((EMOJI[l.genre] || "📍") + " " + (l.nom || (l.genre === "gare" ? "La gare" : "Place de jeux")));
-    s.position.set(l.x, l.genre === "gare" ? 22 : 16, l.z); s.visible = false; monde.add(s); panneauxListe.push(s);
+    s.position.set(l.x, l.genre === "gare" ? 22 : 16, l.z); s.userData.h = s.position.y; s.visible = false; monde.add(s); panneauxListe.push(s);
   }
 }
 function fourchette(x, z){
@@ -212,7 +215,7 @@ function fourchette(x, z){
   const manche = new THREE.Mesh(new THREE.BoxGeometry(.9, 6, .35), metal); manche.position.y = 3; g.add(manche);
   const tete = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, .35), metal); tete.position.y = 6.6; g.add(tete);
   for(let i = 0; i < 4; i++){ const d = new THREE.Mesh(new THREE.BoxGeometry(.32, 2.8, .3), metal); d.position.set(-.95 + i * .63, 8.6, 0); g.add(d); }
-  g.position.set(x, -.5, z); monde.add(g);
+  g.position.set(x, -.5, z); g.name = "fourchette"; monde.add(g);
 }
 
 /* ================= le train qui passe ================= */
@@ -264,7 +267,7 @@ function animerTrain(dt){
   if(t.s < -140 && t.sens < 0){ t.sens = 1; t.pause = 6 + Math.random() * 8; t.klaxon = false; }
   t.wagons.forEach((w, i) => {
     const s = t.s - t.sens * i * 25, p = pointSur(t.ch, s), visible = s > -30 && s < t.ch.L + 30;
-    w.visible = visible; w.position.set(p.x, 0, p.z); w.rotation.y = p.ang + (t.sens < 0 ? Math.PI : 0);
+    w.visible = visible; w.position.set(p.x, hauteurSol(p.x, p.z), p.z); w.rotation.y = p.ang + (t.sens < 0 ? Math.PI : 0);
   });
   // le train klaxonne quand il approche de nous
   const tete = pointSur(t.ch, t.s); if(!t.klaxon && t.pause <= 0 && joueur && Math.hypot(tete.x - joueur.position.x, tete.z - joueur.position.z) < 160){ t.klaxon = true; son("klaxon"); }
@@ -291,7 +294,7 @@ function preparerBateau(c){
 function animerBateau(dt, t){
   if(!bateau) return; const b = bateau; b.s += b.sens * 6 * dt;
   if(b.s > b.ch.L){ b.sens = -1; } if(b.s < 0){ b.sens = 1; }
-  const p = pointSur(b.ch, b.s); b.g.position.set(p.x, -.3 + Math.sin(t * 1.2) * .15, p.z); b.g.rotation.y = p.ang + (b.sens < 0 ? Math.PI : 0); b.g.rotation.z = Math.sin(t * .9) * .02;
+  const p = pointSur(b.ch, b.s); b.g.position.set(p.x, niveauLac + .2 + Math.sin(t * 1.2) * .15, p.z); b.g.rotation.y = p.ang + (b.sens < 0 ? Math.PI : 0); b.g.rotation.z = Math.sin(t * .9) * .02;
 }
 
 /* ================= les gens qui se promènent ================= */
@@ -323,7 +326,7 @@ function animerGens(dt){
     }
     if(p.bulle && (p.bulleT -= dt) <= 0){ p.g.remove(p.bulle); p.bulle = null; }
     p.s += p.sens * p.v * dt; if(p.s > p.ch.L){ p.s = p.ch.L; p.sens = -1; } if(p.s < 0){ p.s = 0; p.sens = 1; }
-    const q = pointSur(p.ch, p.s); p.g.position.set(q.x + 0, 0, q.z); p.g.rotation.y = q.ang + (p.sens < 0 ? Math.PI : 0);
+    const q = pointSur(p.ch, p.s); p.g.position.set(q.x, hauteurSol(q.x, q.z), q.z); p.g.rotation.y = q.ang + (p.sens < 0 ? Math.PI : 0);
     animerAvatar(p.g, (p.t += dt * 7 * p.v / 1.4), "course", 3);
   }
 }
@@ -337,6 +340,7 @@ function creerJoueur(){
   const ombre = new THREE.Mesh(new THREE.CircleGeometry(.7, 16), new THREE.MeshBasicMaterial({ color: "#000", transparent: true, opacity: .22, depthWrite: false })); ombre.rotation.x = -Math.PI / 2; ombre.position.y = .2 / ECHELLE; joueur.add(ombre);
 }
 function bloque(x, z){
+  if(suisse && hauteurSol(x, z) <= niveauLac + .02 && !(carte && carte.terre)) return true;
   // pas dans les bâtiments
   for(const [dx, dz] of [[0, 0], [.35, 0], [-.35, 0], [0, .35], [0, -.35]]){
     const l = grilleBat.get(cleG(x + dx, z + dz)); if(!l) continue;
@@ -351,8 +355,8 @@ function bloque(x, z){
 }
 function placerA(x, z){
   // on cherche un endroit libre tout près (pas dans une maison)
-  for(let r = 0; r < 60; r += 2) for(let a = 0; a < 12; a++){ const px = x + Math.cos(a / 12 * Math.PI * 2) * r, pz = z + Math.sin(a / 12 * Math.PI * 2) * r; if(!bloque(px, pz)){ joueur.position.set(px, 0, pz); return; } if(r === 0) break; }
-  joueur.position.set(x, 0, z);
+  for(let r = 0; r < 60; r += 2) for(let a = 0; a < 12; a++){ const px = x + Math.cos(a / 12 * Math.PI * 2) * r, pz = z + Math.sin(a / 12 * Math.PI * 2) * r; if(!bloque(px, pz)){ joueur.position.set(px, hauteurSol(px, pz), pz); return; } if(r === 0) break; }
+  joueur.position.set(x, hauteurSol(x, z), z);
 }
 
 /* ================= les commandes ================= */
@@ -457,6 +461,7 @@ async function demarrer(){
       await new Promise(r => setTimeout(r, 30));
       carte = interpreter(d); window.__carte = carte;
       construire(carte); remplirEndroits();
+      await chargerVraieVille();
     }
     $("barre").style.width = "100%";
     if(persoVitrine){ scene.remove(persoVitrine); persoVitrine = null; } decorMenu.visible = false;
@@ -474,7 +479,39 @@ $("jouer").onclick = demarrer;
 $("reessayer").onclick = demarrer;
 $("retourMenu").onclick = () => { $("erreur").hidden = true; $("menu").hidden = false; };
 $("versMenu").onclick = () => { etat = "menu"; $("hud").hidden = true; $("tactile").hidden = true; $("menu").hidden = false; if(joueur){ scene.remove(joueur); joueur = null; } monde.visible = false; decorMenu.visible = true; vitrine(); };
-$("rafraichir").onclick = async () => { await oublierCarte(); carte = null; message("La carte sera téléchargée à nouveau."); $("rafraichir").textContent = "✅ Elle sera re-téléchargée"; };
+$("rafraichir").onclick = async () => { await oublierCarte(); await oublierSuisse(); carte = null; message("La carte sera téléchargée à nouveau."); $("rafraichir").textContent = "✅ Elle sera re-téléchargée"; };
+
+/* ================= la vraie ville (swisstopo) ================= */
+async function chargerVraieVille(){
+  try{
+    suisse = await chargerSuisse(monde, rendu, camera, (t, p) => { $("chargeTexte").textContent = t; $("barre").style.width = Math.round(p * 100) + "%"; });
+    hauteurSol = suisse.hauteur; niveauLac = suisse.lac;
+    osm.forEach(o => o.visible = false);
+    const lac = monde.userData.lac; if(lac) lac.position.y = niveauLac - .25;
+    const f = monde.getObjectByName("fourchette"); if(f) f.position.y = niveauLac - .3;
+    // au nord de la zone : un sol vert à la bonne hauteur, pour ne pas voir le vide
+    const L = limites(); let hn = 0; for(let i = 0; i <= 10; i++) hn += hauteurSol(L.x0 + (L.x1 - L.x0) * i / 10, L.z0 + 1); hn /= 11;
+    const nord = new THREE.Mesh(new THREE.PlaneGeometry(9000, 3000), new THREE.MeshLambertMaterial({ color: "#8FAF7A" })); nord.rotation.x = -Math.PI / 2; nord.position.set((L.x0 + L.x1) / 2, hn - 1, L.z0 - 1495); monde.add(nord);
+    $("credit3d").hidden = false;
+  }catch(e){
+    suisse = null; hauteurSol = () => 0; niveauLac = -.5; osm.forEach(o => o.visible = true);
+    console.warn("vraie ville indisponible", e);
+    setTimeout(() => message("ℹ️ Les photos et les bâtiments 3D de swisstopo ne se sont pas chargés : voici la ville simple.", 6), 1500);
+  }
+}
+/* les bâtiments 3D sont-ils bien posés sur le sol ? (on corrige la hauteur une fois, d'après les premiers bâtiments) */
+let calibre = false, tCal = 0;
+function calibrer(){
+  if(calibre || !suisse || (tCal += 1) % 30) return;
+  const ecarts = [], b = new THREE.Box3();
+  suisse.tuiles[0].group.traverse(o => { if(!o.isMesh || ecarts.length > 200) return; b.setFromObject(o); if(b.isEmpty()) return;
+    const cx = (b.min.x + b.max.x) / 2, cz = (b.min.z + b.max.z) / 2, h = Math.min(hauteurSol(b.min.x, b.min.z), hauteurSol(b.max.x, b.max.z), hauteurSol(b.min.x, b.max.z), hauteurSol(b.max.x, b.min.z), hauteurSol(cx, cz));
+    ecarts.push(b.min.y - h); });
+  if(ecarts.length < 8) return;
+  ecarts.sort((a, c) => a - c); const med = ecarts[Math.floor(ecarts.length / 2)];
+  if(Math.abs(med) > 1.5) suisse.tuiles.forEach(t => { t.group.matrix.elements[13] -= med; t.group.matrixWorldNeedsUpdate = true; });
+  calibre = true; window.__calibrage = med;
+}
 
 /* ================= la boucle ================= */
 let avant = performance.now(), temps = 0, tPas = 0, tRue = 0;
@@ -503,17 +540,19 @@ function boucle(maintenant){
       tPas += dt * (court ? 13 : 8.5); animerAvatar(joueur, tPas, "course", court ? 7 : 3.5);
     } else animerAvatar(joueur, temps, "repos");
     if((touches.Space || sautT) && sol){ vy = 6; sol = false; son("saut"); } sautT = false;
-    if(!sol){ vy -= 18 * dt; joueur.position.y += vy * dt; if(joueur.position.y <= 0){ joueur.position.y = 0; sol = true; vy = 0; } }
+    const hs = hauteurSol(joueur.position.x, joueur.position.z);
+    if(!sol){ vy -= 18 * dt; joueur.position.y += vy * dt; if(joueur.position.y <= hs){ joueur.position.y = hs; sol = true; vy = 0; } } else joueur.position.y += (hs - joueur.position.y) * Math.min(1, dt * 14);
     // la caméra suit, derrière
-    const cx = joueur.position.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cz = joueur.position.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cy = 1.4 + Math.sin(cam.pitch) * cam.dist;
+    const cx = joueur.position.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cz = joueur.position.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cy = joueur.position.y + 1.4 + Math.sin(cam.pitch) * cam.dist;
     camera.position.lerp(new THREE.Vector3(cx, cy, cz), Math.min(1, dt * 8)); camera.lookAt(joueur.position.x, joueur.position.y + 1.3, joueur.position.z);
     animerTrain(dt); animerBateau(dt, temps); animerGens(dt);
-    for(const s of panneauxListe){ const d = Math.hypot(s.position.x - joueur.position.x, s.position.z - joueur.position.z); s.visible = d < 260; }
+    for(const s of panneauxListe){ const d = Math.hypot(s.position.x - joueur.position.x, s.position.z - joueur.position.z); s.visible = d < 260; if(suisse) s.position.y = s.userData.h + hauteurSol(s.position.x, s.position.z) + 6; }
     if((tRue -= dt) <= 0){ tRue = .5; const r = rueIci(); $("rue").textContent = r ? "📍 " + r : "📍 Vevey"; dessinerMinicarte(); }
   }
+  if(suisse && etat === "jeu"){ suisse.maj(); calibrer(); }
   rendu.render(scene, camera);
   requestAnimationFrame(boucle);
 }
 remplirProfils(); vitrine(); requestAnimationFrame(boucle);
 if(PARAMS.has("jouer")) demarrer();
-window.__vevey = { get joueur(){ return joueur; }, get carte(){ return carte; }, get train(){ return train; }, get gens(){ return gens; }, touches, cam, placerA, bloque };
+window.__vevey = { THREE, get suisse(){ return suisse; }, hauteur: (x, z) => hauteurSol(x, z), get joueur(){ return joueur; }, get carte(){ return carte; }, get train(){ return train; }, get gens(){ return gens; }, touches, cam, placerA, bloque };
