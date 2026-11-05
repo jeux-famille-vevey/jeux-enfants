@@ -81,7 +81,8 @@ async function photo(progres){
 }
 
 /* ---------- tout assembler ---------- */
-export async function chargerSuisse(scene, rendu, camera, progres){
+export async function chargerSuisse(scene, rendu, camera, progres, options){
+  options = options || {};
   ZOOM = rendu.capabilities.maxTextureSize >= 8192 && !matchMedia("(pointer: coarse)").matches ? 18 : 17;
   const R = await relief(progres);
   const P = await photo(progres);
@@ -118,33 +119,82 @@ export async function chargerSuisse(scene, rendu, camera, progres){
   const cadre = new THREE.Matrix4();
   WGS84_ELLIPSOID.getEastNorthUpFrame(CENTRE.lat * Math.PI / 180, CENTRE.lon * Math.PI / 180, H0 + GEOIDE, cadre);
   const versJeu = new THREE.Matrix4().makeRotationX(-Math.PI / 2).multiply(cadre.clone().invert());
-  const MURS = new THREE.Color("#EFE6D6"), TUILES = new THREE.Color("#B65A43"), PLAT = new THREE.Color("#A3A7AE"), FEUILLES = new THREE.Color("#4E8F43");
-  const creer = (url, genre) => {
+  /* les façades : couleurs variées, fenêtres à chaque étage et vitrines au rez-de-chaussée, dessinées par la carte graphique
+     (attribut « fac » : x = position le long du mur, y = hauteur au-dessus du bas du bâtiment, z = 0 toit, 1 mur, 2 mur avec magasins, 3 mur sans fenêtres) */
+  const FACADES = ["#F3E7D3", "#EFE1C6", "#F2D7BC", "#E9E4DA", "#F7EEDD", "#DDD5C6", "#F0CDAA", "#E8DFF0", "#DCE8F0", "#F3DADA", "#FFF2D2", "#E2E8D6", "#F5E3C8", "#D9CBB5"];
+  const TOITS = ["#B65A43", "#A9503C", "#C0664B", "#9C4A38", "#8E8F94", "#A3A7AE", "#7E8590"];
+  const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  mat.onBeforeCompile = (sh) => {
+    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nattribute vec3 fac;\nvarying vec3 vFac;").replace("#include <begin_vertex>", "#include <begin_vertex>\nvFac = fac;");
+    sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\nvarying vec3 vFac;\nfloat hasard(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }")
+      .replace("#include <color_fragment>", `#include <color_fragment>
+      if(vFac.z > .5 && vFac.z < 2.5){
+        float col = floor(vFac.x / 3.3), u = fract(vFac.x / 3.3), h = vFac.y;
+        vec3 vitre = mix(vec3(.30,.38,.50), vec3(.62,.72,.84), clamp((fract(h / 3.0) - .3) * 1.6, 0., 1.));
+        if(vFac.z > 1.5 && h < 3.6){
+          // le rez-de-chaussée avec des vitrines et un store coloré
+          if(u > .07 && u < .93 && h > .25 && h < 2.55) diffuseColor.rgb = mix(vec3(.22,.27,.33), vec3(.55,.64,.74), smoothstep(.3, 2.4, h));
+          else if(h > 2.65 && h < 3.25) diffuseColor.rgb = mix(vec3(.85,.25,.22), vec3(.2,.45,.75), step(.5, hasard(vec2(col, 7.))));
+          else if(h < .25) diffuseColor.rgb *= .75;
+        } else if(h > 1.0){
+          float etage = floor((h - .6) / 3.0), f = fract((h - .6) / 3.0);
+          if(u > .27 && u < .73 && f > .3 && f < .85){
+            diffuseColor.rgb = vitre;
+            if(hasard(vec2(col, etage)) > .86) diffuseColor.rgb = vec3(.98, .86, .55);          // une fenêtre allumée
+            if(abs(u - .5) < .018 || abs(f - .58) < .02) diffuseColor.rgb *= 1.6;               // le cadre
+          } else if(u > .24 && u < .76 && f > .26 && f <= .3) diffuseColor.rgb *= .82;          // le rebord
+          else if(f < .04) diffuseColor.rgb *= .93;                                             // la ligne entre les étages
+        }
+      }`);
+  };
+  const versHex = (h) => new THREE.Color(h);
+  const FAC = FACADES.map(versHex), TOI = TOITS.map(versHex);
+  const hash = (n) => { n = Math.imul((n | 0) ^ 0x9E3779B9, 0x85EBCA6B); n ^= n >>> 13; n = Math.imul(n, 0xC2B2AE35); n ^= n >>> 16; return (n >>> 0) / 4294967296; };
+  const SPECIAL = { eglise: { mur: versHex("#D6CFC0"), toit: versHex("#5E646E"), type: 3 }, gare: { mur: versHex("#EADCC0"), toit: versHex("#6E737C"), type: 2 }, ecole: { mur: versHex("#FFD9A0"), toit: versHex("#B65A43"), type: 1 },
+    chateau: { mur: versHex("#F1ECE2"), toit: versHex("#5E646E"), type: 1 }, musee: { mur: versHex("#F4F1EA"), toit: versHex("#8E8F94"), type: 1 } };
+  const creer = (url) => {
     const t = new TilesRenderer(U(url));
     const gl = new GLTFLoader(t.manager); gl.setDRACOLoader(draco); t.manager.addHandler(/\.(gltf|glb)$/i, gl);
-    t.errorTarget = genre === "arbres" ? 20 : 10; t.maxDepth = 30;
+    t.errorTarget = 10; t.maxDepth = 30;
     t.setCamera(camera); t.setResolutionFromRenderer(camera, rendu);
     t.group.matrixAutoUpdate = false; t.group.matrix.copy(versJeu); t.group.matrixWorldNeedsUpdate = true;
-    t.addEventListener("load-model", (ev) => {
+    t.addEventListener("load-model", (ev) => { try{ habiller(ev); }catch(e){ console.error("façades", e); } });
+    t.addEventListener("load-error", (e) => console.error("tuile 3D :", e.error && e.error.message, e.url));
+    const habiller = (ev) => {
+      ev.scene.updateWorldMatrix(true, true); t.group.updateMatrixWorld(true);
+      const parent = ev.scene.parent ? new THREE.Matrix4() : t.group.matrixWorld.clone(), M = new THREE.Matrix4(), m3 = new THREE.Matrix3();
       ev.scene.traverse((o) => {
         if(!o.isMesh || !o.geometry) return;
-        const g = o.geometry; if(!g.attributes.normal) g.computeVertexNormals();
-        // les couleurs : les murs crème, les toits en tuiles (ou gris s'ils sont plats), les arbres verts
-        const n = g.attributes.normal, nb = g.attributes.position.count, col = new Float32Array(nb * 3), m3 = new THREE.Matrix3(), v = new THREE.Vector3();
-        o.updateWorldMatrix(true, false); m3.getNormalMatrix(o.matrixWorld);
+        let g = o.geometry; if(g.index){ g = g.toNonIndexed(); o.geometry.dispose(); o.geometry = g; }
+        if(!g.attributes.normal) g.computeVertexNormals();
+        M.multiplyMatrices(parent, o.matrixWorld); m3.getNormalMatrix(M);
+        const P = g.attributes.position, N = g.attributes.normal, nb = P.count, B = g.attributes._batchid || g.attributes._feature_id_0 || g.attributes.batchid;
+        const col = new Float32Array(nb * 3), fac = new Float32Array(nb * 3), v = new THREE.Vector3(), n = new THREE.Vector3();
+        const ids = new Int32Array(nb), monde = new Float32Array(nb * 3), bas = new Map(), centre = new Map();
         for(let k = 0; k < nb; k++){
-          v.fromBufferAttribute(n, k).applyMatrix3(m3).normalize();
-          const c = genre === "arbres" ? FEUILLES : v.y > .97 ? PLAT : v.y > .35 ? TUILES : MURS;
-          col[k * 3] = c.r; col[k * 3 + 1] = c.g; col[k * 3 + 2] = c.b;
+          v.fromBufferAttribute(P, k).applyMatrix4(M); monde[k * 3] = v.x; monde[k * 3 + 1] = v.y; monde[k * 3 + 2] = v.z;
+          const id = B ? Math.round(B.getX(k)) : Math.floor(k / 3000); ids[k] = id;
+          const b = bas.get(id); if(b === undefined || v.y < b) bas.set(id, v.y);
+          const c = centre.get(id) || [0, 0, 0]; c[0] += v.x; c[1] += v.z; c[2]++; centre.set(id, c);
         }
-        g.setAttribute("color", new THREE.BufferAttribute(col, 3));
-        o.material = new THREE.MeshLambertMaterial({ vertexColors: true });
+        const infos = new Map();
+        for(const [id, c] of centre){ const x = c[0] / c[2], z = c[1] / c[2], info = options.infoBatiment ? options.infoBatiment(x, z) : null, hb = hash(Math.round(x * 7) ^ Math.round(z * 13));
+          infos.set(id, { sp: info && SPECIAL[info.genre], mur: FAC[Math.floor(hb * FAC.length)], toit: TOI[Math.floor(hash(id + 77 + Math.round(x)) * TOI.length)], magasins: hb > .45 ? 2 : 1 }); }
+        for(let k = 0; k < nb; k++){
+          n.fromBufferAttribute(N, k).applyMatrix3(m3).normalize();
+          const inf = infos.get(ids[k]), sp = inf.sp, mur = Math.abs(n.y) < .5;
+          const c = mur ? (sp ? sp.mur : inf.mur) : n.y > .97 ? (sp ? sp.toit : versHex("#A3A7AE")) : (sp ? sp.toit : inf.toit);
+          col[k * 3] = c.r; col[k * 3 + 1] = c.g; col[k * 3 + 2] = c.b;
+          if(mur){ const tx = -n.z, tz = n.x, l = Math.hypot(tx, tz) || 1; fac[k * 3] = (monde[k * 3] * tx + monde[k * 3 + 2] * tz) / l; fac[k * 3 + 1] = monde[k * 3 + 1] - bas.get(ids[k]); fac[k * 3 + 2] = sp ? sp.type : inf.magasins; }
+        }
+        g.setAttribute("color", new THREE.BufferAttribute(col, 3)); g.setAttribute("fac", new THREE.BufferAttribute(fac, 3));
+        o.material = mat;
       });
-    });
+    };
     scene.add(t.group);
     return t;
   };
-  const batiments = creer(URL_BATIMENTS, "batiments");
+  const batiments = creer(URL_BATIMENTS);
   /* poser les bâtiments sur le sol : pour chaque bâtiment chargé, on regarde son point le plus bas par rapport au terrain
      (un bâtiment touche toujours le sol quelque part) ; la valeur du milieu de tous ces écarts = la correction à faire */
   const ecarts = []; let correction = 0;

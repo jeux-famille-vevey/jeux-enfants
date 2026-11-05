@@ -154,7 +154,7 @@ function construire(c){
     nonIdx.dispose();
     // pour ne pas traverser les murs
     const xs = pts.map(p => p[0]), zs = pts.map(p => p[1]), boite = [Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs)];
-    const rec = { pts, boite, h: b.h };
+    const rec = { pts, boite, h: b.h, nom: b.nom, genre: /ch[âa]teau/i.test(b.nom || "") ? "chateau" : /alimentarium|mus[ée]e/i.test(b.nom || "") ? "musee" : b.genre };
     for(let gx = Math.floor(boite[0] / GRILLE); gx <= Math.floor(boite[2] / GRILLE); gx++) for(let gz = Math.floor(boite[1] / GRILLE); gz <= Math.floor(boite[3] / GRILLE); gz++){
       const k = gx + "," + gz; if(!grilleBat.has(k)) grilleBat.set(k, []); grilleBat.get(k).push(rec); }
   }
@@ -481,10 +481,82 @@ $("retourMenu").onclick = () => { $("erreur").hidden = true; $("menu").hidden = 
 $("versMenu").onclick = () => { etat = "menu"; $("hud").hidden = true; $("tactile").hidden = true; $("menu").hidden = false; if(joueur){ scene.remove(joueur); joueur = null; } monde.visible = false; decorMenu.visible = true; vitrine(); };
 $("rafraichir").onclick = async () => { await oublierCarte(); await oublierSuisse(); carte = null; message("La carte sera téléchargée à nouveau."); $("rafraichir").textContent = "✅ Elle sera re-téléchargée"; };
 
+/* ================= le bâtiment OSM à un endroit (pour reconnaître l'église, la gare, l'école…) ================= */
+function infoBatiment(x, z){
+  const l = grilleBat.get(cleG(x, z)); if(!l) return null;
+  for(const b of l){ if(x < b.boite[0] || x > b.boite[2] || z < b.boite[1] || z > b.boite[3]) continue; if(dansPoly(x, z, b.pts)) return b.genre === "normal" ? null : b; }
+  return null;
+}
+
+/* ================= la vie dans les rues : lampadaires, voitures garées et qui roulent, bancs ================= */
+let voitures = [], decorFait = false;
+const COULEURS_AUTOS = ["#E5484D", "#3D7BD9", "#FFFFFF", "#22232B", "#9AA0AE", "#FFD23F", "#3FA34D", "#8E5BC4", "#FF9F1C", "#C9CED8"];
+function modeleAuto(couleur){
+  const g = new THREE.Group(), c = new THREE.MeshLambertMaterial({ color: couleur }), vitre = new THREE.MeshLambertMaterial({ color: "#2B3A55" }), noir = new THREE.MeshLambertMaterial({ color: "#1A1A1F" });
+  const caisse = new THREE.Mesh(new THREE.BoxGeometry(1.75, .75, 4.1), c); caisse.position.y = .65; g.add(caisse);
+  const toit = new THREE.Mesh(new THREE.BoxGeometry(1.55, .6, 2.1), vitre); toit.position.set(0, 1.3, -.2); g.add(toit);
+  const dessus = new THREE.Mesh(new THREE.BoxGeometry(1.5, .08, 1.9), c); dessus.position.set(0, 1.62, -.2); g.add(dessus);
+  [[-.82, 1.3], [.82, 1.3], [-.82, -1.3], [.82, -1.3]].forEach(([x, z]) => { const r = new THREE.Mesh(new THREE.CylinderGeometry(.34, .34, .25, 10), noir); r.rotation.z = Math.PI / 2; r.position.set(x, .34, z); g.add(r); });
+  const phare = new THREE.MeshBasicMaterial({ color: "#FFF6C8" }); [-.6, .6].forEach(x => { const p = new THREE.Mesh(new THREE.BoxGeometry(.3, .15, .05), phare); p.position.set(x, .75, 2.06); g.add(p); });
+  return g;
+}
+function decorRues(c){
+  if(decorFait) return; decorFait = true;
+  const lampes = [], autos = [], bancs = [];
+  const grandes = /^(primary|secondary|tertiary|unclassified|residential|living_street|pedestrian)$/;
+  for(const r of c.routes){
+    if(!grandes.test(r.type) || r.tunnel || r.pont) continue;
+    const ch = chemin(r.pts); const pas = r.type === "pedestrian" ? 22 : 32;
+    for(let s = 8; s < ch.L - 4; s += pas){ const p = pointSur(ch, s), d = r.l / 2 + .8, nx = Math.cos(p.ang), nz = -Math.sin(p.ang), cote = (Math.floor(s / pas) % 2) ? 1 : -1;
+      const x = p.x + nx * d * cote, z = p.z + nz * d * cote; if(!bloque(x, z)) lampes.push([x, z]); }
+    if(/^(residential|living_street|unclassified)$/.test(r.type)) for(let s = 6; s < ch.L - 6; s += 7){ if(hash(Math.round(s) * 31 + r.pts.length * 7 + Math.round(r.pts[0][0])) > .35) continue;
+      const p = pointSur(ch, s), d = r.l / 2 - 1.1, nx = Math.cos(p.ang), nz = -Math.sin(p.ang), cote = hash(s + r.pts.length) > .5 ? 1 : -1;
+      autos.push([p.x + nx * d * cote, p.z + nz * d * cote, p.ang]); }
+  }
+  for(const v of c.verts){ if(!/^(park|garden|playground|village_green)$/.test(v.type)) continue; const p = v.pts[Math.floor(v.pts.length / 3)], q = v.pts[Math.floor(v.pts.length * 2 / 3)];
+    [[p, q], [q, p]].forEach(([a, b]) => { const x = a[0] + (b[0] - a[0]) * .2, z = a[1] + (b[1] - a[1]) * .2; if(!bloque(x, z)) bancs.push([x, z, Math.atan2(b[0] - a[0], b[1] - a[1])]); }); }
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), un = new THREE.Vector3(1, 1, 1), v = new THREE.Vector3(), axe = new THREE.Vector3(0, 1, 0);
+  // les lampadaires
+  const NL = Math.min(lampes.length, 3000);
+  if(NL){ const mat = new THREE.MeshLambertMaterial({ color: "#3E4450" });
+    const poteau = new THREE.InstancedMesh(new THREE.CylinderGeometry(.07, .1, 5, 6), mat, NL), tete = new THREE.InstancedMesh(new THREE.BoxGeometry(.35, .2, .8), mat, NL), lum = new THREE.InstancedMesh(new THREE.BoxGeometry(.28, .05, .6), new THREE.MeshBasicMaterial({ color: "#FFF3C4" }), NL);
+    for(let i = 0; i < NL; i++){ const [x, z] = lampes[i], h = hauteurSol(x, z); m.compose(v.set(x, h + 2.5, z), q.identity(), un); poteau.setMatrixAt(i, m);
+      m.compose(v.set(x, h + 5, z), q.identity(), un); tete.setMatrixAt(i, m); m.compose(v.set(x, h + 4.88, z), q.identity(), un); lum.setMatrixAt(i, m); }
+    monde.add(poteau, tete, lum); }
+  // les voitures garées
+  const NA = Math.min(autos.length, 900);
+  if(NA){ const caisse = new THREE.InstancedMesh(new THREE.BoxGeometry(1.75, .8, 4.1), new THREE.MeshLambertMaterial({ color: "#FFFFFF" }), NA), toit = new THREE.InstancedMesh(new THREE.BoxGeometry(1.55, .62, 2.1), new THREE.MeshLambertMaterial({ color: "#2B3A55" }), NA);
+    const coul = new THREE.Color();
+    for(let i = 0; i < NA; i++){ const [x, z, a] = autos[i], h = hauteurSol(x, z); q.setFromAxisAngle(axe, a); m.compose(v.set(x, h + .7, z), q, un); caisse.setMatrixAt(i, m); caisse.setColorAt(i, coul.set(COULEURS_AUTOS[Math.floor(hash(i * 3 + 1) * COULEURS_AUTOS.length)]));
+      m.compose(v.set(x + Math.sin(a) * -.2, h + 1.38, z + Math.cos(a) * -.2), q, un); toit.setMatrixAt(i, m); }
+    monde.add(caisse, toit); }
+  // les bancs
+  bancs.slice(0, 300).forEach(([x, z, a]) => { const g = new THREE.Group(), bois = new THREE.MeshLambertMaterial({ color: "#B07A4A" }), fer = new THREE.MeshLambertMaterial({ color: "#3E4450" });
+    const assise = new THREE.Mesh(new THREE.BoxGeometry(1.8, .08, .45), bois); assise.position.y = .45; g.add(assise); const dos = new THREE.Mesh(new THREE.BoxGeometry(1.8, .4, .06), bois); dos.position.set(0, .75, -.2); g.add(dos);
+    [-.8, .8].forEach(px => { const p = new THREE.Mesh(new THREE.BoxGeometry(.06, .45, .45), fer); p.position.set(px, .22, 0); g.add(p); });
+    g.position.set(x, hauteurSol(x, z), z); g.rotation.y = a; monde.add(g); });
+  // les voitures qui roulent (sur les vraies routes)
+  const routes = c.routes.filter(r => /^(primary|secondary|tertiary|unclassified|residential)$/.test(r.type) && !r.tunnel).map(r => chemin(r.pts)).filter(ch => ch.L > 60);
+  const N = routes.length ? (tactile ? 10 : 22) : 0;
+  for(let i = 0; i < N; i++){ const ch = routes[Math.floor(hash(i * 17 + 3) * routes.length)], g = modeleAuto(COULEURS_AUTOS[i % COULEURS_AUTOS.length]); monde.add(g);
+    voitures.push({ g, ch, s: hash(i + 5) * ch.L, sens: hash(i + 9) < .5 ? 1 : -1, v: 7 + hash(i) * 5, pause: 0 }); }
+}
+function animerVoitures(dt){
+  if(!joueur) return; const jx = joueur.position.x, jz = joueur.position.z;
+  for(const a of voitures){
+    const p = pointSur(a.ch, a.s), devant = pointSur(a.ch, a.s + a.sens * 6);
+    const dj = Math.hypot(devant.x - jx, devant.z - jz), proche = Math.hypot(p.x - jx, p.z - jz) < 260;
+    a.g.visible = proche; if(!proche){ a.s += a.sens * a.v * dt; } else if(dj > 4.5){ a.s += a.sens * a.v * dt; }       // la voiture s'arrête si quelqu'un est devant
+    if(a.s > a.ch.L){ a.s = a.ch.L; a.sens = -1; } if(a.s < 0){ a.s = 0; a.sens = 1; }
+    const q = pointSur(a.ch, a.s), dec = 1.7 * a.sens, nx = Math.cos(q.ang), nz = -Math.sin(q.ang);
+    a.g.position.set(q.x + nx * dec, hauteurSol(q.x, q.z), q.z + nz * dec); a.g.rotation.y = q.ang + (a.sens < 0 ? Math.PI : 0);
+  }
+}
+
 /* ================= la vraie ville (swisstopo) ================= */
 async function chargerVraieVille(){
   try{
-    suisse = await chargerSuisse(monde, rendu, camera, (t, p) => { $("chargeTexte").textContent = t; $("barre").style.width = Math.round(p * 100) + "%"; });
+    suisse = await chargerSuisse(monde, rendu, camera, (t, p) => { $("chargeTexte").textContent = t; $("barre").style.width = Math.round(p * 100) + "%"; }, { infoBatiment });
     hauteurSol = suisse.hauteur; niveauLac = suisse.lac;
     osm.forEach(o => o.visible = false); arbres(carte);   // les arbres, posés sur le vrai relief
     const lac = monde.userData.lac; if(lac) lac.position.y = niveauLac - .25;
@@ -492,10 +564,11 @@ async function chargerVraieVille(){
     // au nord de la zone : un sol vert à la bonne hauteur, pour ne pas voir le vide
     const L = limites(); let hn = 0; for(let i = 0; i <= 10; i++) hn += hauteurSol(L.x0 + (L.x1 - L.x0) * i / 10, L.z0 + 1); hn /= 11;
     const nord = new THREE.Mesh(new THREE.PlaneGeometry(9000, 3000), new THREE.MeshLambertMaterial({ color: "#8FAF7A" })); nord.rotation.x = -Math.PI / 2; nord.position.set((L.x0 + L.x1) / 2, hn - 1, L.z0 - 1495); monde.add(nord);
-    $("credit3d").hidden = false;
+    $("credit3d").hidden = false; decorRues(carte);
   }catch(e){
     suisse = null; hauteurSol = () => 0; niveauLac = -.5; osm.forEach(o => o.visible = true);
     console.warn("vraie ville indisponible", e);
+    decorRues(carte);
     setTimeout(() => message("ℹ️ Les photos et les bâtiments 3D de swisstopo ne se sont pas chargés : voici la ville simple.", 6), 1500);
   }
 }
@@ -538,7 +611,7 @@ function boucle(maintenant){
     // la caméra suit, derrière
     const cx = joueur.position.x + Math.sin(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cz = joueur.position.z + Math.cos(cam.yaw) * Math.cos(cam.pitch) * cam.dist, cy = joueur.position.y + 1.4 + Math.sin(cam.pitch) * cam.dist;
     camera.position.lerp(new THREE.Vector3(cx, cy, cz), Math.min(1, dt * 8)); camera.lookAt(joueur.position.x, joueur.position.y + 1.3, joueur.position.z);
-    animerTrain(dt); animerBateau(dt, temps); animerGens(dt);
+    animerTrain(dt); animerBateau(dt, temps); animerGens(dt); animerVoitures(dt);
     for(const s of panneauxListe){ const d = Math.hypot(s.position.x - joueur.position.x, s.position.z - joueur.position.z); s.visible = d < 260; if(suisse) s.position.y = s.userData.h + hauteurSol(s.position.x, s.position.z) + 6; }
     if((tRue -= dt) <= 0){ tRue = .5; const r = rueIci(); $("rue").textContent = r ? "📍 " + r : "📍 Vevey"; dessinerMinicarte(); }
   }
