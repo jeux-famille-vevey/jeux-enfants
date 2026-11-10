@@ -3,7 +3,7 @@
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
   var P = window.POLICE, svg = $("svg");
-  var BLEU = "#3D7BD9", GRIS = "#9AA0AE", GRIS_CLAIR = "#C9CED8", ENCRE = "#1D2357", POINT = "#8C93A3", ROUGE = "#E5484D", JAUNE = "#FFF3C4";
+  var BLEU = "#3D7BD9", GRIS = "#9AA0AE", GRIS_CLAIR = "#C9CED8", ENCRE = "#22232B", POINT = "#8C93A3", ROUGE = "#22232B";   // économie d'encre : pas de grands aplats, le modèle en noir
   var COULEURS = ["#E5484D", "#FF9F1C", "#3FA34D", "#3D7BD9", "#8E5BC4", "#FF6F9F", "#2EC4B6"];
   var MOTS = [["A", "Avion", "2708"], ["B", "Ballon", "1f388"], ["C", "Chat", "1f431"], ["D", "Dauphin", "1f42c"], ["E", "Éléphant", "1f418"], ["F", "Fraise", "1f353"],
     ["G", "Girafe", "1f992"], ["H", "Hibou", "1f989"], ["I", "Île", "1f3dd"], ["J", "Jus", "1f9c3"], ["K", "Koala", "1f428"], ["L", "Lion", "1f981"],
@@ -39,14 +39,13 @@
   /* ---------- les lignes d'école ---------- */
   function lignes(x0, x1, base, hcap){
     var hx = hcap * 14 / 21, hd = hcap * 7 / 21, s = "";
-    s += '<rect x="' + x0 + '" y="' + f(base - hx) + '" width="' + f(x1 - x0) + '" height="' + f(hx) + '" fill="' + JAUNE + '"/>';
     s += '<line x1="' + x0 + '" x2="' + x1 + '" y1="' + f(base - hcap) + '" y2="' + f(base - hcap) + '" stroke="' + GRIS_CLAIR + '" stroke-width=".25"/>';
     s += '<line x1="' + x0 + '" x2="' + x1 + '" y1="' + f(base - hx) + '" y2="' + f(base - hx) + '" stroke="' + GRIS + '" stroke-width=".25" stroke-dasharray=".8 .9"/>';
     s += '<line x1="' + x0 + '" x2="' + x1 + '" y1="' + f(base) + '" y2="' + f(base) + '" stroke="' + BLEU + '" stroke-width=".4"/>';
     s += '<line x1="' + x0 + '" x2="' + x1 + '" y1="' + f(base + hd) + '" y2="' + f(base + hd) + '" stroke="' + GRIS_CLAIR + '" stroke-width=".25"/>';
     return s;
   }
-  function image(code, x, y, t){ return '<image href="img/' + code + '.svg" x="' + f(x) + '" y="' + f(y) + '" width="' + f(t) + '" height="' + f(t) + '"/>'; }
+  function image(code, x, y, t){ return '<image href="img/' + code + '.svg" x="' + f(x) + '" y="' + f(y) + '" width="' + f(t) + '" height="' + f(t) + '" style="filter:grayscale(1) contrast(.6) brightness(1.45)"/>'; }
   function texte(t, x, y, taille, couleur, gras, ancre){ return '<text x="' + f(x) + '" y="' + f(y) + '" font-size="' + taille + '" font-family="Fredoka, Trebuchet MS, sans-serif" font-weight="' + (gras ? 700 : 500) + '" fill="' + (couleur || ENCRE) + '"' + (ancre ? ' text-anchor="' + ancre + '"' : "") + ">" + esc(t) + "</text>"; }
   function entete(titre, sous){ return texte(titre, 14, 24, 8, ENCRE, true) + texte(sous || "Prénom : ______________________     Date : ____________", 14, 31, 3.6, GRIS); }
   var M = 14, X1 = 196;
@@ -62,9 +61,9 @@
   /* ---------- les fiches ---------- */
   function ficheLettre(i){
     var m = MOTS[i], L = m[0], c = COULEURS[i % COULEURS.length], s = "";
-    s += '<rect x="14" y="12" width="182" height="58" rx="5" fill="' + c + '"/><rect x="18" y="16" width="92" height="50" rx="4" fill="#fff"/>';
-    var r = ecrire(L, 26, 58, 34, true, c); s += r.svg; s += ecrire(L.toLowerCase(), r.x + 6, 58, 34, true, c).svg;
-    s += image(m[2], 132, 18, 40) + texte(m[1], 152, 66, 6.5, "#fff", true, "middle");
+    s += '<rect x="14" y="12" width="182" height="58" rx="5" fill="none" stroke="' + GRIS + '" stroke-width=".4"/>';
+    var r = ecrire(L, 24, 58, 34, true, ENCRE); s += r.svg; s += ecrire(L.toLowerCase(), r.x + 6, 58, 34, true, ENCRE).svg;
+    s += image(m[2], 134, 16, 38) + texte(m[1], 153, 66, 6.5, ENCRE, true, "middle");
     s += texte("Prénom : ______________________     Repasse les pointillés, puis écris tout seul sur la dernière ligne.", 14, 78, 3.2, ENCRE);
     var h = tailleChoisie(), pas = h * 1.75, base = 82 + h + 6, lignesDispo = Math.floor((283 - base) / pas) + 1;
     var plan = [L, L, L.toLowerCase(), L.toLowerCase(), m[1]];
@@ -108,9 +107,9 @@
     var h = Math.min(tailleChoisie(), 13), s = entete("Les chiffres", "Repasse les chiffres, puis compte les ronds !"), base = 42 + h, pas = Math.min(h * 1.75, 24);
     for(var n = 0; n < 10; n++){
       var c = COULEURS[n % COULEURS.length];
-      s += lignes(M, 150, base, h); var r = ecrire(String(n), M + 4, base, h, true, c); s += r.svg; var x = r.x + 6;
+      s += lignes(M, 150, base, h); var r = ecrire(String(n), M + 4, base, h, true, ENCRE); s += r.svg; var x = r.x + 6;
       while(x + largeur("0", h) < 148){ r = ecrire(String(n), x, base, h, false); s += r.svg; x = r.x + 6; }
-      for(var k = 0; k < n; k++) s += '<circle cx="' + f(156 + (k % 5) * 8) + '" cy="' + f(base - h * .7 + Math.floor(k / 5) * 7) + '" r="3" fill="' + c + '"/>';
+      for(var k = 0; k < n; k++) s += '<circle cx="' + f(156 + (k % 5) * 8) + '" cy="' + f(base - h * .7 + Math.floor(k / 5) * 7) + '" r="3" fill="none" stroke="' + ENCRE + '" stroke-width=".35"/>';
       base += pas;
     }
     return s;
@@ -120,8 +119,8 @@
     MOTS.forEach(function(m, i){
       var col = i % 4, row = Math.floor(i / 4); if(i >= 24) col = i - 24 + 1;
       var x = 14 + col * cw, y = 38 + row * rh, c = COULEURS[i % COULEURS.length];
-      s += '<rect x="' + f(x + 1) + '" y="' + f(y + 1) + '" width="' + f(cw - 2) + '" height="' + f(rh - 2) + '" rx="3.5" fill="#fff" stroke="' + c + '" stroke-width=".7"/>';
-      var r = ecrire(m[0], x + 4, y + 19, 11, true, c); s += r.svg; s += ecrire(m[0].toLowerCase(), r.x + 1.5, y + 19, 11, true, c).svg;
+      s += '<rect x="' + f(x + 1) + '" y="' + f(y + 1) + '" width="' + f(cw - 2) + '" height="' + f(rh - 2) + '" rx="3.5" fill="none" stroke="' + GRIS + '" stroke-width=".35"/>';
+      var r = ecrire(m[0], x + 4, y + 19, 11, true, ENCRE); s += r.svg; s += ecrire(m[0].toLowerCase(), r.x + 1.5, y + 19, 11, true, ENCRE).svg;
       s += image(m[2], x + cw - 17, y + 15, 14) + texte(m[1], x + 4, y + rh - 4.5, 3.6, ENCRE, true);
     });
     return s;
