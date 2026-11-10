@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiches d'écriture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{ --nuit:#1D2357; --ciel:#3B3F8F; --encre:#FFF8E7; --doux:#C9CCF2; --soleil:#FFD23F; --orange:#FF9F1C; --panneau:#272C6B; --panneau2:#323889;
+  --police:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",system-ui,sans-serif; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:linear-gradient(var(--nuit),var(--ciel)) fixed;color:var(--encre);font-family:var(--police);min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+.barre{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.barre h1{margin:0;font-size:clamp(1.4rem,4vw,2rem);color:var(--soleil);text-shadow:0 3px 0 var(--orange);flex:1}
+.rond{background:var(--panneau);border-radius:999px;padding:9px 15px;font-weight:700;text-decoration:none;color:var(--encre)}
+.page{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:16px;padding:0 16px 24px;max-width:1300px;margin:0 auto}
+.choix{background:var(--panneau);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:12px;align-self:start}
+.choix h2{margin:4px 0 0;font-size:1.05rem;color:var(--doux);font-weight:600}
+.types{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.types button{background:var(--panneau2);border-radius:16px;padding:10px 8px;font-weight:600;font-size:1rem;border:3px solid transparent;text-align:left;line-height:1.2}
+.types button span{font-size:1.5rem;display:block}
+.types button.on{border-color:var(--soleil);background:#454CB0}
+.lettres{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.lettres button{background:#FFF8E7;color:var(--nuit);border-radius:12px;font-size:1.35rem;font-weight:700;aspect-ratio:1;border:3px solid transparent}
+.lettres button.on{border-color:var(--soleil);background:var(--soleil)}
+.champ{display:flex;flex-direction:column;gap:6px}
+.champ input{font:inherit;font-size:1.25rem;border-radius:14px;border:3px solid var(--panneau2);background:var(--nuit);color:var(--encre);padding:9px 12px;width:100%}
+.puces{display:flex;flex-wrap:wrap;gap:6px}
+.puces button{background:var(--panneau2);border-radius:999px;padding:7px 13px;font-weight:600;border:3px solid transparent}
+.puces button.on{border-color:var(--soleil);background:#454CB0}
+.imprimer{background:linear-gradient(135deg,#7BE495,#2EC4B6);color:var(--nuit);border-radius:18px;padding:14px;font-size:1.3rem;font-weight:700;box-shadow:0 5px 0 #1E8F85}
+.imprimer:active{transform:translateY(3px);box-shadow:0 2px 0 #1E8F85}
+.aide{color:var(--doux);font-size:.9rem;line-height:1.4;margin:0}
+.apercu{display:flex;justify-content:center;align-items:flex-start}
+.feuille{background:#fff;width:min(100%,780px);aspect-ratio:210/297;box-shadow:0 10px 30px rgba(0,0,0,.35);border-radius:4px}
+.feuille svg{width:100%;height:100%;display:block}
+[hidden]{display:none !important}
+@media (max-width:820px){ .page{grid-template-columns:1fr} }
+/* à l'impression : seulement la feuille, en A4 */
+@page{ size:A4 portrait; margin:0 }
+@media print{
+  html,body{background:#fff !important}
+  .barre,.choix{display:none !important}
+  .page{display:block;padding:0;margin:0;max-width:none}
+  .apercu{display:block}
+  .feuille{width:210mm;height:296mm;box-shadow:none;border-radius:0;aspect-ratio:auto}
+}
+</style>
+</head>
+<body>
+<div class="barre"><a class="rond" href="../">🏠 Tous les jeux</a><h1>🖨️ Fiches d'écriture</h1></div>
+<div class="page">
+  <div class="choix">
+    <h2>1. Quelle fiche ?</h2>
+    <div class="types" id="types">
+      <button data-type="lettre" class="on"><span>🔤</span>Une lettre</button>
+      <button data-type="mot"><span>✍️</span>Un prénom ou un mot</button>
+      <button data-type="affiche"><span>🖼️</span>L'alphabet illustré</button>
+      <button data-type="alphabet"><span>✏️</span>L'alphabet à repasser</button>
+      <button data-type="chiffres"><span>🔢</span>Les chiffres</button>
+      <button data-type="phrase"><span>📝</span>Une phrase</button>
+    </div>
+    <div id="choixLettre">
+      <h2>2. Quelle lettre ?</h2>
+      <div class="lettres" id="lettres"></div>
+    </div>
+    <div id="choixMot" hidden class="champ">
+      <h2>2. Écris le prénom ou le mot</h2>
+      <input id="mot" maxlength="14" value="Mikael" autocomplete="off" aria-label="Le prénom ou le mot">
+      <div class="puces" id="prenoms"></div>
+    </div>
+    <div id="choixPhrase" hidden class="champ">
+      <h2>2. Écris la phrase (courte)</h2>
+      <input id="phrase" maxlength="28" value="Je suis content." autocomplete="off" aria-label="La phrase">
+    </div>
+    <div id="choixTaille">
+      <h2>Taille des lettres</h2>
+      <div class="puces" id="tailles"><button data-t="petite">Petite (grands)</button><button data-t="moyenne" class="on">Moyenne</button><button data-t="grande">Grande (petits)</button></div>
+    </div>
+    <button class="imprimer" id="imprimer">🖨️ Imprimer cette fiche</button>
+    <p class="aide">Seule la fiche affichée s'imprime (une page A4). Dans la fenêtre d'impression, garde la taille à 100 %.</p>
+  </div>
+  <div class="apercu"><div class="feuille"><svg id="svg" viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
+</div>
+<script src="police.js?v=1"></script>
+<script src="fiches.js?v=1"></script>
+</body>
+</html>
