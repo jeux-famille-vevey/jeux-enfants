@@ -8,6 +8,42 @@
    Après avoir ajouté ou modifié une histoire : lancer outils/enregistrer-histoires.py pour refaire les enregistrements. */
 window.LIVRES = [
 {
+  id:"lune", titre:"Aleyah va sur la Lune", auteur:"Une histoire écrite par Aleyah",
+  couverture:{ f:"lune", p:[["@fusee",80,84,40,"",""],["@drapeau",52,84,22,"balance","suisse"],["@aleyah",30,84,24,"saut","cosmo,joie,rire"]] }, age:"4-10 ans",
+  persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, aleyah:{ nom:"Aleyah", h:1.2, v:.95, c:"#FF8FD0", vx:"siwis+2" }, yusuf:{ nom:"Yusuf", h:1.2, v:1, c:"#FF9F1C", vx:"pierre+4" },
+           amyrah:{ nom:"Amyrah", h:1.3, v:.95, c:"#FFD23F", vx:"siwis+4" }, maman:{ nom:"Maman", h:1, v:.92, c:"#7BE495", vx:"siwis" }, baba:{ nom:"Baba", h:.9, v:.92, c:"#7FD3FF", vx:"tom" },
+           parents:{ nom:"Baba et Maman", h:1, v:.92, c:"#7FD3FF", vx:"siwis-1" }, tous:{ nom:"Tout le monde", h:1.2, v:1, c:"#FFD23F", vx:"siwis+3" } },
+  pages:[
+    { s:{ f:"salon", p:[["@baba",20,86,30,"","papa,debout,sourire"],["@maman",38,86,29,"","maman,debout,sourire"],["@aleyah",64,86,24,"saut","ecole,joie,rire"],["🌙",82,24,10,"vole"]] },
+      l:[["aleyah","« Baba, Maman ! Aujourd'hui, je veux aller sur la Lune ! »"],["parents","« D'accord ! »"]] },
+    { s:{ f:"salon", p:[["@luneCarton",64,62,30,"balance",""],["@baba",16,86,30,"","papa,salut,rire"],["@maman",34,86,29,"","maman,joie,rire"],["@aleyah",52,86,24,"","carton,debout,fache"]] },
+      l:[["narr","Alors ils lui fabriquent une Lune en carton… et un déguisement de cosmonaute en carton."],["narr","Mais Aleyah n'est pas contente du tout."]] },
+    { s:{ f:"salon", p:[["@aleyah",48,86,26,"","carton,salut,fache"],["💢",62,30,8,""]] },
+      l:[["aleyah","« Non ! Moi, je veux aller sur la Lune pour de vrai ! »"]] },
+    { s:{ f:"atelier", p:[["@fusee",58,84,40,"","chantier"],["@aleyah",24,86,24,"","ecole,salut,sourire"],["⏳",84,26,9,"vole"]] },
+      l:[["narr","Alors, pendant des années et des années, Aleyah construit une vraie fusée."]] },
+    { s:{ f:"rampe", p:[["@fusee",64,80,40,"",""],["@baba",14,86,30,"","papa,peur,surpris"],["@maman",30,86,29,"","maman,triste,triste"],["@aleyah",46,86,24,"","cosmo,salut,sourire"]] },
+      l:[["narr","Le jour du départ arrive. Baba et Maman ne veulent pas qu'elle parte."],["aleyah","« Ne vous inquiétez pas ! J'y vais, et tout se passera bien. »"]] },
+    { s:{ f:"rampe", p:[["@fusee",72,80,40,"",""],["@aleyah",16,86,24,"","cosmo,debout,surpris"],["@yusuf",34,86,19,"saut","cosmo,joie,rire"],["@amira",50,86,17,"saut","cosmo,joie,rire"]] },
+      l:[["yusuf","« Moi aussi, je veux venir ! »"],["amyrah","« Et moi aussi ! »"],["narr","Maman et Baba sont d'accord pour Yusuf. Et finalement, Amyrah vient aussi !"]] },
+    { s:{ f:"cockpit", p:[["@baba",77,46,18,"","papa,debout,rire"],["@maman",90,46,17,"","maman,debout,rire"],["🤫",62,20,8,"vole"]] },
+      l:[["narr","Mais chut… il y a un secret !"],["narr","Baba et Maman sont montés aussi. Ils se sont cachés dans le coffre de la fusée, sans qu'Aleyah le sache !"]] },
+    { s:{ f:"espace", p:[["@fusee",50,72,36,"vole","feu"],["✨",24,40,8,"vole"],["⭐",80,30,7,"vole"]] },
+      l:[["tous","« Trois, deux, un… décollage ! »"],["narr","Zou ! La fusée file dans l'espace, tout droit vers la Lune."]] },
+    { s:{ f:"lune", p:[["@fusee",84,84,38,"",""],["@aleyah",30,84,24,"saut","cosmo,joie,rire"],["@yusuf",48,84,19,"saut","cosmo,joie,rire"],["@amira",62,84,17,"saut","cosmo,joie,rire"]] },
+      l:[["narr","Ça y est : ils sont sur la Lune ! Ici, on saute très, très haut."]] },
+    { s:{ f:"lune", p:[["@drapeau",44,84,22,"balance","suisse"],["@aleyah",24,84,24,"","cosmo,joie,rire"],["@fusee",84,84,38,"",""]] },
+      l:[["narr","Aleyah plante le drapeau de la Suisse."],["aleyah","« Bonjour la Lune ! »"]] },
+    { s:{ f:"lune", p:[["@drapeau",20,84,22,"","suisse"],["@drapeau",36,84,26,"balance","aleyah"],["@aleyah",80,84,24,"saut","cosmo,joie,rire"]] },
+      l:[["narr","Et elle plante un autre drapeau, où c'est écrit : « Aleyah, la meilleure »."],["aleyah","« En fait, c'est moi la meilleure ! »"]] },
+    { s:{ f:"salon", p:[["@chaton",44,86,13,"saut",""],["@chaton",62,86,13,"",",gris"],["💦",34,80,8,""],["💦",74,80,8,""],["💦",54,66,6,""],["@aleyah",16,86,24,"","ecole,peur,surpris"],["@baba",86,86,30,"","papa,salut,fache"]] },
+      l:[["narr","Pour finir, quand ils reviennent sur la Terre… surprise !"],["narr","Lewis et Hamilton, les deux chats, ont fait pipi partout !"],["tous","« Beurk ! »"],["narr","Fin."]] }
+  ],
+  quiz:[ { q:"Où Aleyah veut-elle aller ?", c:["À la mer","Sur la Lune","Au zoo"], r:1 }, { q:"Que lui fabriquent Baba et Maman d'abord ?", c:["Une Lune en carton","Un gâteau","Une cabane"], r:0 },
+         { q:"Où se cachent Baba et Maman ?", c:["Sous le lit","Dans le coffre de la fusée","Dans le jardin"], r:1 }, { q:"Quel drapeau Aleyah plante-t-elle ?", c:["Le drapeau de la Suisse","Le drapeau des pirates"], r:0 },
+         { q:"Qu'ont fait Lewis et Hamilton ?", c:["Ils ont dormi","Ils ont fait pipi partout","Ils ont mangé un gâteau"], r:1 } ]
+},
+{
   id:"chat", titre:"Amira et le chat", auteur:"Une histoire écrite en famille",
   couverture:{ f:"chambre", p:[["@amira",36,86,19,"","robeJaune,joie,rire"],["@chaton",58,86,13,"saut","boite"]] }, age:"3-8 ans",
   persos:{ narr:{ nom:"", h:1, v:.9, vx:"siwis" }, amira:{ nom:"Amira", h:1.3, v:.95, c:"#FFD23F", vx:"siwis+4" }, maman:{ nom:"Maman", h:1, v:.92, c:"#7BE495", vx:"siwis" },

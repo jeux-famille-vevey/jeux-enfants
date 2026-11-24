@@ -66,6 +66,8 @@
     blouse:    { haut:"#FFFFFF", bas:"#3D4A5A", jambe:"pant", chaussure:"#2B2140", manche:"longue", robe:"#FFFFFF", poches:true },
     tshirt:    { haut:"#FF9F1C", bas:"#1D2357", jambe:"peau", chaussure:"#3D7BD9", manche:"courte" },
     papy:      { haut:"#8A5A3B", bas:"#4A4F5E", jambe:"pant", chaussure:"#2B2140", manche:"longue", col:true },
+    cosmo:     { haut:"#F2F4F8", bas:"#E2E6EE", jambe:"pant", chaussure:"#9AA0AE", manche:"longue", chapeau:"bulle", suisse:true },
+    carton:    { haut:"#C9A06A", bas:"#B8894E", jambe:"pant", chaussure:"#8A5A3B", manche:"longue", chapeau:"boiteCarton" },
     mamy:      { haut:"#E5484D", bas:"#E5484D", jambe:"peau", chaussure:"#22232B", manche:"longue", robe:"#C23B40", robeLongue:true }
   };
 
@@ -134,6 +136,7 @@
       chemin("M4 -72 l6 16", tenue.ceinture, 5) + chemin("M-2 -72 l-5 15", tenue.ceinture, 5);
     if(tenue.armure) s += chemin("M-22 -112 Q0 -104 22 -112", "#9AA0AE", 3) + chemin("M-24 -96 Q0 -88 24 -96", "#9AA0AE", 3) + '<path d="M-8 -118 L8 -118 L6 -100 L0 -94 L-6 -100Z" fill="#E5484D"/>';
     if(tenue.col) s += '<path d="M-10 -124 L0 -112 L10 -124Z" fill="#FFFFFF" stroke="' + TRAIT + '" stroke-width="1.5"/>' + rond(0, -104, 2, "#FFFFFF") + rond(0, -92, 2, "#FFFFFF") + rond(0, -80, 2, "#FFFFFF");
+    if(tenue.suisse) s += '<rect x="6" y="-116" width="18" height="18" rx="2" fill="#E5484D"/><path d="M15 -112 V-102 M10 -107 H20" stroke="#FFFFFF" stroke-width="3.5"/>' + chemin("M-20 -108 L-4 -108 M-20 -100 L-8 -100", "#9AA0AE", 3);
     if(tenue.logo) s += '<path d="M0 -116 L5 -104 L18 -104 L8 -96 L12 -84 L0 -91 L-12 -84 L-8 -96 L-18 -104 L-5 -104Z" fill="#FFD23F" stroke="' + TRAIT + '" stroke-width="1.5"/>';
     if(tenue.etoiles) [[-12,-104],[12,-92],[-6,-82],[16,-112]].forEach(function(p){ s += '<text x="' + p[0] + '" y="' + p[1] + '" font-size="11" text-anchor="middle" fill="#FFD23F">★</text>'; });
     // bras (et ce qu'on tient dans la main droite / le bouclier sur le bras gauche)
@@ -175,6 +178,9 @@
     if(c && c.indexOf("casqueCross") === 0){ var col = c.split(":")[1] || "#3D7BD9";
       return rond(0, -154, 40, col, ' stroke="' + TRAIT + '" stroke-width="2.5"') + '<path d="M-30 -166 Q0 -176 30 -166 L28 -142 Q0 -134 -28 -142Z" fill="#2B2B3A"/>' +
         '<path d="M-22 -160 Q-4 -166 10 -160" stroke="#FFFFFF" stroke-width="3" fill="none" opacity=".6"/>' + '<path d="M-20 -194 Q0 -210 30 -196 L34 -186 Q4 -196 -20 -186Z" fill="' + col + '" stroke="' + TRAIT + '" stroke-width="2"/>'; }
+    if(c === "bulle") return rond(0, -154, 46, "#BFE8FF", ' opacity=".28" stroke="#FFFFFF" stroke-width="4"') + chemin("M-30 -176 Q-20 -192 -4 -196", "#FFFFFF", 5) + '<rect x="-26" y="-112" width="52" height="10" rx="5" fill="#C9CED8" stroke="' + TRAIT + '" stroke-width="1.5"/>';
+    if(c === "boiteCarton") return '<path d="M-44 -198 H44 V-108 H-44Z M-28 -176 Q-28 -124 0 -124 Q28 -124 28 -176 Q28 -186 0 -186 Q-28 -186 -28 -176Z" fill="#C9A06A" fill-rule="evenodd" stroke="#8A5A3B" stroke-width="3"/>' +
+      chemin("M-44 -150 H-30 M30 -150 H44", "#E8D3A8", 6) + ligne(-30, -198, -38, -214, "#8A5A3B", 3) + rond(-38, -216, 5, "#E5484D");
     if(c === "casque") return '<path d="M-36 -150 Q-38 -194 0 -196 Q38 -194 36 -150 L26 -150 L26 -164 L-26 -164 L-26 -150Z" fill="#C9CED8" stroke="' + TRAIT + '" stroke-width="2" stroke-linejoin="round"/>' +
       '<path d="M0 -196 Q10 -214 26 -214 Q16 -204 4 -194Z" fill="#E5484D"/>' + chemin("M-30 -170 L30 -170", "#9AA0AE", 3);
     return "";
@@ -205,6 +211,7 @@
   /* ---------- un petit chat roux (assis) ; option « boite » : il dépasse d'un carton ---------- */
   function chaton(opts){
     var o = (opts || "").split(","), boite = o[0] === "boite", s = "", C = "#F4A340", F = "#D9822B";
+    if(o[1] === "gris"){ C = "#A9AEBC"; F = "#7E8494"; }
     if(!boite) s += chemin("M28 -8 Q62 -10 58 -46 Q56 -62 46 -58", C, 10) + chemin("M50 -40 L56 -50", F, 4);                 // la queue
     s += ovale(0, -30, 30, 30, C, ' stroke="' + TRAIT + '" stroke-width="2"') + chemin("M-12 -50 L-8 -40 M0 -54 L0 -42 M12 -50 L8 -40", F, 4); // le corps
     s += ovale(-14, -2, 10, 6, "#FFF1DE") + ovale(14, -2, 10, 6, "#FFF1DE");                                                    // les pattes
@@ -218,6 +225,31 @@
     if(boite) s += '<path d="M-56 -36 L56 -36 L52 0 L-52 0Z" fill="#C8955A" stroke="' + TRAIT + '" stroke-width="2"/><path d="M-56 -36 L-74 -56 L-40 -50Z M56 -36 L74 -56 L40 -50Z" fill="#B5814A" stroke="' + TRAIT + '" stroke-width="2"/>' +
       chemin("M-20 -18 L20 -18", "#A6733F", 4);
     return s;
+  }
+  /* ---------- l'histoire de la Lune : la fusée, la Lune en carton, les drapeaux ---------- */
+  function fusee(opts){
+    var o = (opts || "").split(","), chantier = o[0] === "chantier", feu = o[0] === "feu", s = "", B = chantier ? "#C9CED8" : "#FFFFFF", R = chantier ? "#9AA0AE" : "#E5484D";
+    if(feu) s += '<path d="M-40 -10 Q0 120 40 -10Z" fill="#FF9F1C"/><path d="M-24 -10 Q0 70 24 -10Z" fill="#FFD23F"/>';
+    s += '<path d="M-60 -20 L-110 30 L-110 -40 L-60 -120Z M60 -20 L110 30 L110 -40 L60 -120Z" fill="' + R + '" stroke="' + TRAIT + '" stroke-width="3" stroke-linejoin="round"/>';
+    s += '<path d="M-60 -10 L-60 -300 Q-60 -400 0 -440 Q60 -400 60 -300 L60 -10Z" fill="' + B + '" stroke="' + TRAIT + '" stroke-width="3"/>';
+    if(!chantier) s += '<path d="M-48 -360 Q-30 -410 0 -432 Q30 -410 48 -360Z" fill="#E5484D"/><rect x="-60" y="-80" width="120" height="22" fill="#E5484D"/>';
+    s += rond(0, -270, 32, "#5A5F6E", ' stroke="' + TRAIT + '" stroke-width="3"') + rond(0, -270, 24, chantier ? "#8A93A8" : "#7FD3FF") + chemin("M-12 -282 Q-6 -290 4 -290", "#FFFFFF", 4);
+    if(!chantier) s += '<rect x="-20" y="-200" width="40" height="40" rx="4" fill="#E5484D"/><path d="M0 -192 V-168 M-12 -180 H12" stroke="#FFFFFF" stroke-width="7"/>';
+    if(chantier){ s += '<path d="M-80 0 V-330 M80 0 V-330" stroke="#FFB020" stroke-width="7"/>'; for(var y = -40; y > -330; y -= 60) s += chemin("M-80 " + y + " H80", "#FFB020", 6);
+      s += '<rect x="-60" y="-440" width="120" height="120" fill="#FFFFFF" opacity="0"/>' + '<text x="-40" y="-120" font-size="34">🔧</text><text x="18" y="-330" font-size="30">🔩</text>'; }
+    return s;
+  }
+  function luneCarton(){
+    var s = ligne(0, -260, 0, -150, "#8A5A3B", 2) + rond(0, -80, 72, "#D7B57E", ' stroke="#8A5A3B" stroke-width="4"');
+    [[-26,-104,16],[24,-60,20],[-10,-40,10],[30,-112,9]].forEach(function(c){ s += rond(c[0], c[1], c[2], "#B98E52"); });
+    return s + '<rect x="-58" y="-136" width="40" height="12" fill="#E8DCC0" opacity=".9" transform="rotate(-20 -38 -130)"/><rect x="24" y="-22" width="40" height="12" fill="#E8DCC0" opacity=".9" transform="rotate(25 44 -16)"/>';
+  }
+  function drapeau(opts){
+    var o = (opts || "").split(","), s = ligne(0, 0, 0, -200, "#9AA0AE", 6) + rond(0, -202, 6, "#FFD23F");
+    if(o[0] === "suisse") return s + '<rect x="2" y="-196" width="84" height="84" fill="#E5484D"/><path d="M44 -178 V-130 M20 -154 H68" stroke="#FFFFFF" stroke-width="16"/>';
+    return s + '<path d="M2 -198 H200 L178 -160 L200 -122 H2Z" fill="#FF6FB0" stroke="' + TRAIT + '" stroke-width="2"/>' +
+      '<text x="92" y="-166" text-anchor="middle" font-size="30" font-weight="700" fill="#FFFFFF" font-family="Fredoka, Arial, sans-serif">Aleyah</text>' +
+      '<text x="92" y="-133" text-anchor="middle" font-size="23" font-weight="700" fill="#FFF35C" font-family="Fredoka, Arial, sans-serif">la meilleure ★</text>';
   }
   /* ---------- Balou, le ballon magique ---------- */
   function balou(opts){
@@ -436,6 +468,9 @@
     // l'histoire de motocross
     gigi: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F", haut:"#3D7BD9" }); },
     chaton: chaton,
+    fusee: fusee,
+    luneCarton: luneCarton,
+    drapeau: drapeau,
     docteure: function(opts){ return enfant(opts, { peau:"#E8B98E", cheveux:"#6B3E23", longs:true }); },
     youssouf: function(opts){ return enfant(opts, { peau:"#C98E62", cheveux:"#22150F" }); },
     moto: motoCross,
@@ -443,5 +478,5 @@
     pilote: function(opts){ var o = (opts || "").split(","), c = o[3] || "#3D7BD9"; return enfant(o.slice(0, 3).join(","), { peau:"#E8B98E", cheveux:"#22150F", haut:c, casque:c }); }
   };
   // hauteur dessinée (unités) de chaque personnage, pour la mise à l'échelle
-  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110, moto:230, podium:120, diplo:330, trex:240, chaton:110 };
+  window.DESSINS_HAUTEUR = { balou:200, grognon:250, mikaelLit:200, zouli:190, soucoupe:110, moto:230, podium:120, diplo:330, trex:240, chaton:110, fusee:440, luneCarton:260, drapeau:210 };
 })();
