@@ -43,8 +43,13 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
 #place{position:absolute;top:58px;left:50%;transform:translateX(-50%) skewX(-10deg);font-size:clamp(3rem,11vw,5.2rem);font-weight:700;font-style:italic;color:#fff;text-shadow:0 4px 0 #3B3FCF,0 0 14px rgba(0,0,0,.25);line-height:1}
 #place sup{font-size:.45em;vertical-align:top;margin-left:2px}
 #gain{position:absolute;top:60px;right:12px;background:var(--panel);border-radius:14px;padding:6px 11px;font-weight:700}
-#message{position:absolute;top:27%;left:50%;transform:translate(-50%,-50%);font-size:clamp(1.8rem,7vw,3.6rem);font-weight:700;color:var(--sun);text-shadow:0 4px 0 var(--tang),0 0 18px rgba(0,0,0,.35);opacity:0;transition:opacity .25s;text-align:center;white-space:nowrap}
+#message{position:absolute;top:27%;left:50%;transform:translate(-50%,-50%);font-size:clamp(1.8rem,7vw,3.6rem);font-weight:700;color:var(--sun);text-shadow:0 4px 0 var(--tang),0 0 18px rgba(0,0,0,.35);opacity:0;transition:opacity .25s;text-align:center;width:92vw;line-height:1.1}
 #message.on{opacity:1}
+#barre{position:absolute;right:16px;top:130px;bottom:140px;width:8px;border-radius:99px;background:rgba(29,35,87,.45)}
+#barre i{position:absolute;left:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(29,35,87,.5);transition:top .2s linear}
+#barre i.moi{width:20px;height:20px;margin:-10px 0 0 -10px;background:#FF9F1C;box-shadow:0 0 0 3px #fff;z-index:2}
+.puces button:disabled{opacity:.45}
+.gros:disabled{filter:grayscale(.6);opacity:.7}
 @media (max-width:600px){ #place{top:72px} #gain{top:76px} #manche{font-size:.9rem} }
 #decompte{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-size:clamp(5rem,26vw,11rem);font-weight:700;color:#FFF35C;text-shadow:0 7px 0 #8E5BC4,0 0 30px rgba(0,0,0,.3)}
 #astuce{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:var(--panel);border-radius:999px;padding:8px 16px;font-weight:600;max-width:92vw;text-align:center;transition:opacity .5s}
@@ -72,6 +77,8 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
     <p class="sous">Glisse sur le toboggan géant dans ta bouée, pousse les autres pour les faire tomber, envole-toi par-dessus le bord pour couper… et atterris au milieu de la piscine !</p>
     <h2>Qui joue ?</h2>
     <div class="puces" id="profils"></div>
+    <h2>Tu joues avec…</h2>
+    <div class="puces" id="persos"></div>
     <span id="pieces">🪙 0</span>
     <button class="gros" id="jouer"><span class="e">🏆</span><span>La Coupe de la Plage<small>3 manches : qualifie-toi jusqu'à la finale</small></span></button>
     <button class="gros vert" id="libre"><span class="e">🛟</span><span>Une course pour s'amuser<small>Sans élimination</small></span></button>
@@ -89,6 +96,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
   </div>
   <div id="place">16<sup>e</sup></div>
   <div id="gain">🪙 0</div>
+  <div id="barre"></div>
   <div id="message"></div>
   <div id="decompte"></div>
   <div id="astuce"></div>
@@ -105,6 +113,7 @@ button{font:inherit;cursor:pointer;border:0;color:inherit}
     <button class="gros bleu" id="finMenu"><span class="e">🏠</span><span>Menu</span></button>
   </div>
 </div>
-<script type="module" src="jeu.js?v=1"></script>
+<script type="importmap">{"imports":{"three":"../course3d/lib/three.module.min.js"}}</script>
+<script type="module" src="jeu.js?v=2"></script>
 </body>
 </html>

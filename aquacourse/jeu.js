@@ -4,6 +4,8 @@
 import * as THREE from "../course3d/lib/three.module.min.js";
 import { profils, avatarDe, creerAvatar, animerAvatar, auHasard } from "../commun/avatar.js";
 import { lireManette } from "../commun/manette.js";
+import { GLTFLoader } from "./lib/GLTFLoader.js";
+import * as SkeletonUtils from "./lib/SkeletonUtils.js";
 
 const $ = (id) => document.getElementById(id);
 const lire = (k, d) => { try{ const v = localStorage.getItem(k); return v === null ? d : v; }catch(e){ return d; } };
@@ -12,21 +14,34 @@ const tactile = matchMedia("(pointer: coarse)").matches || new URLSearchParams(l
 const UP = new THREE.Vector3(0, 1, 0);
 const R = 4.2;            // le rayon du tube du toboggan
 const THMAX = 1.38;       // jusqu'où monte le bord (en radians depuis le fond)
-const GV = 14; const CF = .55;   // la force qui pousse vers l'extérieur dans les virages (adoucie)
-           // la gravité quand on vole
+const GV = 14;            // la gravité quand on vole
+const CF = .55;           // la force qui pousse vers l'extérieur dans les virages (adoucie)
 const NB_BOTS = 15;
 const COUPE = [{ nom: "Manche 1", qualif: 10 }, { nom: "Manche 2", qualif: 5 }, { nom: "Finale", qualif: 1 }];
 const NOMS = ["Léo", "Zoé", "Noah", "Lina", "Sami", "Inès", "Tom", "Maya", "Adam", "Jade", "Ilyas", "Rose", "Nino", "Lou", "Yanis", "Mia", "Eliott", "Sara", "Hugo", "Nour"];
+/* les animaux (modèles 3D libres CC0 « Free Low-Poly Animals » de Vuena, trouvés sur GitHub) */
+const ANIMAUX = { chat: { e: "🐱", nom: "Chat" }, renard: { e: "🦊", nom: "Renard" }, hibou: { e: "🦉", nom: "Hibou" } };
+const modeles = {};
+const chargement = Promise.all(Object.keys(ANIMAUX).map(n => new GLTFLoader().loadAsync("animaux/" + n + ".glb").then(g => { modeles[n] = g; }).catch(e => console.warn("animal", n, e))));
 const COULEURS_BOUEE = ["#FF6F9F", "#4CC9F0", "#3FCF6A", "#8E5BC4", "#FFD23F", "#E5484D", "#FFFFFF", "#2EC4B6", "#FF9F1C"];
 
 /* ================= le menu ================= */
 let profil = lire("avatar-profil", "mikael"); if(!profils().some(p => p.id === profil)) profil = profils()[0].id;
 const cleP = () => "aquacourse-pieces-" + profil;
 function majPieces(){ $("pieces").textContent = "🪙 " + (parseInt(lire(cleP(), "0"), 10) || 0) + " pièces"; }
+const clePerso = () => "aquacourse-perso-" + profil;
+function remplirPersos(){
+  const box = $("persos"); box.innerHTML = ""; const choix = lire(clePerso(), "moi");
+  [["moi", "🧑", "Mon personnage"], ...Object.entries(ANIMAUX).map(([k, a]) => [k, a.e, a.nom])].forEach(([k, e, nom]) => {
+    const b = document.createElement("button"); b.textContent = e + " " + nom; if(k === choix) b.className = "on";
+    if(k !== "moi" && !modeles[k]) b.disabled = true;
+    b.onclick = () => { ecrire(clePerso(), k); remplirPersos(); vitrine(); }; box.appendChild(b); });
+}
+function persoChoisi(){ const k = lire(clePerso(), "moi"); return k !== "moi" && modeles[k] ? { animal: k } : { cfg: avatarDe(profil) }; }
 function remplirProfils(){
   const box = $("profils"); box.innerHTML = "";
   profils().forEach(p => { const b = document.createElement("button"); b.textContent = p.e + " " + p.nom; if(p.id === profil) b.className = "on";
-    b.onclick = () => { profil = p.id; ecrire("avatar-profil", profil); remplirProfils(); vitrine(); majPieces(); }; box.appendChild(b); });
+    b.onclick = () => { profil = p.id; ecrire("avatar-profil", profil); remplirProfils(); remplirPersos(); vitrine(); majPieces(); }; box.appendChild(b); });
 }
 $("monPerso").onclick = () => { location.href = "../avatar/?profil=" + encodeURIComponent(profil) + "&retour=../aquacourse/"; };
 $("aide").innerHTML = tactile
@@ -36,12 +51,20 @@ $("aide").innerHTML = tactile
 /* ================= la scène ================= */
 const canvas = $("c");
 const rendu = new THREE.WebGLRenderer({ canvas, antialias: !tactile });
-rendu.setPixelRatio(Math.min(devicePixelRatio || 1, tactile ? 1.5 : 1.5)); rendu.outputColorSpace = THREE.SRGBColorSpace;
-const scene = new THREE.Scene(); scene.background = new THREE.Color("#8FD6FF"); scene.fog = new THREE.Fog("#C4E9FF", 300, 1400);
+rendu.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5)); rendu.outputColorSpace = THREE.SRGBColorSpace;
+rendu.shadowMap.enabled = true; rendu.shadowMap.type = tactile ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene(); scene.background = new THREE.Color("#BFE7FF"); scene.fog = new THREE.Fog("#C4E9FF", 300, 1400);
 const camera = new THREE.PerspectiveCamera(62, 1, .3, 5000);
 scene.add(new THREE.HemisphereLight("#FFFFFF", "#9CC7D9", 1.6));
-const soleil = new THREE.DirectionalLight("#FFF2D8", 1.9); soleil.position.set(-200, 300, 150); scene.add(soleil);
-function taille(){ rendu.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.fov = camera.aspect < 1 ? 74 : 62; camera.updateProjectionMatrix(); }
+const soleil = new THREE.DirectionalLight("#FFF2D8", 2.1); soleil.position.set(-60, 100, 50); scene.add(soleil); scene.add(soleil.target);
+soleil.castShadow = true; soleil.shadow.mapSize.set(tactile ? 1024 : 2048, tactile ? 1024 : 2048); soleil.shadow.bias = -.0015; soleil.shadow.normalBias = .04;
+Object.assign(soleil.shadow.camera, { left: -32, right: 32, top: 32, bottom: -32, near: 10, far: 260 });
+const ciel = new THREE.Mesh(new THREE.SphereGeometry(3000, 32, 16), new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, fog: false,
+  vertexShader: "varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }",
+  fragmentShader: "varying vec3 vP; void main(){ float h = clamp(vP.y, 0., 1.); vec3 c = mix(vec3(.80, .93, 1.), vec3(.20, .55, .97), pow(h, .55)); float s = max(dot(vP, normalize(vec3(-.5, .45, .6))), 0.); c += vec3(1., .9, .6) * (pow(s, 400.) * 2. + pow(s, 12.) * .25); gl_FragColor = vec4(c, 1.); }" }));
+ciel.renderOrder = -1; scene.add(ciel);
+let fovBase = 62;
+function taille(){ rendu.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; fovBase = camera.aspect < 1 ? 74 : 62; camera.fov = fovBase; camera.updateProjectionMatrix(); }
 addEventListener("resize", taille); taille();
 const mat = (c, o) => new THREE.MeshLambertMaterial(Object.assign({ color: c }, o || {}));
 function texture(dessin, w, h){ const c = document.createElement("canvas"); c.width = w; c.height = h; dessin(c.getContext("2d"), w, h);
@@ -49,14 +72,17 @@ function texture(dessin, w, h){ const c = document.createElement("canvas"); c.wi
 function alea(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
 /* ---- la mer, les nuages ---- */
-const mer = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), mat("#3FB6F0")); mer.rotation.x = -Math.PI / 2; scene.add(mer);
-const lagon = new THREE.Mesh(new THREE.CircleGeometry(240, 60), mat("#7FDDF5")); lagon.rotation.x = -Math.PI / 2; lagon.position.y = .05; scene.add(lagon);
+const texMer = texture((g, w, h) => { g.fillStyle = "#3FB6F0"; g.fillRect(0, 0, w, h); g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 2;
+  for(let i = 0; i < 70; i++){ const x = Math.random() * w, y = Math.random() * h, l = 6 + Math.random() * 14; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + l / 2, y - 3, x + l, y); g.stroke(); } }, 256, 256);
+texMer.wrapS = texMer.wrapT = THREE.RepeatWrapping; texMer.repeat.set(120, 120);
+const mer = new THREE.Mesh(new THREE.PlaneGeometry(6000, 6000), mat("#FFFFFF", { map: texMer })); mer.rotation.x = -Math.PI / 2; scene.add(mer);
+const lagon = new THREE.Mesh(new THREE.CircleGeometry(240, 60), mat("#7FDDF5", { transparent: true, opacity: .75 })); lagon.rotation.x = -Math.PI / 2; lagon.position.y = .05; scene.add(lagon);
 (function(){ const blanc = mat("#FFFFFF", { emissive: "#BFCFE0" }), r = alea(7);
   for(let i = 0; i < 26; i++){ const g = new THREE.Group(), a = r() * Math.PI * 2, d = 600 + r() * 700;
     for(let k = 0; k < 5; k++){ const s = new THREE.Mesh(new THREE.SphereGeometry(30 + r() * 30, 10, 8), blanc); s.position.set(k * 40 - 80 + r() * 20, r() * 20, r() * 30); s.scale.y = .6; g.add(s); }
     g.position.set(Math.cos(a) * d, 90 + r() * 160, Math.sin(a) * d); g.lookAt(0, g.position.y, 0); scene.add(g); } })();
 // l'île
-const ile = new THREE.Mesh(new THREE.CylinderGeometry(180, 192, 4, 64), mat("#F2D9A0")); ile.position.y = -1.6; scene.add(ile);
+const ile = new THREE.Mesh(new THREE.CylinderGeometry(180, 192, 4, 64), mat("#F2D9A0")); ile.position.y = -1.6; ile.receiveShadow = true; scene.add(ile);
 
 /* ================= le toboggan (fabriqué à chaque course) ================= */
 const texPiste = (() => { const t = texture((g, w, h) => {
@@ -67,16 +93,25 @@ const texPiste = (() => { const t = texture((g, w, h) => {
     g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 4; g.beginPath(); for(let x = 0; x <= w; x += 4) g.lineTo(x, y0 + 70 + Math.sin(x / w * Math.PI * 4) * 6); g.stroke(); }
 }, 128, 256); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; })();
 const matPiste = new THREE.MeshLambertMaterial({ map: texPiste, side: THREE.DoubleSide });
+const texEauTob = (() => { const t = texture((g, w, h) => { g.clearRect(0, 0, w, h);
+  for(let i = 0; i < 40; i++){ const x = Math.random() * w, y = Math.random() * h, l = 10 + Math.random() * 40; g.strokeStyle = "rgba(255,255,255," + (.25 + Math.random() * .45) + ")"; g.lineWidth = 1.5 + Math.random() * 2.5;
+    g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x + 4, y + l * .3, x - 4, y + l * .6, x, y + l); g.stroke(); }
+  const gr = g.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, "rgba(120,220,255,0)"); gr.addColorStop(.5, "rgba(120,220,255,.35)"); gr.addColorStop(1, "rgba(120,220,255,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+}, 64, 256); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; })();
+const matEauTob = new THREE.MeshBasicMaterial({ map: texEauTob, transparent: true, depthWrite: false, side: THREE.DoubleSide });
+const texBoost = texture((g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = "rgba(255,210,63,.95)"; g.strokeStyle = "#FF9F1C"; g.lineWidth = 6;
+  for(let k = 0; k < 2; k++){ const y = k * h / 2 + 10; g.beginPath(); g.moveTo(10, y + 60); g.lineTo(w / 2, y + 8); g.lineTo(w - 10, y + 60); g.lineTo(w - 10, y + 100); g.lineTo(w / 2, y + 48); g.lineTo(10, y + 100); g.closePath(); g.fill(); g.stroke(); } }, 128, 256);
+const matBoost = new THREE.MeshBasicMaterial({ map: texBoost, transparent: true, depthWrite: false, side: THREE.DoubleSide });
 const texCible = texture((g, w, h) => { const c = ["#3FB6F0", "#FFFFFF", "#E5484D", "#FFFFFF", "#FFD23F"]; c.forEach((col, i) => { g.fillStyle = col; g.beginPath(); g.arc(w / 2, h / 2, w / 2 * (1 - i * .2), 0, Math.PI * 2); g.fill(); }); }, 256, 256);
 let piste = null;
 
 function construirePiste(seed){
   if(piste) scene.remove(piste.groupe);
   const rnd = alea(seed), groupe = new THREE.Group();
-  const H = 60, amp = 3 + rnd() * 4, freq = 2 + Math.floor(rnd() * 3), ph = rnd() * 6, aMax = 2.35 * Math.PI * 2, sens = rnd() < .5 ? 1 : -1, ang0 = rnd() * Math.PI * 2;
+  const H = 60, nChutes = 5 + Math.floor(rnd() * 3), amp = 3 + rnd() * 4, freq = 2 + Math.floor(rnd() * 3), ph = rnd() * 6, aMax = 2.35 * Math.PI * 2, sens = rnd() < .5 ? 1 : -1, ang0 = rnd() * Math.PI * 2;
   const brut = [];
   for(let a = 0; a <= aMax; a += .004){ const r = 16 + a * 4.2 + amp * Math.sin(a * freq + ph) * Math.min(1, a / 1.5), an = ang0 + a * sens;
-    brut.push(new THREE.Vector3(Math.cos(an) * r, H - a * ((H - 16) / aMax) + Math.sin(a * 7) * .45 * Math.min(1, a), Math.sin(an) * r)); }
+    brut.push(new THREE.Vector3(Math.cos(an) * r, H - (H - 16) * (a / aMax + .021 * Math.sin(a / aMax * Math.PI * 2 * nChutes)) + Math.sin(a * 7) * .3 * Math.min(1, a), Math.sin(an) * r)); }
   const fin0 = brut[brut.length - 1], dirFin = fin0.clone().sub(brut[brut.length - 2]).setY(0).normalize(), yFin = fin0.y;
   for(let d = .3; d <= 45; d += .3) brut.push(fin0.clone().addScaledVector(dirFin, d).setY(yFin - (yFin - 6) * (1 - Math.cos(Math.PI * d / 45)) / 2));
   // tous les mètres
@@ -92,7 +127,16 @@ function construirePiste(seed){
     const p = P[i].clone().addScaledVector(U[i], R * (1 - Math.cos(th))).addScaledVector(S[i], R * Math.sin(th)); pos.set([p.x, p.y, p.z], q * 3); uv.set([k / (NT - 1), i / 9], q * 2); }
   for(let i = 0; i < n - 1; i++) for(let k = 0; k < NT - 1; k++){ const a = i * NT + k, b = a + NT; idx.push(a, b, a + 1, b, b + 1, a + 1); }
   const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2)); geo.setIndex(idx); geo.computeVertexNormals();
-  groupe.add(new THREE.Mesh(geo, matPiste));
+  const tube = new THREE.Mesh(geo, matPiste); tube.receiveShadow = true; groupe.add(tube);
+  // l'eau qui coule au fond du toboggan, et les flèches turbo
+  const bande = (th0, th1, i0, i1, decal, nt, vRep) => { const ni = i1 - i0 + 1, p2 = new Float32Array(ni * nt * 3), u2 = new Float32Array(ni * nt * 2), id2 = [];
+    for(let i = i0; i <= i1; i++) for(let k = 0; k < nt; k++){ const th = th0 + (th1 - th0) * k / (nt - 1), q = (i - i0) * nt + k, nr = U[i].clone().multiplyScalar(Math.cos(th)).addScaledVector(S[i], -Math.sin(th));
+      const p = P[i].clone().addScaledVector(U[i], R * (1 - Math.cos(th))).addScaledVector(S[i], R * Math.sin(th)).addScaledVector(nr, decal); p2.set([p.x, p.y, p.z], q * 3); u2.set([k / (nt - 1), (i - i0) / vRep], q * 2); }
+    for(let i = 0; i < ni - 1; i++) for(let k = 0; k < nt - 1; k++){ const a = i * nt + k, b = a + nt; id2.push(a, b, a + 1, b, b + 1, a + 1); }
+    const g2 = new THREE.BufferGeometry(); g2.setAttribute("position", new THREE.BufferAttribute(p2, 3)); g2.setAttribute("uv", new THREE.BufferAttribute(u2, 2)); g2.setIndex(id2); return g2; };
+  const eauTob = new THREE.Mesh(bande(-1, 1, 0, n - 1, .07, 9, 7), matEauTob); eauTob.renderOrder = 1; groupe.add(eauTob);
+  const boosts = [];
+  for(let s0 = 70; s0 < n - 70; s0 += 95 + Math.floor(rnd() * 40)){ boosts.push(s0); const b = new THREE.Mesh(bande(-.4, .4, s0, s0 + 4, .12, 4, 4), matBoost); b.renderOrder = 2; groupe.add(b); }
   // les bords blancs
   [-1, 1].forEach(sg => { const pts = []; for(let i = 0; i < n; i += 3){ const th = sg * (THMAX + .06); pts.push(P[i].clone().addScaledVector(U[i], R * (1 - Math.cos(th))).addScaledVector(S[i], R * Math.sin(th))); }
     groupe.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), Math.floor(n / 2), .3, 6, false), mat("#FFFFFF"))); });
@@ -121,7 +165,7 @@ function construirePiste(seed){
     if(rnd() < .5){ const h = new THREE.Mesh(new THREE.CircleGeometry(4 + rnd() * 4, 12), herbe); h.rotation.x = -Math.PI / 2; h.position.y = .45; g.add(h); }
     g.position.set(x, .4, z); groupe.add(g); }
   scene.add(groupe);
-  piste = { n, L: n - 1, P, T, S, U, K, groupe, piscine, dirFin: dF, H };
+  piste = { n, L: n - 1, P, T, S, U, K, groupe, piscine, dirFin: dF, H, boosts };
 }
 const F = { p: new THREE.Vector3(), T: new THREE.Vector3(), S: new THREE.Vector3(), U: new THREE.Vector3(), k: 0 };
 function cadre(s){
@@ -156,10 +200,15 @@ function bruit(d, v, f){ const a = audio(); if(!a || !sonOn) return; const n = M
 const SON = {
   bip: () => note(660, 0, .18, "square", .07), go: () => note(1320, 0, .4, "square", .08), boing: () => glisse(520, 170, .3, "square", .06),
   envol: () => glisse(300, 1200, .5, "triangle", .1), ko: () => { [880, 660, 440].forEach((f, i) => note(f, i * .08, .15, "triangle", .1)); },
-  splash: () => bruit(.8, .35, 2600), bravo: () => [523, 659, 784, 1046, 1318].forEach((f, i) => note(f, i * .1, .35, "triangle", .1)),
+  splash: () => bruit(.8, .35, 2600), boost: () => glisse(400, 1600, .35, "triangle", .1), victoire: () => SON.bravo(), qualifie: () => SON.bravo(), bravo: () => [523, 659, 784, 1046, 1318].forEach((f, i) => note(f, i * .1, .35, "triangle", .1)),
   piece: () => { note(1318, 0, .12); note(1760, .07, .2); }, rate: () => glisse(400, 150, .6, "sawtooth", .05)
 };
-function son(n){ if(sonOn) try{ SON[n](); }catch(e){} }
+const FICHIERS = { boost: "boost", envol: "envol", victoire: "victoire", qualifie: "qualifie", rate: "rate" }, tampons = {};
+function chargerSons(){ const a = audio(); if(!a || chargerSons.fait) return; chargerSons.fait = true;
+  Object.entries(FICHIERS).forEach(([k, f]) => fetch("sons/" + f + ".mp3").then(r => r.arrayBuffer()).then(b => a.decodeAudioData(b)).then(t => { tampons[k] = t; }).catch(() => {})); }
+function son(n){ if(!sonOn) return; const a = audio(); chargerSons();
+  if(tampons[n] && a){ const s = a.createBufferSource(), g = a.createGain(); g.gain.value = .5; s.buffer = tampons[n]; s.connect(g); g.connect(a.destination); s.start(); return; }
+  try{ SON[n] && SON[n](); }catch(e){} }
 function sonEau(v){
   const a = audio(); if(!a) return;
   if(!eauSon){ const n = a.sampleRate * 2, b = a.createBuffer(1, n, a.sampleRate), x = b.getChannelData(0); for(let i = 0; i < n; i++) x[i] = Math.random() * 2 - 1;
@@ -170,18 +219,28 @@ $("sonBtn").onclick = () => { sonOn = !sonOn; ecrire("aquacourse-son", sonOn ? "
 $("sonBtn").textContent = sonOn ? "🔊" : "🔇";
 
 /* ================= les coureurs ================= */
-function creerCoureur(cfg, numero, couleurBouee){
+function creerCoureur(perso, numero, couleurBouee, leger){
   const g = new THREE.Group();
   const bouee = new THREE.Mesh(new THREE.TorusGeometry(.85, .36, 10, 22), mat(couleurBouee)); bouee.rotation.x = Math.PI / 2; bouee.position.y = .4; g.add(bouee);
   const bandes = new THREE.Mesh(new THREE.TorusGeometry(.85, .37, 10, 22, Math.PI / 3), mat("#FFFFFF")); bandes.rotation.x = Math.PI / 2; bandes.position.y = .4; g.add(bandes);
-  const av = creerAvatar(cfg, { numero, pose: "assis" }); av.scale.setScalar(.5); av.position.y = .5; g.add(av);
+  let av = null, anim = null;
+  if(perso.animal && modeles[perso.animal]){
+    const m = modeles[perso.animal], o = SkeletonUtils.clone(m.scene);
+    o.traverse(x => { if(x.isMesh){ const lod1 = /LOD1/i.test(x.name); x.visible = leger ? lod1 : !lod1; x.frustumCulled = false; } });
+    o.scale.setScalar(2.3); o.position.y = .3; g.add(o);
+    const mixer = new THREE.AnimationMixer(o), actions = {}; m.animations.forEach(a => { actions[a.name] = mixer.clipAction(a); });
+    anim = { mixer, actions, cur: null };
+  } else { av = creerAvatar(perso.cfg || auHasard(), { numero, pose: "assis" }); av.scale.setScalar(.5); av.position.y = .5; g.add(av); }
+  g.traverse(x => { if(x.isMesh) x.castShadow = true; });
   scene.add(g);
-  return { g, av, s: 0, th: 0, vth: 0, vs: 0, vt: 22, mode: "piste", pos: new THREE.Vector3(), vel: new THREE.Vector3(), tVol: 0, sDecol: 0, fini: false, ordre: 0, t: Math.random() * 10 };
+  return { g, av, anim, s: 0, th: 0, vth: 0, vs: 0, vt: 22, mode: "piste", pos: new THREE.Vector3(), vel: new THREE.Vector3(), tVol: 0, sDecol: 0, fini: false, ordre: 0, t: Math.random() * 10 };
 }
 let J = null, bots = [];
 function viderCoureurs(){ if(J) scene.remove(J.g); bots.forEach(b => scene.remove(b.g)); J = null; bots = []; }
 let persoVitrine = null;
-function vitrine(){ if(persoVitrine) scene.remove(persoVitrine.g); const P = profils().find(p => p.id === profil); persoVitrine = creerCoureur(avatarDe(profil), P && P.numero, "#FF9F1C"); }
+function vitrine(){ if(persoVitrine) scene.remove(persoVitrine.g); const P = profils().find(p => p.id === profil); persoVitrine = creerCoureur(persoChoisi(), P && P.numero, "#FF9F1C"); }
+function jouerAnim(r, nom){ const A = r.anim; if(!A) return; const a = A.actions[nom] || A.actions.idle; if(!a || A.cur === a) return;
+  a.reset().fadeIn(.2).play(); if(A.cur) A.cur.fadeOut(.2); A.cur = a; }
 
 /* ================= les commandes ================= */
 const touches = {};
@@ -210,12 +269,12 @@ function lancerCourse(){
   audio(); construirePiste((Math.random() * 1e9) | 0); viderCoureurs();
   if(persoVitrine){ scene.remove(persoVitrine.g); persoVitrine = null; }
   const P = profils().find(p => p.id === profil);
-  J = creerCoureur(avatarDe(profil), P && P.numero, "#FF9F1C"); J.joueur = true; J.nom = P ? P.nom : "Toi"; J.s = 2; J.vt = 25;
+  J = creerCoureur(persoChoisi(), P && P.numero, "#FF9F1C"); J.joueur = true; J.nom = P ? P.nom : "Toi"; J.s = 2; J.vt = 25;
   const noms = NOMS.slice().sort(() => Math.random() - .5);
-  for(let i = 0; i < NB_BOTS; i++){ const b = creerCoureur(auHasard(), 7 + i, COULEURS_BOUEE[i % COULEURS_BOUEE.length]); b.nom = noms[i]; b.s = 7 + Math.floor(i / 3) * 5; b.th = ((i % 3) - 1) * .6;
+  for(let i = 0; i < NB_BOTS; i++){ const sorte = Object.keys(modeles), b = creerCoureur(sorte.length && i % 5 < 3 ? { animal: sorte[i % sorte.length] } : { cfg: auHasard() }, 7 + i, COULEURS_BOUEE[i % COULEURS_BOUEE.length], true); b.cassecou = Math.random() < .35; b.nom = noms[i]; b.s = 7 + Math.floor(i / 3) * 5; b.th = ((i % 3) - 1) * .6;
     b.vt = 20.3 + Math.random() * 3.5 + (mode === "coupe" ? manche * .35 : 0); b.cible = b.th; b.tCible = 1 + Math.random() * 2; b.cdChoc = 0; bots.push(b); }
   [J, ...bots].forEach(r => { r.vs = 0; placer(r); });
-  ordreArrivee = 0; kos = 0; gains = { total: 0, detail: [] }; $("gain").textContent = "🪙 0";
+  ordreArrivee = 0; kos = 0; $("barre").innerHTML = ""; gains = { total: 0, detail: [] }; $("gain").textContent = "🪙 0";
   $("manche").textContent = mode === "coupe" ? "🏆 " + COUPE[manche].nom + " · top " + COUPE[manche].qualif : "🛟 Course libre";
   if(mode === "coupe" && COUPE[manche].qualif === 1) $("manche").textContent = "🏆 Finale : finis 1er !";
   etat = "decompte"; decompte = 3.6; $("menu").hidden = true; $("fin").hidden = true; $("hud").hidden = false;
@@ -228,9 +287,9 @@ function placer(r){ // dessiner le coureur à sa place
     cadre(r.s); surface(F, r.th, r.pos);
     const nrm = F.U.clone().multiplyScalar(Math.cos(r.th)).addScaledVector(F.S, -Math.sin(r.th)), x = new THREE.Vector3().crossVectors(nrm, F.T);
     r.g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, nrm, F.T)); r.g.position.copy(r.pos).addScaledVector(nrm, .05);
-  } else if(r.mode === "vol" || r.mode === "ko" || r.mode === "saut"){
+  } else if(r.mode === "vol" || r.mode === "saut"){
     r.g.position.copy(r.pos); const h = Math.hypot(r.vel.x, r.vel.z); if(h > .5) r.g.rotation.set(0, Math.atan2(r.vel.x, r.vel.z), 0);
-    if(r.mode === "ko"){ r.g.rotation.z = r.t * 9; r.g.rotation.x = r.t * 5; } else r.g.rotateX(-Math.max(-.5, Math.min(.5, r.vel.y * .03)));
+    if(r.ko){ r.g.rotation.z = r.t * 9; r.g.rotation.x = r.t * 5; } else r.g.rotateX(-Math.max(-.5, Math.min(.5, r.vel.y * .03)));
   } else if(r.mode === "piscine"){ r.g.position.copy(r.pos); r.g.position.y = .55 + Math.sin(r.t * 3) * .08; r.g.rotation.set(0, r.g.rotation.y + .004, 0); }
   r.g.visible = r.mode !== "cache";
 }
@@ -240,8 +299,9 @@ function decoller(r){
   const eTh = F.S.clone().multiplyScalar(Math.cos(r.th)).addScaledVector(F.U, Math.sin(r.th));
   r.vel.copy(F.T).multiplyScalar(r.vs).addScaledVector(eTh, R * r.vth).addScaledVector(UP, 4);
   r.sDecol = r.s; r.tVol = 0;
-  if(r.joueur){ r.mode = "vol"; son("envol"); message("🚀 Envolé !", 1); }
-  else { r.mode = "ko"; if(temps - (r.pousse || -9) < 2.2){ kos++; message(kos > 1 ? "💥 KO ! ×" + kos : "💥 KO !", 1.3); son("ko"); gagner(10, "KO"); } }
+  r.mode = "vol"; r.ko = false;
+  if(r.joueur){ son("envol"); message("🚀 Envolé !", 1); }
+  else { if(temps - (r.pousse || -9) < 2.2){ r.ko = true; kos++; message(kos > 1 ? "💥 KO ! ×" + kos : "💥 KO !", 1.3); son("ko"); gagner(10, "KO"); } }
 }
 function sautFinal(r){
   r.mode = "saut"; r.fini = true; r.ordre = ++ordreArrivee; cadre(piste.L - .01); surface(F, r.th, r.pos);
@@ -254,7 +314,8 @@ function avancerPiste(r, dt, volantA){
   cadre(r.s);
   const acc = (-9.8 * F.U.y * Math.sin(r.th) - CF * r.vs * r.vs * F.k * Math.cos(r.th) + volantA) / R - 2.2 * r.vth;
   r.vth += acc * dt; r.th += r.vth * dt;
-  r.vs += ((r.vt - r.vs) * .7 - F.T.y * 9.8 * .6) * dt; r.s += r.vs * dt;
+  r.vs += ((r.vt - r.vs) * .7 - F.T.y * 9.8 * .6) * dt; const s0 = r.s; r.s += r.vs * dt;
+  if(Math.abs(r.th) < .45) for(const b of piste.boosts) if(s0 < b + 2 && r.s >= b + 2){ r.vs = Math.min(40, r.vs + 10); if(r.joueur){ son("boost"); message("⚡ TURBO !", .9); secousse = .25; } }
   if(r.s >= piste.L){ sautFinal(r); return; }
   if(Math.abs(r.th) > THMAX) decoller(r);
 }
@@ -268,8 +329,8 @@ function trouverAtterrissage(r){
   if(Math.abs(along) < 1.5 && rho > R - 1.4 && rho < R + 1 && Math.abs(th) < THMAX - .05){
     const s = Math.max(0, best + along); if(s >= piste.L - 1) return false;
     r.mode = "piste"; r.s = s; r.th = th; r.vth = 0; r.vs = Math.max(15, Math.min(32, r.vel.dot(piste.T[best])));
-    eclabousse(r.pos, 14); son("splash");
-    if(r.s - r.sDecol > 25){ message("🦅 LONG VOL !", 1.4); gagner(10, "Long vol"); } else message("👍", .6);
+    eclabousse(r.pos, 14); r.ko = false;
+    if(r.joueur){ son("splash"); secousse = .4; if(r.s - r.sDecol > 25){ message("🦅 LONG VOL !", 1.4); gagner(10, "Long vol"); } else message("👍", .6); }
     return true;
   }
   return false;
@@ -288,16 +349,18 @@ function voler(r, dt, volantA){
       if(r.joueur){ son("splash"); arriveeJoueur(d); }
       return;
     }
-    eclabousse(r.pos.clone().setY(.3), 22); if(r.joueur || Math.random() < .5) son("splash");
+    eclabousse(r.pos.clone().setY(.3), 22); if(r.joueur || (J && r.pos.distanceTo(J.pos) < 50)) son("splash");
     r.mode = "cache"; r.attente = r.joueur ? 1.1 : 2.5;
     if(r.joueur) message("💦 Plouf ! Tu repars", 1.3);
   }
 }
-function repartir(r){ r.mode = "piste"; r.s = Math.max(1, r.joueur ? r.sDecol - 6 : r.sDecol - 45); r.th = 0; r.vth = 0; r.vs = 14; }
+function repartir(r){ r.ko = false; r.envol = 0; r.mode = "piste"; r.s = Math.max(1, r.joueur ? r.sDecol - 6 : r.sDecol - 45); r.th = 0; r.vth = 0; r.vs = 14; }
 
 function piloterBot(b, dt){
   b.tCible -= dt; if(b.tCible <= 0){ b.tCible = 1.5 + Math.random() * 2.5; b.cible = (Math.random() - .5) * 1.3; }
   cadre(b.s);
+  if(b.envol > 0){ b.envol -= dt; return -Math.sign(F.k) * 14; }
+  if(b.cassecou && b.s > 40 && Math.abs(F.k) > .012 && Math.random() < dt * .12){ b.envol = 1.6; return 0; }
   const tenir = CF * b.vs * b.vs * F.k * Math.cos(b.th) + 9.8 * F.U.y * Math.sin(b.th);
   return Math.max(-14, Math.min(14, tenir + R * ((b.cible - b.th) * 5 - b.vth * 2.5)));
 }
@@ -309,8 +372,8 @@ function chocs(dt){
     const dl = (b.th - J.th) * R; if(Math.hypot(ds, dl) > 2.1) continue;
     const cote = Math.abs(dl) > .15 ? Math.sign(dl) : (Math.random() < .5 ? -1 : 1);
     b.vth += cote * (1.9 + Math.max(0, J.vs - b.vs) * .1); J.vth -= cote * .7;
-    if(ds > 0 && J.vs > b.vs){ b.vs += 2; J.vs -= 2.2; } else if(ds < 0) J.vs += 1.5;
-    b.pousse = temps; b.cdChoc = .45; son("boing");
+    if(ds > 0 && J.vs > b.vs){ b.vs += 2; J.vs -= .8; } else if(ds < 0) J.vs += 1.5;
+    b.pousse = temps; b.cdChoc = .45; son("boing"); secousse = Math.max(secousse, .2);
     const p = J.pos.clone().lerp(b.pos, .5); for(let i = 0; i < 6; i++) particule(p, new THREE.Vector3((Math.random() - .5) * 6, 3 + Math.random() * 3, (Math.random() - .5) * 6), "#FFFFFF", .5, .5);
   }
 }
@@ -336,9 +399,9 @@ function afficherFin(){
   if(mode === "libre"){ t.textContent = place === 1 ? "🏆 Gagné !" : "Bravo !"; t.className = "ok"; $("finTexte").textContent = "Tu es arrivé " + (place === 1 ? "1er" : place + "e") + " sur " + (NB_BOTS + 1) + "."; suite.lastElementChild.textContent = "Encore une course"; suite.dataset.action = "libre"; }
   else {
     const q = COUPE[manche].qualif;
-    if(place <= q && manche === COUPE.length - 1){ t.textContent = "🏆 Champion de la Coupe !"; t.className = "ok"; $("finTexte").textContent = "Tu as gagné la finale de la Coupe de la Plage !"; suite.lastElementChild.textContent = "Rejouer la coupe"; suite.dataset.action = "coupe0"; confettis(J.pos.clone().setY(8)); son("bravo"); }
-    else if(place <= q){ t.textContent = "✅ Qualifié !"; t.className = "ok"; $("finTexte").textContent = "Il fallait finir dans les " + q + " premiers. Prochaine étape : " + COUPE[manche + 1].nom + " !"; suite.lastElementChild.textContent = COUPE[manche + 1].nom + " ➜"; suite.dataset.action = "suivante"; }
-    else { t.textContent = "😮 Éliminé… de peu !"; t.className = "non"; $("finTexte").textContent = q === 1 ? "En finale, il faut finir 1er. Tu peux réessayer !" : "Il fallait finir dans les " + q + " premiers. Tu peux réessayer !"; suite.lastElementChild.textContent = "Réessayer la manche"; suite.dataset.action = "meme"; }
+    if(place <= q && manche === COUPE.length - 1){ t.textContent = "🏆 Champion de la Coupe !"; t.className = "ok"; $("finTexte").textContent = "Tu as gagné la finale de la Coupe de la Plage !"; suite.lastElementChild.textContent = "Rejouer la coupe"; suite.dataset.action = "coupe0"; confettis(J.pos.clone().setY(8)); son("victoire"); }
+    else if(place <= q){ t.textContent = "✅ Qualifié !"; t.className = "ok"; $("finTexte").textContent = "Il fallait finir dans les " + q + " premiers. Prochaine étape : " + COUPE[manche + 1].nom + " !"; suite.lastElementChild.textContent = COUPE[manche + 1].nom + " ➜"; suite.dataset.action = "suivante"; son("qualifie"); }
+    else { t.textContent = "😮 Éliminé… de peu !"; t.className = "non"; $("finTexte").textContent = q === 1 ? "En finale, il faut finir 1er. Tu peux réessayer !" : "Il fallait finir dans les " + q + " premiers. Tu peux réessayer !"; suite.lastElementChild.textContent = "Réessayer la manche"; suite.dataset.action = "meme"; son("rate"); }
   }
   $("finDetail").innerHTML = gains.detail.map(([a, n]) => "<span>" + a + "</span><b>+" + n + " 🪙</b>").join("") + "<span><b style='color:inherit'>Total</b></span><b>" + gains.total + " 🪙</b>";
   const tous = [J, ...bots].sort((a, b) => avancement(b) - avancement(a)), q = mode === "libre" ? 99 : COUPE[manche].qualif;
@@ -364,8 +427,16 @@ function majCamera(dt){
     const h = J.vel.clone().setY(0); if(h.lengthSq() < .01) h.set(0, 0, 1); h.normalize();
     camPos.copy(J.pos).addScaledVector(h, -10).addScaledVector(UP, 6); camVise.copy(J.pos).addScaledVector(h, 6).addScaledVector(UP, -3);
   } else { camPos.copy(J.pos).add(new THREE.Vector3(0, 10, 0)).addScaledVector(piste.dirFin, -14); camVise.copy(J.pos); }
-  const k = Math.min(1, dt * 6); camera.position.lerp(camPos, k); vise.lerp(camVise, k); camera.lookAt(vise);
+  camPos.y = Math.max(camPos.y, 2.5);
+  const k = Math.min(1, dt * 6); camera.position.lerp(camPos, k); vise.lerp(camVise, k);
+  if(secousse > 0){ secousse -= dt; camera.position.x += (Math.random() - .5) * secousse; camera.position.y += (Math.random() - .5) * secousse; }
+  camera.lookAt(vise);
+  const vit = J.mode === "piste" ? J.vs : J.vel.length(), fov = fovBase + Math.max(0, Math.min(16, (vit - 22) * .9));
+  if(Math.abs(camera.fov - fov) > .05){ camera.fov += (fov - camera.fov) * Math.min(1, dt * 3); camera.updateProjectionMatrix(); }
+  // l'ombre suit le joueur
+  soleil.target.position.copy(J.pos); soleil.position.copy(J.pos).add(new THREE.Vector3(-50, 90, 40));
 }
+let secousse = 0;
 
 /* ================= la boucle ================= */
 let avantT = performance.now();
@@ -375,10 +446,22 @@ function boucle(maintenant){
   rendu.render(scene, camera);
   requestAnimationFrame(boucle);
 }
-function maj(dt){
-  temps += dt;
+function animerCoureur(r, dt){
+  if(r.anim){ jouerAnim(r, r.mode === "piscine" ? (r.joueur ? "jump" : "call") : r.ko ? "hit" : (r.mode === "vol" || r.mode === "saut") ? "jump" : r.mode === "menu" ? "call" : "sit"); r.anim.mixer.update(dt); return; }
+  if(!r.av) return;
+  animerAvatar(r.av, r.t, r.mode === "piscine" ? (r.joueur ? "danse" : "salut") : r.ko ? "danse" : r.mode === "menu" ? "salut" : "repos");
+  if(r.mode !== "piscine" && r.av.userData.jambes) r.av.userData.jambes.forEach(j => j.rotation.x = -1.45);
+}
+function majBarre(){
+  const b = $("barre"); if(!b.children.length){ [J, ...bots].forEach(r => { const d = document.createElement("i"); if(r.joueur) d.className = "moi"; b.appendChild(d); }); }
+  [J, ...bots].forEach((r, i) => { const f = r.fini ? 1 : Math.min(1, avancement(r) / piste.L); b.children[i].style.top = ((1 - f) * 100) + "%"; });
+}
+function maj(dt0){
+  const ralenti = J && (etat === "course" || etat === "arrivee") ? (J.mode === "vol" ? .55 : J.mode === "saut" ? .7 : 1) : 1;
+  const dt = dt0 * ralenti;
+  temps += dt; texEauTob.offset.y -= dt * 3.6; texMer.offset.x += dt * .004; ciel.position.copy(camera.position);
   if(etat === "menu"){
-    if(persoVitrine){ const g = persoVitrine.g; g.position.set(300, Math.sin(temps * 2) * .1, 300); g.rotation.set(Math.sin(temps) * .05, temps * .6, 0); animerAvatar(persoVitrine.av, temps, "salut"); }
+    if(persoVitrine){ const g = persoVitrine.g; persoVitrine.mode = "menu"; persoVitrine.t += dt; g.position.set(300, Math.sin(temps * 2) * .1, 300); g.rotation.set(Math.sin(temps) * .05, temps * .6, 0); animerCoureur(persoVitrine, dt); }
     camera.position.set(298.2, 2.2, 306.5); camera.lookAt(298.2, 1, 300);
   } else {
     const volantJ = lireVolant();
@@ -395,7 +478,7 @@ function maj(dt){
         r.t += dt;
         const v = r.joueur ? volantJ * 9 : 0;
         if(r.mode === "piste"){ avancerPiste(r, dt, r.joueur ? v : piloterBot(r, dt)); }
-        else if(r.mode === "vol" || r.mode === "ko" || r.mode === "saut") voler(r, dt, r.joueur ? volantJ * 9 : 0);
+        else if(r.mode === "vol" || r.mode === "saut") voler(r, dt, r.joueur ? volantJ * 9 : 0);
         else if(r.mode === "cache"){ r.attente -= dt; if(r.attente <= 0) repartir(r); }
         if(r.mode === "piste" && r.vs > 8 && Math.random() < (r.joueur ? .7 : .15)){ cadre(r.s); particule(r.pos.clone().addScaledVector(F.T, -1.2).addScaledVector(F.U, .3), F.T.clone().multiplyScalar(-2).add(new THREE.Vector3((Math.random() - .5) * 3, 2 + Math.random() * 2, (Math.random() - .5) * 3)), "#FFFFFF", .5, .6); }
       }
@@ -403,11 +486,11 @@ function maj(dt){
       if(etat === "course"){ place = calculerPlace(); $("place").innerHTML = ecrirePlace(place); sonEau(J.mode === "piste" ? J.vs : 0); if(J.t > 6) $("astuce").style.opacity = J.mode === "saut" ? 1 : 0; }
       if(etat === "arrivee"){ tFin -= dt; if(tFin <= 0) afficherFin(); }
     }
-    for(const r of [J, ...bots]){ placer(r);
-      animerAvatar(r.av, r.t, r.mode === "piscine" ? (r.joueur ? "danse" : "salut") : r.mode === "ko" ? "danse" : "repos");
-      if(r.mode !== "piscine" && r.av.userData.jambes) r.av.userData.jambes.forEach(j => j.rotation.x = -1.45); }
-    majCamera(dt);
+    for(const r of [J, ...bots]){ placer(r); animerCoureur(r, dt); }
+    majCamera(dt); majBarre();
   }
 }
-remplirProfils(); majPieces(); vitrine(); requestAnimationFrame(boucle);
+remplirProfils(); remplirPersos(); majPieces(); vitrine(); requestAnimationFrame(boucle);
+chargement.then(() => { remplirPersos(); if(etat === "menu") vitrine(); $("jouer").disabled = $("libre").disabled = false; });
+$("jouer").disabled = $("libre").disabled = true; setTimeout(() => { $("jouer").disabled = $("libre").disabled = false; }, 15000);
 window.__aqua = { get J(){ return J; }, get bots(){ return bots; }, get piste(){ return piste; }, get etat(){ return etat; }, touches, decoller, lancerCourse, simuler(n, v){ for(let i = 0; i < n; i++){ if(v !== undefined) volantForce = v; maj(1 / 30); } volantForce = null; }, set volant(v){ volantForce = v; } };
