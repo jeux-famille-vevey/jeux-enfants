@@ -12,6 +12,7 @@ const lire = (k, d) => { try{ const v = localStorage.getItem(k); return v === nu
 const ecrire = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
 const tactile = matchMedia("(pointer: coarse)").matches || new URLSearchParams(location.search).has("tactile");
 const UP = new THREE.Vector3(0, 1, 0);
+const RP = 18;            // le rayon de la piscine d'arrivée
 const R = 4.2;            // le rayon du tube du toboggan
 const THMAX = 1.38;       // jusqu'où monte le bord (en radians depuis le fond)
 const GV = 14;            // la gravité quand on vole
@@ -45,8 +46,8 @@ function remplirProfils(){
 }
 $("monPerso").onclick = () => { location.href = "../avatar/?profil=" + encodeURIComponent(profil) + "&retour=../aquacourse/"; };
 $("aide").innerHTML = tactile
-  ? "👆 <b>Glisse ton doigt</b> vers la gauche ou la droite pour tourner dans le toboggan. Monte tout en haut du bord dans les virages pour <b>t'envoler</b> et retomber plus bas (attention à ne pas tomber dans l'eau !). À la fin, guide-toi en l'air pour atterrir <b>au milieu de la piscine</b>."
-  : "⌨️ Les <b>flèches ← →</b> (en bas à droite du clavier) pour tourner, ou glisse avec la souris. Monte tout en haut du bord dans les virages pour <b>t'envoler</b> et retomber plus bas (attention à ne pas tomber dans l'eau !). À la fin, guide-toi en l'air pour atterrir <b>au milieu de la piscine</b>.<br>🎮 Manette : le joystick gauche.";
+  ? "👆 <b>Glisse ton doigt</b> vers la gauche ou la droite pour tourner dans le toboggan. Monte tout en haut du bord dans les virages pour <b>t'envoler</b> et retomber plus bas (attention à ne pas tomber dans l'eau !). Tu peux même <b>sauter directement dans la piscine</b> (sous le rayon jaune) pour un raccourci ! Guide-toi en l'air pour atterrir <b>au milieu de la cible</b>."
+  : "⌨️ Les <b>flèches ← →</b> (en bas à droite du clavier) pour tourner, ou glisse avec la souris. Monte tout en haut du bord dans les virages pour <b>t'envoler</b> et retomber plus bas (attention à ne pas tomber dans l'eau !). Tu peux même <b>sauter directement dans la piscine</b> (sous le rayon jaune) pour un raccourci ! Guide-toi en l'air pour atterrir <b>au milieu de la cible</b>.<br>🎮 Manette : le joystick gauche.";
 
 /* ================= la scène ================= */
 const canvas = $("c");
@@ -108,10 +109,11 @@ let piste = null;
 function construirePiste(seed){
   if(piste) scene.remove(piste.groupe);
   const rnd = alea(seed), groupe = new THREE.Group();
-  const H = 60, nChutes = 5 + Math.floor(rnd() * 3), amp = 3 + rnd() * 4, freq = 2 + Math.floor(rnd() * 3), ph = rnd() * 6, aMax = 2.35 * Math.PI * 2, sens = rnd() < .5 ? 1 : -1, ang0 = rnd() * Math.PI * 2;
+  const H = 125, CHUTE = 30, nChutes = 8 + Math.floor(rnd() * 4), amp = 3 + rnd() * 4, freq = 2 + Math.floor(rnd() * 3), ph = rnd() * 6, aMax = 4.15 * Math.PI * 2, sens = rnd() < .5 ? 1 : -1, ang0 = rnd() * Math.PI * 2;
   const brut = [];
   for(let a = 0; a <= aMax; a += .004){ const r = 16 + a * 4.2 + amp * Math.sin(a * freq + ph) * Math.min(1, a / 1.5), an = ang0 + a * sens;
-    brut.push(new THREE.Vector3(Math.cos(an) * r, H - (H - 16) * (a / aMax + .021 * Math.sin(a / aMax * Math.PI * 2 * nChutes)) + Math.sin(a * 7) * .3 * Math.min(1, a), Math.sin(an) * r)); }
+    const dep = Math.min(1, a / 3.2), u = a / aMax; // une grande descente au départ, puis des chutes et des virages
+    brut.push(new THREE.Vector3(Math.cos(an) * r, H - CHUTE * (1 - Math.cos(Math.PI * dep)) / 2 - (H - CHUTE - 16) * (u + .0125 * Math.sin(u * Math.PI * 2 * nChutes)) + Math.sin(a * 7) * .3 * Math.min(1, a), Math.sin(an) * r)); }
   const fin0 = brut[brut.length - 1], dirFin = fin0.clone().sub(brut[brut.length - 2]).setY(0).normalize(), yFin = fin0.y;
   for(let d = .3; d <= 45; d += .3) brut.push(fin0.clone().addScaledVector(dirFin, d).setY(yFin - (yFin - 6) * (1 - Math.cos(Math.PI * d / 45)) / 2));
   // tous les mètres
@@ -152,14 +154,17 @@ function construirePiste(seed){
   groupe.add(tourG);
   const pont = new THREE.Mesh(new THREE.BoxGeometry(6, .8, 1), mat("#B07A4A")); const a0 = P[0].clone().setY(0); pont.position.set(a0.x / 2, H - .2, a0.z / 2); pont.lookAt(P[0].x, H - .2, P[0].z); pont.scale.z = a0.length(); groupe.add(pont);
   // la piscine d'arrivée
-  const fin = P[n - 1], dF = T[n - 1].clone().setY(0).normalize(), piscine = fin.clone().addScaledVector(dF, 33).setY(.75);
-  const bord = new THREE.Mesh(new THREE.CylinderGeometry(13.2, 13.6, 1.6, 48), mat("#FFFFFF")); bord.position.set(piscine.x, 0, piscine.z); groupe.add(bord);
-  const eau = new THREE.Mesh(new THREE.CircleGeometry(12, 48), new THREE.MeshLambertMaterial({ map: texCible })); eau.rotation.x = -Math.PI / 2; eau.position.copy(piscine).setY(.82); groupe.add(eau);
+  const fin = P[n - 1], dF = T[n - 1].clone().setY(0).normalize(), piscine = fin.clone().addScaledVector(dF, 38).setY(.75);
+  const bord = new THREE.Mesh(new THREE.CylinderGeometry(RP + 1.2, RP + 1.6, 1.6, 48), mat("#FFFFFF")); bord.position.set(piscine.x, 0, piscine.z); groupe.add(bord);
+  const eau = new THREE.Mesh(new THREE.CircleGeometry(RP, 48), new THREE.MeshLambertMaterial({ map: texCible })); eau.rotation.x = -Math.PI / 2; eau.position.copy(piscine).setY(.82); groupe.add(eau);
+  const phare = new THREE.Mesh(new THREE.CylinderGeometry(RP * .9, RP * .9, 90, 32, 1, true), new THREE.MeshBasicMaterial({ color: "#FFF6A0", transparent: true, opacity: .16, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+  phare.position.copy(piscine).setY(45); groupe.add(phare);
+  for(let k = 0; k < 2; k++){ const ar = new THREE.Mesh(new THREE.TorusGeometry(RP + 1.4, .9, 10, 40, Math.PI), mat(k ? "#3FCF6A" : "#FF6F9F")); ar.position.copy(piscine).setY(0); ar.rotation.y = k * Math.PI / 2; groupe.add(ar); }
   const arche = new THREE.Mesh(new THREE.TorusGeometry(8, .7, 10, 30, Math.PI), mat("#FF9F1C")); arche.position.copy(fin).addScaledVector(dF, 3); arche.position.y = fin.y - 1; arche.lookAt(arche.position.clone().add(dF)); groupe.add(arche);
   // les palmiers (pas sous le toboggan)
   const tronc = mat("#9A6A43"), palme = mat("#3FA34D"), herbe = mat("#8BD36B");
   for(let q = 0; q < 70; q++){ const a = rnd() * Math.PI * 2, r = 20 + rnd() * 150, x = Math.cos(a) * r, z = Math.sin(a) * r;
-    let gene = Math.hypot(x - piscine.x, z - piscine.z) < 18; for(let i = 0; i < n && !gene; i += 4) if(P[i].y < 26 && Math.hypot(P[i].x - x, P[i].z - z) < 10) gene = true; if(gene) continue;
+    let gene = Math.hypot(x - piscine.x, z - piscine.z) < RP + 6; for(let i = 0; i < n && !gene; i += 4) if(P[i].y < 26 && Math.hypot(P[i].x - x, P[i].z - z) < 10) gene = true; if(gene) continue;
     const g = new THREE.Group(), t = new THREE.Mesh(new THREE.CylinderGeometry(.35, .55, 10, 7), tronc); t.position.y = 5; t.rotation.z = (rnd() - .5) * .2; g.add(t);
     for(let k = 0; k < 6; k++){ const f = new THREE.Mesh(new THREE.BoxGeometry(.6, .15, 6), palme); f.position.set(Math.sin(k) * 2.4, 10, Math.cos(k) * 2.4); f.rotation.y = k; f.rotation.x = .45; g.add(f); }
     if(rnd() < .5){ const h = new THREE.Mesh(new THREE.CircleGeometry(4 + rnd() * 4, 12), herbe); h.rotation.x = -Math.PI / 2; h.position.y = .45; g.add(h); }
@@ -274,11 +279,11 @@ function lancerCourse(){
   for(let i = 0; i < NB_BOTS; i++){ const sorte = Object.keys(modeles), b = creerCoureur(sorte.length && i % 5 < 3 ? { animal: sorte[i % sorte.length] } : { cfg: auHasard() }, 7 + i, COULEURS_BOUEE[i % COULEURS_BOUEE.length], true); b.cassecou = Math.random() < .35; b.nom = noms[i]; b.s = 7 + Math.floor(i / 3) * 5; b.th = ((i % 3) - 1) * .6;
     b.vt = 20.3 + Math.random() * 3.5 + (mode === "coupe" ? manche * .35 : 0); b.cible = b.th; b.tCible = 1 + Math.random() * 2; b.cdChoc = 0; bots.push(b); }
   [J, ...bots].forEach(r => { r.vs = 0; placer(r); });
-  ordreArrivee = 0; kos = 0; $("barre").innerHTML = ""; gains = { total: 0, detail: [] }; $("gain").textContent = "🪙 0";
+  ordreArrivee = 0; kos = 0; $("barre").innerHTML = ""; place = NB_BOTS + 1; $("place").innerHTML = ecrirePlace(place); gains = { total: 0, detail: [] }; $("gain").textContent = "🪙 0";
   $("manche").textContent = mode === "coupe" ? "🏆 " + COUPE[manche].nom + " · top " + COUPE[manche].qualif : "🛟 Course libre";
   if(mode === "coupe" && COUPE[manche].qualif === 1) $("manche").textContent = "🏆 Finale : finis 1er !";
   etat = "decompte"; decompte = 3.6; $("menu").hidden = true; $("fin").hidden = true; $("hud").hidden = false;
-  $("astuce").textContent = tactile ? "👆 Glisse ton doigt ← → pour tourner" : "⌨️ Flèches ← → pour tourner"; $("astuce").style.opacity = 1;
+  $("astuce").innerHTML = (tactile ? "👆 Glisse ton doigt ← → pour tourner" : "⌨️ Flèches ← → pour tourner") + "<br>🚀 Envole-toi vers la piscine (le rayon jaune) pour un raccourci !"; $("astuce").style.opacity = 1;
   camera.position.copy(J.pos).add(new THREE.Vector3(0, 6, 0)).addScaledVector(piste.T[0], -10);
 }
 
@@ -305,14 +310,15 @@ function decoller(r){
 }
 function sautFinal(r){
   r.mode = "saut"; r.fini = true; r.ordre = ++ordreArrivee; cadre(piste.L - .01); surface(F, r.th, r.pos);
-  const vy = 6, tVol = (vy + Math.sqrt(vy * vy + 2 * GV * (r.pos.y - .8))) / GV, dist = 33 * (.88 + .12 * Math.min(1.4, r.vs / 25));
+  const vy = 6, tVol = (vy + Math.sqrt(vy * vy + 2 * GV * (r.pos.y - .8))) / GV, dist = 38 * (.88 + .12 * Math.min(1.4, r.vs / 25));
   r.vel.copy(piste.dirFin).multiplyScalar(dist / tVol).addScaledVector(F.S.clone().setY(0).normalize(), Math.sin(r.th) * 6 + (r.joueur ? 0 : (Math.random() - .5) * 16)); r.vel.y = vy; if(!r.joueur) r.vel.multiplyScalar(.82 + Math.random() * .3).setY(vy);
   r.tVol = 0; if(r.joueur){ son("envol"); $("astuce").textContent = tactile ? "🎯 Glisse ← → pour viser le milieu de la piscine !" : "🎯 Flèches ← → pour viser le milieu de la piscine !"; $("astuce").style.opacity = 1; }
 }
 
 function avancerPiste(r, dt, volantA){
   cadre(r.s);
-  const acc = (-9.8 * F.U.y * Math.sin(r.th) - CF * r.vs * r.vs * F.k * Math.cos(r.th) + volantA) / R - 2.2 * r.vth;
+  const centri = CF * r.vs * r.vs * F.k * Math.cos(r.th), aide = r.joueur && Math.abs(volantA) < 1 ? centri * .65 : 0; // si on ne tourne pas, on ne s'envole pas tout seul
+  const acc = (-9.8 * F.U.y * Math.sin(r.th) - centri + aide + volantA) / R - 2.2 * r.vth;
   r.vth += acc * dt; r.th += r.vth * dt;
   r.vs += ((r.vt - r.vs) * .7 - F.T.y * 9.8 * .6) * dt; const s0 = r.s; r.s += r.vs * dt;
   if(Math.abs(r.th) < .45) for(const b of piste.boosts) if(s0 < b + 2 && r.s >= b + 2){ r.vs = Math.min(40, r.vs + 10); if(r.joueur){ son("boost"); message("⚡ TURBO !", .9); secousse = .25; } }
@@ -340,12 +346,14 @@ function voler(r, dt, volantA){
   if(volantA && (r.mode === "vol" || r.mode === "saut")){ const h = new THREE.Vector3(r.vel.z, 0, -r.vel.x).normalize(); r.vel.addScaledVector(h, -volantA * (r.mode === "saut" ? 1.1 : .9) * dt); }
   r.pos.addScaledVector(r.vel, dt);
   if(r.mode === "vol" && r.tVol > .3 && r.vel.y < 0 && trouverAtterrissage(r)) return;
-  const surIle = Math.hypot(r.pos.x, r.pos.z) < 180, sol = r.mode === "saut" ? .8 : surIle ? .4 : 0;
+  const dP = Math.hypot(r.pos.x - piste.piscine.x, r.pos.z - piste.piscine.z), dansPiscine = dP < RP;
+  const surIle = Math.hypot(r.pos.x, r.pos.z) < 180, sol = r.mode === "saut" || dansPiscine ? .8 : surIle ? .4 : 0;
   if(r.pos.y <= sol){
-    if(r.mode === "saut"){ // l'arrivée dans la piscine
-      const d = Math.hypot(r.pos.x - piste.piscine.x, r.pos.z - piste.piscine.z);
+    if(r.mode === "saut" || dansPiscine){ // l'arrivée dans la piscine (par la fin du toboggan, ou en volant directement dedans !)
+      if(r.mode === "vol"){ r.fini = true; r.ordre = ++ordreArrivee; r.raccourci = true; r.ko = false; }
+      const d = dP;
       r.mode = "piscine"; r.pos.y = .8; eclabousse(r.pos, 26);
-      if(d > 12.5){ const v = r.pos.clone().sub(piste.piscine).setY(0).setLength(11); r.pos.set(piste.piscine.x + v.x, .8, piste.piscine.z + v.z); }
+      if(d > RP + .5){ const v = r.pos.clone().sub(piste.piscine).setY(0).setLength(RP - 1); r.pos.set(piste.piscine.x + v.x, .8, piste.piscine.z + v.z); }
       if(r.joueur){ son("splash"); arriveeJoueur(d); }
       return;
     }
@@ -383,9 +391,11 @@ const ecrirePlace = (n) => n + "<sup>" + (n === 1 ? "er" : "e") + "</sup>";
 
 function arriveeJoueur(d){
   place = J.ordre; // l'ordre d'arrivée
-  if(d < 3){ message("🎯 PARFAIT ATTERRISSAGE !", 2); gagner(50, "Atterrissage parfait"); }
-  else if(d < 7){ message("😎 Super atterrissage !", 2); gagner(25, "Bel atterrissage"); }
-  else if(d < 12.5){ message("💦 Dans la piscine !", 2); gagner(10, "Atterrissage"); }
+  if(J.raccourci){ gagner(20, "Raccourci par les airs"); }
+  if(d < 3.6){ message(J.raccourci ? "🚀 RACCOURCI + PARFAIT !" : "🎯 PARFAIT ATTERRISSAGE !", 2); gagner(50, "Atterrissage parfait"); }
+  else if(J.raccourci){ message("🚀 RACCOURCI PISCINE !", 2); gagner(10, "Atterrissage"); }
+  else if(d < 8.4){ message("😎 Super atterrissage !", 2); gagner(25, "Bel atterrissage"); }
+  else if(d < RP + .5){ message("💦 Dans la piscine !", 2); gagner(10, "Atterrissage"); }
   else { message("😅 À côté…", 2); son("rate"); }
   gagner(Math.max(0, (NB_BOTS + 2 - place) * 5), "Place : " + place + (place === 1 ? "er" : "e"));
   confettis(J.pos.clone().setY(6)); son("bravo");
